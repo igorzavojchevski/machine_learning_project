@@ -5,7 +5,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="MLModels\TensorFlowModel\" />
+    <Compile Remove="MLModels\**" />
+    <EmbeddedResource Remove="MLModels\**" />
+    <None Remove="MLModels\**" />
   </ItemGroup>
 
   <ItemGroup>
@@ -17,24 +19,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\ML.Domain\ML.Domain.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Update="MLModels\TensorFlowModel\imagenet_comp_graph_label_strings.txt">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="MLModels\TensorFlowModel\labels.txt">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="MLModels\TensorFlowModel\LICENSE">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="MLModels\TensorFlowModel\model.pb">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="MLModels\TensorFlowModel\tensorflow_inception_graph.pb">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
   </ItemGroup>
 
 </Project>
