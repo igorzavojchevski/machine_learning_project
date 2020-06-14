@@ -12,5 +12,7 @@ namespace ML.Domain.Entities.Mongo.Base
         public string ModifiedBy { get; set; }
 
         public DateTime ModifiedOn { get; set; }
+
+
     }
 }

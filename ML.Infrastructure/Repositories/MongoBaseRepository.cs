@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace ML.Infrastructure.Repositories
 {
-    public class MongoBaseRepository<T> : IMongoBaseRepository<T> where T : MongoBaseEntity
+    public abstract class MongoBaseRepository<T> : IMongoBaseRepository<T> where T : MongoBaseEntity
     {
         protected readonly IMongoDbContext _mongoDbContext;
         protected IMongoCollection<T> _dbCollection;

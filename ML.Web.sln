@@ -21,6 +21,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ML.ClassificationService", 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ML.BL", "ML.BL\ML.BL.csproj", "{EE01C1D8-B60B-4D83-8F65-0A031558F076}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ML.BL.Mongo", "ML.BL.Mongo\ML.BL.Mongo.csproj", "{298D6E07-FBDE-4114-85A8-D059868CCF30}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -63,6 +65,10 @@ Global
 		{EE01C1D8-B60B-4D83-8F65-0A031558F076}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EE01C1D8-B60B-4D83-8F65-0A031558F076}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EE01C1D8-B60B-4D83-8F65-0A031558F076}.Release|Any CPU.Build.0 = Release|Any CPU
+		{298D6E07-FBDE-4114-85A8-D059868CCF30}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{298D6E07-FBDE-4114-85A8-D059868CCF30}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{298D6E07-FBDE-4114-85A8-D059868CCF30}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{298D6E07-FBDE-4114-85A8-D059868CCF30}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

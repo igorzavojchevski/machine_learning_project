@@ -1,7 +1,10 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.ML;
+using ML.BL.Interfaces;
+using ML.BL.Mongo.Interfaces;
 using ML.Domain.DataModels;
+using ML.Domain.Entities.Mongo;
 using ML.Utils.Extensions;
 using ML.Utils.Extensions.Base;
 using System;
@@ -14,32 +17,57 @@ using System.Text;
 namespace ML.BL.Concrete
 {
     //TODO - Rework this
-    public class LabelScoringService
+    public class LabelScoringService : ILabelScoringService
     {
         public IConfiguration Configuration { get; }
         private readonly ILogger<LabelScoringService> _logger;
         private readonly string _labelsFilePath;
         private readonly PredictionEnginePool<ImageInputData, ImageLabelPredictions> _predictionEnginePool;
+        private readonly IAdvertisementService _advertisementService;
 
         public LabelScoringService(
             PredictionEnginePool<ImageInputData, ImageLabelPredictions> predictionEnginePool,
-            IConfiguration configuration, ILogger<LabelScoringService> logger)
+            IConfiguration configuration, 
+            ILogger<LabelScoringService> logger,
+            IAdvertisementService advertisementService)
         {
             _logger = logger;
             Configuration = configuration;
             _labelsFilePath = BaseExtensions.GetPath(Configuration["MLModel:LabelsFilePath"], Configuration.GetValue<bool>("MLModel:IsAbsolute"));
             _predictionEnginePool = predictionEnginePool;
+            _advertisementService = advertisementService;
         }
 
         public void Score()
         {
             FileInfo[] Images = GetListOfImages();
 
+            if (Images == null || Images.Length == 0) { _logger.LogDebug("Score - No Images"); return; }
+
+            Guid GroupGuid = Guid.NewGuid();
+
             for (int i = 0; i < Images.Length; i++)
             {
                 ImagePredictedLabelWithProbability prediction = DoLabelScoring(Images[i]);
-
+                SaveImageScoringInfo(prediction, GroupGuid);
             }
+        }
+
+        private void SaveImageScoringInfo(ImagePredictedLabelWithProbability prediction, Guid GroupGuid)
+        {
+            Advertisement ad = new Advertisement
+            {
+                GroupGuid = GroupGuid,
+                PredictedLabel = prediction.PredictedLabel,
+                MaxProbability = prediction.MaxProbability,
+                TopProbabilities = prediction.AllProbabilities,
+                PredictionExecutionTime = prediction.PredictionExecutionTime,
+                ImageId = prediction.ImageId,
+                ModifiedBy = "SaveImageScoringInfoService",
+                ModifiedOn = DateTime.UtcNow
+            };
+
+            _advertisementService.InsertOne(ad);
         }
 
         private ImagePredictedLabelWithProbability DoLabelScoring(FileInfo fileInfo)

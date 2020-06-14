@@ -29,7 +29,7 @@ namespace ML.Infrastructure.DataContext
         {
             try
             {
-                string connectionString = Configuration["MongoDBConnectionString"];
+                string connectionString = Configuration["ConnectionString:MongoDBConnectionString"];
                 if (string.IsNullOrWhiteSpace(connectionString)) throw new ArgumentNullException(nameof(connectionString), "Cannot be null or empty !");
 
                 MongoClient client = new MongoClient(connectionString);

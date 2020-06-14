@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using ML.BL.Interfaces;
+using ML.BL.Mongo.Interfaces;
 
 namespace ML.ClassificationService
 {
@@ -13,11 +14,13 @@ namespace ML.ClassificationService
     {
         private readonly ILogger<Worker> _logger;
         private readonly IFrameExporterService _frameExporterService;
+        private readonly ILabelScoringService _labelScoringService;
 
-        public Worker(ILogger<Worker> logger, IFrameExporterService frameExporterService)
+        public Worker(ILogger<Worker> logger, IFrameExporterService frameExporterService, ILabelScoringService labelScoringService)
         {
             _logger = logger;
             _frameExporterService = frameExporterService;
+            _labelScoringService = labelScoringService;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -34,11 +37,10 @@ namespace ML.ClassificationService
         {
             _logger.LogInformation("Service Starting");
 
-            _frameExporterService.Export();
+            //TODO - REWORK THIS
+            //_frameExporterService.Export();
 
-
-
-
+            _labelScoringService.Score();
 
             return base.StartAsync(cancellationToken);
         }
