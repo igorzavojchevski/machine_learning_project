@@ -30,7 +30,7 @@ namespace ML.Web
             //
             //change this part for multiple instances due to multiple models
             //Configure the ML.NET model for the pre-trained TensorFlow model.
-            _tensorFlowModelFilePath = BaseExtensions.GetAbsolutePath(Configuration["MLModel:TensorFlowModelFilePath"]);
+            _tensorFlowModelFilePath = BaseExtensions.GetPath(Configuration["MLModel:TensorFlowModelFilePath"], Configuration.GetValue<bool>("MLModel:IsAbsolute"));
             TensorFlowModelConfigurator tensorFlowModelConfigurator = new TensorFlowModelConfigurator(_tensorFlowModelFilePath);
             _mlnetModel = tensorFlowModelConfigurator.Model;
             //

@@ -31,8 +31,7 @@ namespace ML.Web.Controllers
         {
             _logger = logger;
             Configuration = configuration;
-
-            _labelsFilePath = BaseExtensions.GetAbsolutePath(Configuration["MLModel:LabelsFilePath"]);
+            _labelsFilePath = BaseExtensions.GetPath(Configuration["MLModel:LabelsFilePath"], Configuration.GetValue<bool>("MLModel:IsAbsolute"));
 
             // Get the ML Model Engine injected, for scoring.
             _predictionEnginePool = predictionEnginePool;

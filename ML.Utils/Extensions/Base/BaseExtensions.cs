@@ -9,12 +9,14 @@ namespace ML.Utils.Extensions.Base
     public static class BaseExtensions
     {
         //TODO - Rewrite this method
-        public static string GetAbsolutePath(string relativePath)
+        public static string GetPath(string path, bool isAbsolute)
         {
+            if (isAbsolute) return path;
+
             var _dataRoot = new FileInfo(Assembly.GetExecutingAssembly().Location);
             string assemblyFolderPath = _dataRoot.Directory.FullName;
 
-            string fullPath = Path.Combine(assemblyFolderPath, relativePath);
+            string fullPath = Path.Combine(assemblyFolderPath, path);
             return fullPath;
         }
     }
