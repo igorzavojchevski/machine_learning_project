@@ -5,17 +5,21 @@ VisualStudioVersion = 16.0.30011.22
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ML.Web", "ML.Web\ML.Web.csproj", "{2460B5ED-A107-47DE-989A-4747985DA9F5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ML.Core", "ML.Core\ML.Core.csproj", "{98936257-922A-4E12-A4B3-307E62061AE9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ML.Core", "ML.Core\ML.Core.csproj", "{98936257-922A-4E12-A4B3-307E62061AE9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ML.Domain", "ML.Domain\ML.Domain.csproj", "{183BE0F7-A39D-48B1-89AA-C3E719F23026}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ML.Domain", "ML.Domain\ML.Domain.csproj", "{183BE0F7-A39D-48B1-89AA-C3E719F23026}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ML.Utils", "ML.Utils\ML.Utils.csproj", "{3193D05B-FB39-4623-A235-369B91BA0B78}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ML.Utils", "ML.Utils\ML.Utils.csproj", "{3193D05B-FB39-4623-A235-369B91BA0B78}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ML.Infrastructure", "ML.Infrastructure\ML.Infrastructure.csproj", "{071E2F0F-E13D-44FA-9787-650927F8C8B4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ML.Infrastructure", "ML.Infrastructure\ML.Infrastructure.csproj", "{071E2F0F-E13D-44FA-9787-650927F8C8B4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ML.Domain.Entities", "ML.Domain.Entities\ML.Domain.Entities.csproj", "{9B151ECD-A9F4-4D6C-953F-973DDAF17272}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ML.Domain.Entities", "ML.Domain.Entities\ML.Domain.Entities.csproj", "{9B151ECD-A9F4-4D6C-953F-973DDAF17272}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ML.Infrastructure.DependecyResolution", "ML.Infrastructure.DependecyResolution\ML.Infrastructure.DependecyResolution.csproj", "{A5E32AB4-DDE3-4D00-A9F8-09EF1288F8E2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ML.Infrastructure.DependecyResolution", "ML.Infrastructure.DependecyResolution\ML.Infrastructure.DependecyResolution.csproj", "{A5E32AB4-DDE3-4D00-A9F8-09EF1288F8E2}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ML.ClassificationService", "ML.ClassificationService\ML.ClassificationService.csproj", "{8C2EA2BB-253D-4260-8193-ECFE9C6A7D46}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ML.BL", "ML.BL\ML.BL.csproj", "{EE01C1D8-B60B-4D83-8F65-0A031558F076}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -51,6 +55,14 @@ Global
 		{A5E32AB4-DDE3-4D00-A9F8-09EF1288F8E2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A5E32AB4-DDE3-4D00-A9F8-09EF1288F8E2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A5E32AB4-DDE3-4D00-A9F8-09EF1288F8E2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8C2EA2BB-253D-4260-8193-ECFE9C6A7D46}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8C2EA2BB-253D-4260-8193-ECFE9C6A7D46}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8C2EA2BB-253D-4260-8193-ECFE9C6A7D46}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8C2EA2BB-253D-4260-8193-ECFE9C6A7D46}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EE01C1D8-B60B-4D83-8F65-0A031558F076}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EE01C1D8-B60B-4D83-8F65-0A031558F076}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EE01C1D8-B60B-4D83-8F65-0A031558F076}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EE01C1D8-B60B-4D83-8F65-0A031558F076}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -1,0 +1,10 @@
+﻿{
+  "profiles": {
+    "ML.ClassificationService": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "DOTNET_ENVIRONMENT": "Development"
+      }
+    }
+  }
+}
