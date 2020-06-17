@@ -106,7 +106,7 @@ namespace ML.Web.Controllers
             (imageBestLabelPrediction.PredictedLabel, imageBestLabelPrediction.MaxProbability) = GetBestLabel(labels, probabilities);
 
             //test take 5
-            imageBestLabelPrediction.AllProbabilities = GetAllLabels(labels, probabilities).OrderBy(t => t.Value).TakeLast(5).ToDictionary(pair => pair.Key, pair => pair.Value);
+            imageBestLabelPrediction.TopProbabilities = GetAllLabels(labels, probabilities).OrderBy(t => t.Value).TakeLast(5).ToDictionary(pair => pair.Key, pair => pair.Value);
 
             return imageBestLabelPrediction;
         }

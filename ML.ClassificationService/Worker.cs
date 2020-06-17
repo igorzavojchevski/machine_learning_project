@@ -40,7 +40,9 @@ namespace ML.ClassificationService
             //TODO - REWORK THIS
             //_frameExporterService.Export();
 
-            _labelScoringService.Score();
+            string imagesPath = @"C:\Users\igor.zavojchevski\Desktop\Master\TestMaterial\Frames\Panda"; //this should be output of frameexporterservice
+
+            _labelScoringService.Score(imagesPath);
 
             return base.StartAsync(cancellationToken);
         }

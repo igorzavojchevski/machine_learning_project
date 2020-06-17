@@ -7,41 +7,77 @@ using ML.BL.Interfaces;
 using ML.BL.Mongo.Concrete;
 using ML.BL.Mongo.Interfaces;
 using ML.Core;
+using ML.Core.TensorFlowInception;
 using ML.Domain.DataModels;
 using ML.Infrastructure.DataContext;
 using ML.Infrastructure.Interfaces;
 using ML.Infrastructure.Repositories;
-using System;
+using ML.Utils.Extensions.Base;
 
 namespace ML.Infrastructure.DependecyResolution
 {
     public static class ServiceResolution
     {
-        //TODO - Rework this for separate logic for repositories/services/functional services
-        public static IServiceCollection AddInternalServices(this IServiceCollection services)
+        public static IServiceCollection RegisterServices(this IServiceCollection services, IConfiguration Configuration)
         {
             services.AddSingleton<IMongoDbContext, MongoDbContext>();
 
-            services.AddTransient<IFrameExporterService, FrameExporterService>();
-            services.AddTransient<IAdvertisementRepository, AdvertisementRepository>();
-            services.AddTransient<IAdvertisementService, AdvertisementService>();
-            
-            services.AddTransient<ILabelScoringService, LabelScoringService>();
+            services.AddRepositories();
+            services.AddServices();
+
+            services.InstanceMLEngine(Configuration);
+
             return services;
         }
 
-        public static IServiceCollection AddExternalService(this IServiceCollection services, ITransformer _mlnetModel)
+        //Repositories
+        private static IServiceCollection AddRepositories(this IServiceCollection services)
+        {
+            services.AddTransient<IAdvertisementRepository, AdvertisementRepository>();
+            return services;
+        }
+
+        //Services
+        private static IServiceCollection AddServices(this IServiceCollection services)
+        {
+            services.AddTransient<IFrameExporterService, FrameExporterService>();
+            services.AddTransient<IAdvertisementService, AdvertisementService>();
+            services.AddTransient<ILabelScoringService, LabelScoringService>();
+
+            return services;
+        }
+
+        //MLEngine
+        private static IServiceCollection InstanceMLEngine(this IServiceCollection services, IConfiguration Configuration)
+        {
+            services.InstanceInceptionTensorFlowModel(Configuration);
+
+            return services;
+        }
+
+
+        #region TensorFlowInceptionModel
+        //PrepareTensorFlowInceptionModel
+        private static IServiceCollection InstanceInceptionTensorFlowModel(this IServiceCollection services, IConfiguration Configuration)
         {
             // Register the PredictionEnginePool as a service in the IoC container for DI.
             services.AddPredictionEnginePool<ImageInputData, ImageLabelPredictions>();
             services
                 .AddOptions<PredictionEnginePoolOptions<ImageInputData, ImageLabelPredictions>>()
-                .Configure(options => { options.ModelLoader = new InMemoryModelLoader(_mlnetModel); });
-
-
-            //TO-DO REWORK THIS PART FOR MULTIPLE MODELS
-
+                .Configure(options => { options.ModelLoader = new InMemoryModelLoader(GetTensorFlowInceptionMLModel(Configuration)); });
             return services;
         }
+        //PrepareTensorFlowInceptionModel
+        private static ITransformer GetTensorFlowInceptionMLModel(IConfiguration Configuration)
+        {
+            //Configure the ML.NET model for the pre-trained Inception TensorFlow model.
+            string _tensorFlowModelFilePath = BaseExtensions.GetPath(
+                Configuration["MLModel:TensorFlowModelFilePath"],
+                Configuration.GetValue<bool>("MLModel:IsAbsolute"));
+            TensorFlowInceptionModelConfigurator tensorFlowInceptionModelConfigurator = new TensorFlowInceptionModelConfigurator(_tensorFlowModelFilePath);
+            ITransformer _InceptionMLNetModel = tensorFlowInceptionModelConfigurator.Model;
+            return _InceptionMLNetModel;
+        }
+        #endregion
     }
 }

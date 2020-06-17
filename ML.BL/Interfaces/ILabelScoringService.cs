@@ -6,6 +6,6 @@ namespace ML.BL.Interfaces
 {
     public interface ILabelScoringService
     {
-        void Score();
+        void Score(string imagesToCheckPath);
     }
 }

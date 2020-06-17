@@ -21,12 +21,6 @@ namespace ML.ClassificationService
             CreateHostBuilder(args).Build().Run();
         }
 
-        //public static IHostBuilder CreateHostBuilder(string[] args) =>
-        //    Host.CreateDefaultBuilder(args)
-        //        .ConfigureServices((hostContext, services) =>
-        //        {
-        //            services.AddHostedService<Worker>();
-        //        });
         public static IHostBuilder CreateHostBuilder(string[] args)
         {
             return Host.CreateDefaultBuilder(args)
@@ -43,25 +37,11 @@ namespace ML.ClassificationService
                     config.SourceName = "Sample Service Source";
                 });
 
-                ITransformer _mlnetModel = GetMLModel(Configuration);
-                services.AddInternalServices();
-                services.AddExternalService(_mlnetModel);
+                services.RegisterServices(Configuration);
 
             }).UseWindowsService();
         }
 
-        private static ITransformer GetMLModel(IConfiguration Configuration)
-        {
-            //
-            //change this part for multiple instances due to multiple models
-            //Configure the ML.NET model for the pre-trained TensorFlow model.
-            string _tensorFlowModelFilePath = BaseExtensions.GetPath(
-                Configuration["MLModel:TensorFlowModelFilePath"],
-                Configuration.GetValue<bool>("MLModel:IsAbsolute"));
-            TensorFlowModelConfigurator tensorFlowModelConfigurator = new TensorFlowModelConfigurator(_tensorFlowModelFilePath);
-            ITransformer _mlnetModel = tensorFlowModelConfigurator.Model;
-            return _mlnetModel;
-            //
-        }
+        
     }
 }

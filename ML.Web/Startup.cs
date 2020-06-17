@@ -16,24 +16,11 @@ namespace ML.Web
 {
     public class Startup
     {
-        private readonly string _tensorFlowModelFilePath;
-
-        private readonly ITransformer _mlnetModel;
         public IConfiguration Configuration { get; }
 
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
-
-
-
-            //
-            //change this part for multiple instances due to multiple models
-            //Configure the ML.NET model for the pre-trained TensorFlow model.
-            _tensorFlowModelFilePath = BaseExtensions.GetPath(Configuration["MLModel:TensorFlowModelFilePath"], Configuration.GetValue<bool>("MLModel:IsAbsolute"));
-            TensorFlowModelConfigurator tensorFlowModelConfigurator = new TensorFlowModelConfigurator(_tensorFlowModelFilePath);
-            _mlnetModel = tensorFlowModelConfigurator.Model;
-            //
         }
 
         // This method gets called by the runtime. Use this method to add services to the container.
@@ -51,16 +38,7 @@ namespace ML.Web
 
             services.AddMvc(opt=>opt.EnableEndpointRouting = false).SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
 
-            services.AddInternalServices();
-            services.AddExternalService(_mlnetModel); //change this to instance pipelines for multiple models
-
-            //services.AddSingleton<IConfiguration>(Configuration);
-
-            //// Register the PredictionEnginePool as a service in the IoC container for DI.
-            //services.AddPredictionEnginePool<ImageInputData, ImageLabelPredictions>();
-            //services
-            //    .AddOptions<PredictionEnginePoolOptions<ImageInputData, ImageLabelPredictions>>()
-            //    .Configure(options => { options.ModelLoader = new InMemoryModelLoader(_mlnetModel); });
+            services.RegisterServices(Configuration);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -76,16 +54,6 @@ namespace ML.Web
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
-
-            //app.UseRouting();
-
-            //app.UseEndpoints(endpoints =>
-            //{
-            //    endpoints.MapGet("/", async context =>
-            //    {
-            //        await context.Response.WriteAsync("Hello World!");
-            //    });
-            //});
 
             app.UseHttpsRedirection();
             app.UseStaticFiles();
