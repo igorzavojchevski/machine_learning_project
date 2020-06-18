@@ -42,7 +42,7 @@ namespace ML.Infrastructure.DependecyResolution
         {
             services.AddTransient<IFrameExporterService, FrameExporterService>();
             services.AddTransient<IAdvertisementService, AdvertisementService>();
-            services.AddTransient<ILabelScoringService, LabelScoringService>();
+            services.AddTransient<ITensorFlowInceptionLabelScoringService, TensorFlowInceptionLabelScoringService>();
 
             return services;
         }
