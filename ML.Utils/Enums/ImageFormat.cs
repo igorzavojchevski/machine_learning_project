@@ -10,6 +10,7 @@
         gif,
         tiff,
         png,
+        jpg,
         unknown
     }
 }

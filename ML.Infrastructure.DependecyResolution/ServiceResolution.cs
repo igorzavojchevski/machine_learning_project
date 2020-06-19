@@ -9,6 +9,9 @@ using ML.BL.Mongo.Interfaces;
 using ML.Core;
 using ML.Core.TensorFlowInception;
 using ML.Domain.DataModels;
+using ML.Domain.DataModels.TrainingModels;
+using ML.ImageClassification.Train.Concrete;
+using ML.ImageClassification.Train.Interfaces;
 using ML.Infrastructure.DataContext;
 using ML.Infrastructure.Interfaces;
 using ML.Infrastructure.Repositories;
@@ -43,6 +46,9 @@ namespace ML.Infrastructure.DependecyResolution
             services.AddTransient<IFrameExporterService, FrameExporterService>();
             services.AddTransient<IAdvertisementService, AdvertisementService>();
             services.AddTransient<ITensorFlowInceptionLabelScoringService, TensorFlowInceptionLabelScoringService>();
+            services.AddTransient<ILabelScoringService, LabelScoringService>();
+            services.AddTransient<ITrainService, TrainService>();
+            services.AddTransient<ILogoLabelScoringService, LogoLabelScoringService>();
 
             return services;
         }
@@ -51,10 +57,16 @@ namespace ML.Infrastructure.DependecyResolution
         private static IServiceCollection InstanceMLEngine(this IServiceCollection services, IConfiguration Configuration)
         {
             services.InstanceInceptionTensorFlowModel(Configuration);
+            services.InstanceLogoClassificationModel(Configuration);
 
             return services;
         }
 
+        private static IServiceCollection InstanceLogoClassificationModel(this IServiceCollection services, IConfiguration Configuration)
+        {
+            services.AddPredictionEnginePool<InMemoryImageData, ImagePrediction>().FromFile(Configuration["MLLogoModel:MLModelFilePath"]);
+            return services;
+        }
 
         #region TensorFlowInceptionModel
         //PrepareTensorFlowInceptionModel
