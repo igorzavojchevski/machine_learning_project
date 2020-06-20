@@ -2,6 +2,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.ML;
 using Microsoft.ML;
+using ML.BL;
 using ML.BL.Concrete;
 using ML.BL.Interfaces;
 using ML.BL.Mongo.Concrete;
@@ -48,7 +49,14 @@ namespace ML.Infrastructure.DependecyResolution
             services.AddTransient<ITensorFlowInceptionLabelScoringService, TensorFlowInceptionLabelScoringService>();
             services.AddTransient<ILabelScoringService, LabelScoringService>();
             services.AddTransient<ITrainService, TrainService>();
-            services.AddTransient<ILogoLabelScoringService, LogoLabelScoringService>();
+            //services.AddTransient<ILogoLabelScoringService, LogoLabelScoringService>();
+            //services.AddFactory<IScoringService, ScoringService>();
+            services.AddTransient<IScoringServiceFactory, ScoringServiceFactory>();
+            services.AddTransient<ILogoScoringService, LogoScoringService>();
+            services.AddTransient<ILabelScoringService, LabelScoringService>();
+
+            //services.AddTransient<LogoLabelScoringService>()
+            //.AddTransient<IScoringService, LogoLabelScoringService>(s => s.GetService<LogoLabelScoringService>());
 
             return services;
         }

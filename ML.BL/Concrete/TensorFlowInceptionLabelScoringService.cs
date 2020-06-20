@@ -4,6 +4,7 @@ using Microsoft.Extensions.ML;
 using ML.BL.Interfaces;
 using ML.BL.Mongo.Interfaces;
 using ML.Domain.DataModels;
+using ML.Domain.DataModels.TrainingModels;
 using ML.Utils.Extensions;
 using ML.Utils.Extensions.Base;
 using System;
@@ -34,39 +35,24 @@ namespace ML.BL.Concrete
             MaxProbabilityThreshold = Configuration.GetValue<float?>("MLModel:MaxProbabilityThreshold"); // do this as system settings
         }
 
-        public ImagePredictedLabelWithProbability DoLabelScoring(FileInfo fileInfo)
+        public ImagePredictedLabelWithProbability DoLabelScoring(InMemoryImageData fileInfo)
         {
-            if (fileInfo.Length == 0)
+            if (!fileInfo.Image.IsValidImage())
             {
-                _logger.LogDebug("fileInfo.Length == 0");
-                return new ImagePredictedLabelWithProbability();
-            }
-
-            string imageName = fileInfo.Name;
-            string imageFullPath = fileInfo.FullName;
-            MemoryStream imageMemoryStream = new MemoryStream();
-            using (FileStream fileStream = File.OpenRead(imageFullPath))
-            {
-                imageMemoryStream = new MemoryStream();
-                imageMemoryStream.SetLength(fileStream.Length);
-                fileStream.Read(imageMemoryStream.GetBuffer(), 0, (int)fileStream.Length);
-            }
-
-            // Check that image is valid.
-            byte[] imageData = imageMemoryStream.ToArray();
-            if (!imageData.IsValidImage())
-            {
-                _logger.LogDebug("DoLabelScoring - Image type not supported {0}", imageFullPath);
+                _logger.LogDebug("DoLabelScoring - Image type not supported {0}", fileInfo.ImageFileName);
                 return new ImagePredictedLabelWithProbability();
             };
 
-            //Memory stream to Image (System.Drawing).
-            Image image = Image.FromStream(imageMemoryStream);
+            Bitmap bitmapImage;
 
-            // Convert to Bitmap.
-            Bitmap bitmapImage = (Bitmap)image;
+            if(fileInfo.Image.Length == 0) _logger.LogInformation("DoLabelScoring - Image Byte Array Length is 0");
 
-            _logger.LogInformation("DoLabelScoring - Start processing image... {0}", imageName);
+            using (MemoryStream ms = new MemoryStream(fileInfo.Image))
+            {
+                bitmapImage = new Bitmap(ms);
+            }
+
+            _logger.LogInformation("DoLabelScoring - Start processing image... {0}", fileInfo.ImageFileName);
 
             // Measure execution time.
             System.Diagnostics.Stopwatch watch = System.Diagnostics.Stopwatch.StartNew();
@@ -80,10 +66,10 @@ namespace ML.BL.Concrete
             // Stop measuring time.
             watch.Stop();
 
-            _logger.LogInformation("Image {0} processed in {1} miliseconds", imageName, watch.ElapsedMilliseconds);
+            _logger.LogInformation("Image {0} processed in {1} miliseconds", fileInfo.ImageFileName, watch.ElapsedMilliseconds);
 
             // Predict the image's label (The one with highest probability).
-            ImagePredictedLabelWithProbability imageLabelsPrediction = FindLabelsWithProbability(imageLabelPredictions, imageInputData, imageName);
+            ImagePredictedLabelWithProbability imageLabelsPrediction = FindLabelsWithProbability(imageLabelPredictions, imageInputData, fileInfo.ImageFileName);
 
             return imageLabelsPrediction;
         }

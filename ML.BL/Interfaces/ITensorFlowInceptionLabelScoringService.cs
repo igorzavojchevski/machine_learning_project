@@ -1,10 +1,11 @@
 ﻿using ML.Domain.DataModels;
+using ML.Domain.DataModels.TrainingModels;
 using System.IO;
 
 namespace ML.BL.Interfaces
 {
     public interface ITensorFlowInceptionLabelScoringService
     {
-        ImagePredictedLabelWithProbability DoLabelScoring(FileInfo fileInfo);
+        ImagePredictedLabelWithProbability DoLabelScoring(InMemoryImageData fileInfo);
     }
 }

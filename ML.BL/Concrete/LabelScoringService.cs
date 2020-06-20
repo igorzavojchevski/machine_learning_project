@@ -3,7 +3,9 @@ using Microsoft.Extensions.Logging;
 using ML.BL.Interfaces;
 using ML.BL.Mongo.Interfaces;
 using ML.Domain.DataModels;
+using ML.Domain.DataModels.TrainingModels;
 using ML.Domain.Entities.Mongo;
+using ML.Utils.Extensions.Base;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -13,9 +15,9 @@ using System.Threading.Tasks;
 
 namespace ML.BL.Concrete
 {
-    public class LabelScoringService : ILabelScoringService
+    public class LabelScoringService : ScoringService, ILabelScoringService
     {
-        public IConfiguration Configuration { get; }
+        private readonly IConfiguration Configuration;
         private readonly ILogger<LabelScoringService> _logger;
         private readonly IAdvertisementService _advertisementService;
         private readonly ITensorFlowInceptionLabelScoringService _tensorFlowInceptionLabelScoringService;
@@ -25,6 +27,7 @@ namespace ML.BL.Concrete
             ILogger<LabelScoringService> logger,
             IAdvertisementService advertisementService,
             ITensorFlowInceptionLabelScoringService tensorFlowInceptionLabelScoringService)
+            : base(configuration, logger)
         {
             Configuration = configuration;
             _logger = logger;
@@ -32,43 +35,62 @@ namespace ML.BL.Concrete
             _tensorFlowInceptionLabelScoringService = tensorFlowInceptionLabelScoringService;
         }
 
-        public void Score(string imagesToCheckPath)
+        public override void Score(string imagesToCheckPath)
         {
-            FileInfo[] Images = GetListOfImages(imagesToCheckPath);
-
-            if (Images == null || Images.Length == 0) { _logger.LogDebug("Score - No Images provided"); return; }
-
-            Guid GroupGuid = Guid.NewGuid();
-
-            List<List<FileInfo>> chunkedList = ChunkImagesInGroups(Images);
-            foreach (List<FileInfo> chunk in chunkedList)
-            {
-                Task.Factory.StartNew(() =>
-                Parallel.ForEach<FileInfo>(chunk, image =>
-                {
-                    DoLabelScoring(GroupGuid, image);
-                }));
-            }
+            base.Score(imagesToCheckPath);
         }
 
-        private void DoLabelScoring(Guid GroupGuid, FileInfo image)
+        public override void DoLabelScoring(Guid GroupGuid, InMemoryImageData image)
         {
             ImagePredictedLabelWithProbability prediction = _tensorFlowInceptionLabelScoringService.DoLabelScoring(image);
             SaveImageScoringInfo(prediction, GroupGuid);
         }
 
-        private List<List<FileInfo>> ChunkImagesInGroups(FileInfo[] Images)
-        {
-            int chunks = Configuration.GetValue<int>("MLModel:MaxChunksToProcessAtOnce"); // do this as system settings
-            return Images.Select((value, i) => new { Index = i, Value = value }).GroupBy(t => t.Index / (chunks != 0 ? chunks : Images.Length)).Select(t => t.Select(v => v.Value).ToList()).ToList();
-        }
+        //public void Score(string imagesToCheckPath)
+        //{
+        //    //FileInfo[] Images = GetListOfImages(imagesToCheckPath);
+        //    IEnumerable<InMemoryImageData> Images = BaseExtensions.LoadInMemoryImagesFromDirectory(imagesToCheckPath, false);
 
-        private FileInfo[] GetListOfImages(string imagesToCheckPath)
-        {
-            DirectoryInfo di = new DirectoryInfo(imagesToCheckPath);
-            FileInfo[] Images = di.GetFiles();
-            return Images;
-        }
+        //    if (Images == null || Images.Count() == 0) { _logger.LogDebug("Score - No Images provided"); return; }
+
+        //    Guid GroupGuid = Guid.NewGuid();
+
+        //    //List<List<FileInfo>> chunkedList = ChunkImagesInGroups(Images);
+        //    List<List<InMemoryImageData>> chunkedList = ChunkImagesInGroups(Images);
+        //    foreach (List<InMemoryImageData> chunk in chunkedList)
+        //    {
+        //        Task.Factory.StartNew(() =>
+        //        Parallel.ForEach<InMemoryImageData>(chunk, image =>
+        //        {
+        //            DoLabelScoring(GroupGuid, image);
+        //        }));
+        //    }
+        //}
+
+        //private void DoLabelScoring(Guid GroupGuid, InMemoryImageData image)
+        //{
+        //    ImagePredictedLabelWithProbability prediction = _tensorFlowInceptionLabelScoringService.DoLabelScoring(image);
+        //    SaveImageScoringInfo(prediction, GroupGuid);
+        //}
+
+        //private List<List<FileInfo>> ChunkImagesInGroups(FileInfo[] Images)
+        //{
+        //    int chunks = Configuration.GetValue<int>("MLModel:MaxChunksToProcessAtOnce"); // do this as system settings
+        //    return Images.Select((value, i) => new { Index = i, Value = value }).GroupBy(t => t.Index / (chunks != 0 ? chunks : Images.Length)).Select(t => t.Select(v => v.Value).ToList()).ToList();
+        //}
+
+        //private List<List<InMemoryImageData>> ChunkImagesInGroups(IEnumerable<InMemoryImageData> Images)
+        //{
+        //    int chunks = Configuration.GetValue<int>("MLModel:MaxChunksToProcessAtOnce"); // do this as system settings
+        //    return Images.Select((value, i) => new { Index = i, Value = value }).GroupBy(t => t.Index / (chunks != 0 ? chunks : Images.Count())).Select(t => t.Select(v => v.Value).ToList()).ToList();
+        //}
+
+        //private FileInfo[] GetListOfImages(string imagesToCheckPath)
+        //{
+        //    DirectoryInfo di = new DirectoryInfo(imagesToCheckPath);
+        //    FileInfo[] Images = di.GetFiles();
+        //    return Images;
+        //}
 
         private void SaveImageScoringInfo(ImagePredictedLabelWithProbability prediction, Guid GroupGuid)
         {
