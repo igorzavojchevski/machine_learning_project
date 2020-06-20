@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.ML;
+using ML.BL.Mongo.Interfaces;
 using ML.Domain.DataModels;
 using ML.Utils.Extensions;
 using ML.Utils.Extensions.Base;
@@ -24,14 +25,19 @@ namespace ML.Web.Controllers
         private readonly PredictionEnginePool<ImageInputData, ImageLabelPredictions> _predictionEnginePool;
         private readonly ILogger<ImageClassificationController> _logger;
         private readonly string _labelsFilePath;
+        private readonly ISystemSettingService _systemSettingService;
         #endregion
 
         #region ctor
-        public ImageClassificationController(PredictionEnginePool<ImageInputData, ImageLabelPredictions> predictionEnginePool, IConfiguration configuration, ILogger<ImageClassificationController> logger) //When using DI/IoC
+        public ImageClassificationController(PredictionEnginePool<ImageInputData, ImageLabelPredictions> predictionEnginePool,
+                                             IConfiguration configuration,
+                                             ILogger<ImageClassificationController> logger,
+                                             ISystemSettingService systemSettingService)
         {
             _logger = logger;
             Configuration = configuration;
-            _labelsFilePath = BaseExtensions.GetPath(Configuration["MLModel:LabelsFilePath"], Configuration.GetValue<bool>("MLModel:IsAbsolute"));
+            _systemSettingService = systemSettingService;
+            _labelsFilePath = BaseExtensions.GetPath(_systemSettingService.TF_LabelsFilePath);
 
             // Get the ML Model Engine injected, for scoring.
             _predictionEnginePool = predictionEnginePool;

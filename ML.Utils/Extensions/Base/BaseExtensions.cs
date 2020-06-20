@@ -12,7 +12,7 @@ namespace ML.Utils.Extensions.Base
     public static class BaseExtensions
     {
         //TODO - Rewrite this method
-        public static string GetPath(string path, bool isAbsolute)
+        public static string GetPath(string path, bool isAbsolute = true)
         {
             if (isAbsolute) return path;
 

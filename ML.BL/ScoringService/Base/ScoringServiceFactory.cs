@@ -10,26 +10,6 @@ using System.Text;
 
 namespace ML.BL
 {
-    //public abstract class ScoringService : IScoringService
-    //{
-    //    private readonly ILogger<ScoringService> _logger;
-
-    //    public ScoringService()
-    //    {
-
-    //    }
-
-    //    public virtual void Score()
-    //    {
-    //    }
-    //}
-
-    public interface IScoringService
-    {
-        void Score(string imagesToCheckPath);
-        void DoLabelScoring(Guid GroupGuid, InMemoryImageData image);
-    }
-
     public interface IScoringServiceFactory
     {
         IScoringService Create(ScoringServiceType type);

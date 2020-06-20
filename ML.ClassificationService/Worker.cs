@@ -18,7 +18,6 @@ namespace ML.ClassificationService
         private readonly IFrameExporterService _frameExporterService;
         private readonly ILabelScoringService _labelScoringService;
         private readonly ITrainService _trainService;
-        //private readonly ILogoLabelScoringService _logoLabelScoringService;
         private readonly IScoringServiceFactory _ScoringServiceFactory;
 
         public Worker(
@@ -27,14 +26,12 @@ namespace ML.ClassificationService
             ILabelScoringService labelScoringService, 
             ITrainService trainService,
             IScoringServiceFactory ScoringServiceFactory
-            //ILogoLabelScoringService logoLabelScoringService
             )
         {
             _logger = logger;
             _frameExporterService = frameExporterService;
             _labelScoringService = labelScoringService;
             _trainService = trainService;
-            //_logoLabelScoringService = logoLabelScoringService;
             _ScoringServiceFactory = ScoringServiceFactory;
         }
 
@@ -62,10 +59,7 @@ namespace ML.ClassificationService
             //Training for Logo Custom
             _trainService.Train();
 
-            ////Evaluation over Custom Logo
-            //string imagesFolderPathForPredictions = @"C:\Users\igor.zavojchevski\Desktop\Master\ML\assets\Training\inputs\images_for_prediction";
-            //_logoLabelScoringService.Score(imagesFolderPathForPredictions);
-
+            //Evaluation over Custom Logo
             string imagesFolderPathForPredictions = @"C:\Users\igor.zavojchevski\Desktop\Master\ML\assets\Training\inputs\images_for_prediction";
             IScoringService sync = _ScoringServiceFactory.Create(ScoringServiceType.LogoScoring);
             sync.Score(imagesFolderPathForPredictions);

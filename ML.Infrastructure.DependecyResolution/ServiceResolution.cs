@@ -4,6 +4,7 @@ using Microsoft.Extensions.ML;
 using Microsoft.ML;
 using ML.BL;
 using ML.BL.Concrete;
+using ML.BL.Helpers;
 using ML.BL.Interfaces;
 using ML.BL.Mongo.Concrete;
 using ML.BL.Mongo.Interfaces;
@@ -16,6 +17,7 @@ using ML.ImageClassification.Train.Interfaces;
 using ML.Infrastructure.DataContext;
 using ML.Infrastructure.Interfaces;
 using ML.Infrastructure.Repositories;
+using ML.Utils;
 using ML.Utils.Extensions.Base;
 
 namespace ML.Infrastructure.DependecyResolution
@@ -24,12 +26,14 @@ namespace ML.Infrastructure.DependecyResolution
     {
         public static IServiceCollection RegisterServices(this IServiceCollection services, IConfiguration Configuration)
         {
+            ServiceProviderHelper.ServiceProvider = services.BuildServiceProvider();
+
             services.AddSingleton<IMongoDbContext, MongoDbContext>();
 
             services.AddRepositories();
             services.AddServices();
 
-            services.InstanceMLEngine(Configuration);
+            services.InstanceMLEngine();
 
             return services;
         }
@@ -37,6 +41,7 @@ namespace ML.Infrastructure.DependecyResolution
         //Repositories
         private static IServiceCollection AddRepositories(this IServiceCollection services)
         {
+            services.AddTransient<ISystemSettingRepository, SystemSettingRepository>();
             services.AddTransient<IAdvertisementRepository, AdvertisementRepository>();
             return services;
         }
@@ -44,56 +49,52 @@ namespace ML.Infrastructure.DependecyResolution
         //Services
         private static IServiceCollection AddServices(this IServiceCollection services)
         {
-            services.AddTransient<IFrameExporterService, FrameExporterService>();
+            services.AddTransient<ISystemSettingService, SystemSettingService>();
             services.AddTransient<IAdvertisementService, AdvertisementService>();
-            services.AddTransient<ITensorFlowInceptionLabelScoringService, TensorFlowInceptionLabelScoringService>();
-            services.AddTransient<ILabelScoringService, LabelScoringService>();
+
+            services.AddTransient<IFrameExporterService, FrameExporterService>();
+
             services.AddTransient<ITrainService, TrainService>();
-            //services.AddTransient<ILogoLabelScoringService, LogoLabelScoringService>();
-            //services.AddFactory<IScoringService, ScoringService>();
+
             services.AddTransient<IScoringServiceFactory, ScoringServiceFactory>();
             services.AddTransient<ILogoScoringService, LogoScoringService>();
             services.AddTransient<ILabelScoringService, LabelScoringService>();
-
-            //services.AddTransient<LogoLabelScoringService>()
-            //.AddTransient<IScoringService, LogoLabelScoringService>(s => s.GetService<LogoLabelScoringService>());
 
             return services;
         }
 
         //MLEngine
-        private static IServiceCollection InstanceMLEngine(this IServiceCollection services, IConfiguration Configuration)
+        private static IServiceCollection InstanceMLEngine(this IServiceCollection services)
         {
-            services.InstanceInceptionTensorFlowModel(Configuration);
-            services.InstanceLogoClassificationModel(Configuration);
+            services.InstanceInceptionTensorFlowModel();
+            services.InstanceLogoClassificationModel();
 
             return services;
         }
 
-        private static IServiceCollection InstanceLogoClassificationModel(this IServiceCollection services, IConfiguration Configuration)
+        private static IServiceCollection InstanceLogoClassificationModel(this IServiceCollection services)
         {
-            services.AddPredictionEnginePool<InMemoryImageData, ImagePrediction>().FromFile(Configuration["MLLogoModel:MLModelFilePath"]);
+            services.AddPredictionEnginePool<InMemoryImageData, ImagePrediction>()
+                .FromFile(filePath: ServiceHelper.GetCustomLogoModelFilePath(), watchForChanges: true);
             return services;
         }
 
         #region TensorFlowInceptionModel
         //PrepareTensorFlowInceptionModel
-        private static IServiceCollection InstanceInceptionTensorFlowModel(this IServiceCollection services, IConfiguration Configuration)
+        private static IServiceCollection InstanceInceptionTensorFlowModel(this IServiceCollection services)
         {
             // Register the PredictionEnginePool as a service in the IoC container for DI.
             services.AddPredictionEnginePool<ImageInputData, ImageLabelPredictions>();
             services
                 .AddOptions<PredictionEnginePoolOptions<ImageInputData, ImageLabelPredictions>>()
-                .Configure(options => { options.ModelLoader = new InMemoryModelLoader(GetTensorFlowInceptionMLModel(Configuration)); });
+                .Configure(options => { options.ModelLoader = new InMemoryModelLoader(GetTensorFlowInceptionMLModel()); });
             return services;
         }
         //PrepareTensorFlowInceptionModel
-        private static ITransformer GetTensorFlowInceptionMLModel(IConfiguration Configuration)
+        private static ITransformer GetTensorFlowInceptionMLModel()
         {
             //Configure the ML.NET model for the pre-trained Inception TensorFlow model.
-            string _tensorFlowModelFilePath = BaseExtensions.GetPath(
-                Configuration["MLModel:TensorFlowModelFilePath"],
-                Configuration.GetValue<bool>("MLModel:IsAbsolute"));
+            string _tensorFlowModelFilePath = BaseExtensions.GetPath(ServiceHelper.GetTensorFlowModelFilePath());
             TensorFlowInceptionModelConfigurator tensorFlowInceptionModelConfigurator = new TensorFlowInceptionModelConfigurator(_tensorFlowModelFilePath);
             ITransformer _InceptionMLNetModel = tensorFlowInceptionModelConfigurator.Model;
             return _InceptionMLNetModel;
