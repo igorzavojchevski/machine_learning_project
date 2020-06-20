@@ -10,8 +10,8 @@ using ML.BL.Mongo.Concrete;
 using ML.BL.Mongo.Interfaces;
 using ML.Core;
 using ML.Core.TensorFlowInception;
-using ML.Domain.DataModels;
-using ML.Domain.DataModels.TrainingModels;
+using ML.Domain.DataModels.TFLabelScoringModel;
+using ML.Domain.DataModels.CustomLogoTrainingModel;
 using ML.ImageClassification.Train.Concrete;
 using ML.ImageClassification.Train.Interfaces;
 using ML.Infrastructure.DataContext;
@@ -19,6 +19,7 @@ using ML.Infrastructure.Interfaces;
 using ML.Infrastructure.Repositories;
 using ML.Utils;
 using ML.Utils.Extensions.Base;
+using ML.Domain.DataModels;
 
 namespace ML.Infrastructure.DependecyResolution
 {
@@ -26,8 +27,6 @@ namespace ML.Infrastructure.DependecyResolution
     {
         public static IServiceCollection RegisterServices(this IServiceCollection services, IConfiguration Configuration)
         {
-            ServiceProviderHelper.ServiceProvider = services.BuildServiceProvider();
-
             services.AddSingleton<IMongoDbContext, MongoDbContext>();
 
             services.AddRepositories();
@@ -59,6 +58,8 @@ namespace ML.Infrastructure.DependecyResolution
             services.AddTransient<IScoringServiceFactory, ScoringServiceFactory>();
             services.AddTransient<ILogoScoringService, LogoScoringService>();
             services.AddTransient<ILabelScoringService, LabelScoringService>();
+            
+            ServiceProviderHelper.ServiceProvider = services.BuildServiceProvider();
 
             return services;
         }

@@ -2,7 +2,8 @@
 using Microsoft.Extensions.ML;
 using ML.BL.Interfaces;
 using ML.BL.Mongo.Interfaces;
-using ML.Domain.DataModels.TrainingModels;
+using ML.Domain.DataModels;
+using ML.Domain.DataModels.CustomLogoTrainingModel;
 using ML.Domain.Entities.Mongo;
 using System;
 using System.Linq;

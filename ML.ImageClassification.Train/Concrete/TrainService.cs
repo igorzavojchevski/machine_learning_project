@@ -1,7 +1,8 @@
 ﻿using Microsoft.Extensions.Logging;
 using Microsoft.ML;
 using Microsoft.ML.Data;
-using ML.Domain.DataModels.TrainingModels;
+using ML.Domain.DataModels;
+using ML.Domain.DataModels.CustomLogoTrainingModel;
 using ML.ImageClassification.Train.Interfaces;
 using ML.Utils.Extensions.Base;
 using System;

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace ML.Domain.DataModels.TrainingModels
+namespace ML.Domain.DataModels.CustomLogoTrainingModel
 {
     public class ImageData
     {

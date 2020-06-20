@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace ML.Domain.DataModels
+namespace ML.Domain.DataModels.TFLabelScoringModel
 {
     public class ImageLabelPredictions
     {

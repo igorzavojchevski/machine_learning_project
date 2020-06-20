@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using ML.BL.Mongo.Interfaces;
-using ML.Domain.DataModels.TrainingModels;
+using ML.Domain.DataModels;
 using ML.Utils.Extensions.Base;
 using System;
 using System.Collections.Generic;

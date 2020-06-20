@@ -3,7 +3,8 @@ using Microsoft.Extensions.ML;
 using ML.BL.Interfaces;
 using ML.BL.Mongo.Interfaces;
 using ML.Domain.DataModels;
-using ML.Domain.DataModels.TrainingModels;
+using ML.Domain.DataModels.TFLabelScoringModel;
+using ML.Domain.DataModels.CustomLogoTrainingModel;
 using ML.Domain.Entities.Mongo;
 using ML.Utils.Extensions;
 using ML.Utils.Extensions.Base;
@@ -68,24 +69,24 @@ namespace ML.BL.Concrete
             _advertisementService.InsertOne(ad);
         }
 
-        private ImagePredictedLabelWithProbability DoWork(InMemoryImageData fileInfo)
+        private ImagePredictedLabelWithProbability DoWork(InMemoryImageData image)
         {
-            if (!fileInfo.Image.IsValidImage())
+            if (!image.Image.IsValidImage())
             {
-                _logger.LogDebug("DoLabelScoring - Image type not supported {0}", fileInfo.ImageFileName);
+                _logger.LogDebug("DoLabelScoring - Image type not supported {0}", image.ImageFileName);
                 return new ImagePredictedLabelWithProbability();
             };
 
             Bitmap bitmapImage;
 
-            if (fileInfo.Image.Length == 0) _logger.LogInformation("DoLabelScoring - Image Byte Array Length is 0");
+            if (image.Image.Length == 0) _logger.LogInformation("DoLabelScoring - Image Byte Array Length is 0");
 
-            using (MemoryStream ms = new MemoryStream(fileInfo.Image))
+            using (MemoryStream ms = new MemoryStream(image.Image))
             {
                 bitmapImage = new Bitmap(ms);
             }
 
-            _logger.LogInformation("DoLabelScoring - Start processing image... {0}", fileInfo.ImageFileName);
+            _logger.LogInformation("DoLabelScoring - Start processing image... {0}", image.ImageFileName);
 
             // Measure execution time.
             System.Diagnostics.Stopwatch watch = System.Diagnostics.Stopwatch.StartNew();
@@ -99,10 +100,10 @@ namespace ML.BL.Concrete
             // Stop measuring time.
             watch.Stop();
 
-            _logger.LogInformation("Image {0} processed in {1} miliseconds", fileInfo.ImageFileName, watch.ElapsedMilliseconds);
+            _logger.LogInformation("Image {0} processed in {1} miliseconds", image.ImageFileName, watch.ElapsedMilliseconds);
 
             // Predict the image's label (The one with highest probability).
-            ImagePredictedLabelWithProbability imageLabelsPrediction = FindLabelsWithProbability(imageLabelPredictions, imageInputData, fileInfo.ImageFileName);
+            ImagePredictedLabelWithProbability imageLabelsPrediction = FindLabelsWithProbability(imageLabelPredictions, imageInputData, image.ImageFileName);
 
             return imageLabelsPrediction;
         }

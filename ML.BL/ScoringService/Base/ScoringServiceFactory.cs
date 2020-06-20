@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using ML.BL.Interfaces;
-using ML.Domain.DataModels.TrainingModels;
+using ML.Domain.DataModels.CustomLogoTrainingModel;
 using ML.Utils.Extensions.Base;
 using System;
 using System.Collections.Generic;

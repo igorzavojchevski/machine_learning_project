@@ -1,4 +1,5 @@
-﻿using ML.Domain.DataModels.TrainingModels;
+﻿using ML.Domain.DataModels;
+using ML.Domain.DataModels.CustomLogoTrainingModel;
 using ML.Utils.Enums;
 using System;
 using System.Collections.Generic;
@@ -32,8 +33,6 @@ namespace ML.Utils.Extensions.Base
             var imagesPath = Directory
                 .GetFiles(folder, "*", searchOption: SearchOption.AllDirectories)
                 .Where(x => imageSupportedFormats.Contains(Path.GetExtension(x).Replace(".", "")));
-            //.Where(x => imageSupportedFormats.Any(supportedformat => nameof(supportedformat) == Path.GetExtension(x).Replace(".", "")));
-            //Path.GetExtension(x) == ".jpg" || Path.GetExtension(x) == ".png");
 
             return useFolderNameasLabel
                 ? imagesPath.Select(imagePath => (imagePath, Directory.GetParent(imagePath).Name))
@@ -59,6 +58,7 @@ namespace ML.Utils.Extensions.Base
                 .Select(x => new InMemoryImageData(
                     image: File.ReadAllBytes(x.imagePath),
                     label: x.label,
-                    imageFileName: Path.GetFileName(x.imagePath)));
+                    imageFileName: Path.GetFileName(x.imagePath),
+                    imageFilePath: x.imagePath));
     }
 }

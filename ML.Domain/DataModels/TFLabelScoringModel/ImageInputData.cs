@@ -1,7 +1,7 @@
 ﻿using Microsoft.ML.Transforms.Image;
 using System.Drawing;
 
-namespace ML.Domain.DataModels
+namespace ML.Domain.DataModels.TFLabelScoringModel
 {
     public class ImageInputData
     {

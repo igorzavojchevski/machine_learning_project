@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.ML;
 using ML.BL.Mongo.Interfaces;
 using ML.Domain.DataModels;
+using ML.Domain.DataModels.TFLabelScoringModel;
 using ML.Utils.Extensions;
 using ML.Utils.Extensions.Base;
 using System;

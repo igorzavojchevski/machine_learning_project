@@ -2,9 +2,9 @@
 using Microsoft.ML.Transforms.Image;
 using System.Collections.Generic;
 using System.Linq;
-using ML.Domain.DataModels;
 using Microsoft.ML.Data;
 using Microsoft.ML.Transforms;
+using ML.Domain.DataModels.TFLabelScoringModel;
 
 namespace ML.Core.TensorFlowInception
 {

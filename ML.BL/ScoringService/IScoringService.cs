@@ -1,4 +1,4 @@
-﻿using ML.Domain.DataModels.TrainingModels;
+﻿using ML.Domain.DataModels;
 using System;
 
 namespace ML.BL

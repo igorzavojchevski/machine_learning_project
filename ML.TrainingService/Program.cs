@@ -1,3 +1,7 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -5,7 +9,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.EventLog;
 using ML.Infrastructure.DependecyResolution;
 
-namespace ML.ClassificationService
+namespace ML.TrainingService
 {
     public class Program
     {
@@ -34,7 +38,5 @@ namespace ML.ClassificationService
 
             }).UseWindowsService();
         }
-
-        
     }
 }
