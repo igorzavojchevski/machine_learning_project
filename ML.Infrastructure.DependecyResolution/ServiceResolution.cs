@@ -58,7 +58,7 @@ namespace ML.Infrastructure.DependecyResolution
             services.AddTransient<IScoringServiceFactory, ScoringServiceFactory>();
             services.AddTransient<ILogoScoringService, LogoScoringService>();
             services.AddTransient<ILabelScoringService, LabelScoringService>();
-            
+
             ServiceProviderHelper.ServiceProvider = services.BuildServiceProvider();
 
             return services;
@@ -76,7 +76,7 @@ namespace ML.Infrastructure.DependecyResolution
         private static IServiceCollection InstanceLogoClassificationModel(this IServiceCollection services)
         {
             services.AddPredictionEnginePool<InMemoryImageData, ImagePrediction>()
-                .FromFile(filePath: ServiceHelper.GetCustomLogoModelFilePath(), watchForChanges: true);
+                .FromFile(filePath: ServiceHelper.SystemSettingService.CUSTOMLOGOMODEL_ModelFilePath, watchForChanges: true);
             return services;
         }
 
@@ -95,7 +95,7 @@ namespace ML.Infrastructure.DependecyResolution
         private static ITransformer GetTensorFlowInceptionMLModel()
         {
             //Configure the ML.NET model for the pre-trained Inception TensorFlow model.
-            string _tensorFlowModelFilePath = BaseExtensions.GetPath(ServiceHelper.GetTensorFlowModelFilePath());
+            string _tensorFlowModelFilePath = BaseExtensions.GetPath(ServiceHelper.SystemSettingService.TF_ModelFilePath);
             TensorFlowInceptionModelConfigurator tensorFlowInceptionModelConfigurator = new TensorFlowInceptionModelConfigurator(_tensorFlowModelFilePath);
             ITransformer _InceptionMLNetModel = tensorFlowInceptionModelConfigurator.Model;
             return _InceptionMLNetModel;

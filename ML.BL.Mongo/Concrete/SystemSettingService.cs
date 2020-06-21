@@ -23,7 +23,7 @@ namespace ML.BL.Mongo.Concrete
         }
 
         #region Get Settings Logic
-        public bool GetValue(string settingKey)
+        public bool GetSettingValue(string settingKey)
         {
 
             var setting = _systemSettingRepository.GetAll().FirstOrDefault(x => x.SettingKey == settingKey);
@@ -51,6 +51,15 @@ namespace ML.BL.Mongo.Concrete
                 return chunks;
             }
         }
+
+        public bool IsTrainingServiceStarted
+        {
+            get
+            {
+                return GetSettingValue("IsTrainingServiceStarted");
+            }
+        }
+
 
         public float TF_LabelScoring_MaxProbabilityThreshold
         {
@@ -91,6 +100,7 @@ namespace ML.BL.Mongo.Concrete
         }
 
 
+
         public string CUSTOMLOGOMODEL_ModelFilePath
         {
             get
@@ -99,7 +109,43 @@ namespace ML.BL.Mongo.Concrete
                 //"MLModelFilePath": "C:\\Users\\igor.zavojchevski\\Desktop\\Master\\ML\\assets\\Training\\outputs\\imageClassifier.zip"
             }
         }
-        
+
+        public string CUSTOMLOGOMODEL_OutputFilePath
+        {
+            get
+            {
+                return GetSettingValueByKey("CUSTOMLOGOMODEL_OutputFilePath");
+                //@"C:\Users\igor.zavojchevski\Desktop\Master\ML\assets\Training\outputs\imageClassifier.zip"
+            }
+        }
+
+        public string CUSTOMLOGOMODEL_ImagesToTrainFolderPath
+        {
+            get
+            {
+                return GetSettingValueByKey("CUSTOMLOGOMODEL_ImagesToTrainFolderPath");
+                //@"C:\Users\igor.zavojchevski\Desktop\Master\ML\assets\Training\inputs\images_to_train";
+            }
+        }
+
+        public string CUSTOMLOGOMODEL_ImagesToTestAfterTrainingFolderPath
+        {
+            get
+            {
+                return GetSettingValueByKey("CUSTOMLOGOMODEL_ImagesToTestAfterTrainingFolderPath");
+                //@"C:\Users\igor.zavojchevski\Desktop\Master\ML\assets\Training\inputs\images_for_prediction";
+            }
+        }
+
+        public string CUSTOMLOGOMODEL_ExportedFromService_ImagesToEvaluateFolderPath
+        {
+            get
+            {
+                return GetSettingValueByKey("CUSTOMLOGOMODEL_ExportedFromService_ImagesToEvaluateFolderPath");
+                //@"C:\Users\igor.zavojchevski\Desktop\Master\ML\assets\Training\inputs\images_for_prediction";
+            }
+        }
+
         #endregion
     }
 }

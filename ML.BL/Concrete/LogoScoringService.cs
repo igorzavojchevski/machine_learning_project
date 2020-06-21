@@ -40,14 +40,15 @@ namespace ML.BL.Concrete
         public override void DoLabelScoring(Guid GroupGuid, InMemoryImageData image)
         {
             ImagePrediction prediction = _predictionEnginePool.Predict(image);
-            SaveImageScoringInfo(prediction, GroupGuid);
+            SaveImageScoringInfo(image, prediction, GroupGuid);
         }
 
-        private void SaveImageScoringInfo(ImagePrediction prediction, Guid GroupGuid)
+        private void SaveImageScoringInfo(InMemoryImageData image, ImagePrediction prediction, Guid GroupGuid)
         {
             Advertisement ad = new Advertisement
             {
                 GroupGuid = GroupGuid,
+                ImageId = image.ImageFileName,
                 PredictedLabel = prediction.PredictedLabel,
                 MaxProbability = prediction.Score.Max(),
                 ModifiedBy = "SaveImageScoringInfoService",

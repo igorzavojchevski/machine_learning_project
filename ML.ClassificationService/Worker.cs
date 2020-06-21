@@ -6,7 +6,9 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using ML.BL;
+using ML.BL.Helpers;
 using ML.BL.Interfaces;
+using ML.BL.Mongo.Concrete;
 using ML.BL.Mongo.Interfaces;
 using ML.ImageClassification.Train.Interfaces;
 
@@ -17,13 +19,12 @@ namespace ML.ClassificationService
         private readonly ILogger<Worker> _logger;
         private readonly IFrameExporterService _frameExporterService;
         private readonly ILabelScoringService _labelScoringService;
-        private readonly ITrainService _trainService;
         private readonly IScoringServiceFactory _ScoringServiceFactory;
 
         public Worker(
-            ILogger<Worker> logger, 
-            IFrameExporterService frameExporterService, 
-            ILabelScoringService labelScoringService, 
+            ILogger<Worker> logger,
+            IFrameExporterService frameExporterService,
+            ILabelScoringService labelScoringService,
             ITrainService trainService,
             IScoringServiceFactory ScoringServiceFactory
             )
@@ -31,7 +32,6 @@ namespace ML.ClassificationService
             _logger = logger;
             _frameExporterService = frameExporterService;
             _labelScoringService = labelScoringService;
-            _trainService = trainService;
             _ScoringServiceFactory = ScoringServiceFactory;
         }
 
@@ -47,24 +47,37 @@ namespace ML.ClassificationService
 
         public override Task StartAsync(CancellationToken cancellationToken)
         {
-            _logger.LogInformation("Service Starting");
+            _logger.LogInformation("Classification Service Starting");
 
-            //TODO - REWORK THIS
-            //_frameExporterService.Export();
-
-            //LabelScoring on TensorFlowInception
-            //string imagesPath = @"C:\Users\igor.zavojchevski\Desktop\Master\TestMaterial\Frames\Panda"; //this should be output of frameexporterservice
-            //_labelScoringService.Score(imagesPath);
-
-            //Training for Logo Custom
-            _trainService.Train();
-
-            //Evaluation over Custom Logo
-            string imagesFolderPathForPredictions = @"C:\Users\igor.zavojchevski\Desktop\Master\ML\assets\Training\inputs\images_for_prediction";
-            IScoringService sync = _ScoringServiceFactory.Create(ScoringServiceType.LogoScoring);
-            sync.Score(imagesFolderPathForPredictions);
+            Thread classificationService = new Thread(Score);
+            classificationService.Start();
 
             return base.StartAsync(cancellationToken);
+        }
+
+        public void Score()
+        {
+            while (true)
+            {
+                if (ServiceHelper.SystemSettingService.IsTrainingServiceStarted)
+                {
+                    Thread.Sleep(TimeSpan.FromMinutes(5));
+                    continue;
+                }
+
+                //TODO - REWORK THIS - place in separate service
+                //_frameExporterService.Export();
+
+                //LabelScoring on TensorFlowInception
+                //string imagesPath = @"C:\Users\igor.zavojchevski\Desktop\Master\TestMaterial\Frames\Panda"; //this should be output of frameexporterservice
+                //_labelScoringService.Score(imagesPath);
+
+                //Evaluation over Custom Logo
+                IScoringService sync = _ScoringServiceFactory.Create(ScoringServiceType.LogoScoring);
+                sync.Score(ServiceHelper.SystemSettingService.CUSTOMLOGOMODEL_ExportedFromService_ImagesToEvaluateFolderPath);
+
+                Thread.Sleep(TimeSpan.FromMinutes(1));
+            }
         }
     }
 }

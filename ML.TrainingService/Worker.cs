@@ -34,10 +34,27 @@ namespace ML.TrainingService
         {
             _logger.LogInformation("Training Service Starting");
 
-            //Training for Logo Custom
-            _trainService.Train();
+            Thread training = new Thread(Training);
+            training.Start();
 
             return base.StartAsync(cancellationToken);
+        }
+
+        public void Training()
+        {
+            while (true)
+            {
+                //Do before training start activities - (set flag for start etc.)
+                _trainService.DoBeforeTrainingStart();
+
+                //Training for Logo Custom
+                _trainService.Train();
+
+                //Do after training finished activities- (set flag for start etc.)
+                _trainService.DoAfterTrainingFinished();
+
+                Thread.Sleep(TimeSpan.FromMinutes(10)); //make scheduled execution
+            }
         }
     }
 }

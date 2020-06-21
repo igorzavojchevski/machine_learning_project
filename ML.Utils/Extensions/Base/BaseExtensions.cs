@@ -26,7 +26,7 @@ namespace ML.Utils.Extensions.Base
 
         public static IEnumerable<(string imagePath, string label)> LoadImagesFromDirectory(
             string folder,
-            bool useFolderNameasLabel)
+            bool useFolderNameAsLabel)
         {
             string[] imageSupportedFormats = Enum.GetNames(typeof(ImageFormat));
 
@@ -34,7 +34,7 @@ namespace ML.Utils.Extensions.Base
                 .GetFiles(folder, "*", searchOption: SearchOption.AllDirectories)
                 .Where(x => imageSupportedFormats.Contains(Path.GetExtension(x).Replace(".", "")));
 
-            return useFolderNameasLabel
+            return useFolderNameAsLabel
                 ? imagesPath.Select(imagePath => (imagePath, Directory.GetParent(imagePath).Name))
                 : imagesPath.Select(imagePath =>
                 {
@@ -60,5 +60,30 @@ namespace ML.Utils.Extensions.Base
                     label: x.label,
                     imageFileName: Path.GetFileName(x.imagePath),
                     imageFilePath: x.imagePath));
+
+
+        public static bool IsFileLocked(string filePath)
+        {
+            try
+            {
+                FileInfo fileInfo = new FileInfo(filePath);
+
+                using (FileStream stream = fileInfo.Open(FileMode.Open, FileAccess.Read, FileShare.None))
+                {
+                    stream.Close();
+                }
+            }
+            catch (IOException)
+            {
+                //the file is unavailable because it is:
+                //still being written to
+                //or being processed by another thread
+                //or does not exist (has already been processed)
+                return true;
+            }
+
+            //file is not locked
+            return false;
+        }
     }
 }

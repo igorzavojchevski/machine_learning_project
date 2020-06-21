@@ -9,12 +9,19 @@ namespace ML.BL.Mongo.Interfaces
     public interface ISystemSettingService : IMongoBaseService<SystemSetting>
     {
         int MaxChunksToProcessAtOnce { get; }
-        
+        bool IsTrainingServiceStarted { get; }
+
+
         float TF_LabelScoring_MaxProbabilityThreshold { get; }
         int TF_LabelScoring_MaxLabels { get; }
         string TF_LabelsFilePath { get; }
         string TF_ModelFilePath { get; }
 
+
         string CUSTOMLOGOMODEL_ModelFilePath { get; }
+        string CUSTOMLOGOMODEL_OutputFilePath { get; }
+        string CUSTOMLOGOMODEL_ImagesToTrainFolderPath { get; }
+        string CUSTOMLOGOMODEL_ImagesToTestAfterTrainingFolderPath { get; }
+        string CUSTOMLOGOMODEL_ExportedFromService_ImagesToEvaluateFolderPath { get; }
     }
 }

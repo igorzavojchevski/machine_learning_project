@@ -12,6 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\ML.BL.Mongo\ML.BL.Mongo.csproj" />
     <ProjectReference Include="..\ML.Core\ML.Core.csproj" />
     <ProjectReference Include="..\ML.Domain\ML.Domain.csproj" />
     <ProjectReference Include="..\ML.Utils\ML.Utils.csproj" />
