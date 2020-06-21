@@ -53,7 +53,7 @@ namespace ML.Infrastructure.DependecyResolution
 
             services.AddTransient<IFrameExporterService, FrameExporterService>();
 
-            services.AddTransient<ITrainService, TrainService>();
+            services.AddTransient<ITrainingService, TrainingService>();
 
             services.AddTransient<IScoringServiceFactory, ScoringServiceFactory>();
             services.AddTransient<ILogoScoringService, LogoScoringService>();

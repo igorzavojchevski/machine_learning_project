@@ -25,7 +25,7 @@ namespace ML.ClassificationService
             ILogger<Worker> logger,
             IFrameExporterService frameExporterService,
             ILabelScoringService labelScoringService,
-            ITrainService trainService,
+            ITrainingService trainService,
             IScoringServiceFactory ScoringServiceFactory
             )
         {

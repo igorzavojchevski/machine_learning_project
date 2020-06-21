@@ -12,7 +12,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\ML.BL\ML.BL.csproj" />
-    <ProjectReference Include="..\ML.ImageClassification.Train\ML.ImageClassification.Train.csproj" />
+    <ProjectReference Include="..\ML.ImageClassification.Train\ML.ImageClassification.Training.csproj" />
     <ProjectReference Include="..\ML.Infrastructure.DependecyResolution\ML.Infrastructure.DependecyResolution.csproj" />
   </ItemGroup>
 </Project>

@@ -12,9 +12,9 @@ namespace ML.TrainingService
     public class Worker : BackgroundService
     {
         private readonly ILogger<Worker> _logger;
-        private readonly ITrainService _trainService;
+        private readonly ITrainingService _trainService;
 
-        public Worker(ILogger<Worker> logger, ITrainService trainService)
+        public Worker(ILogger<Worker> logger, ITrainingService trainService)
         {
             _logger = logger;
             _trainService = trainService;

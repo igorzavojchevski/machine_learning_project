@@ -4,7 +4,7 @@ using System.Text;
 
 namespace ML.ImageClassification.Train.Interfaces
 {
-    public interface ITrainService
+    public interface ITrainingService
     {
         void DoBeforeTrainingStart();
         void DoAfterTrainingFinished();

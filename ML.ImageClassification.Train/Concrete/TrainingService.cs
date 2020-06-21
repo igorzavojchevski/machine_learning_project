@@ -16,13 +16,13 @@ using System.Threading;
 
 namespace ML.ImageClassification.Train.Concrete
 {
-    public class TrainService : ITrainService
+    public class TrainingService : ITrainingService
     {
-        private readonly ILogger<TrainService> _logger;
+        private readonly ILogger<TrainingService> _logger;
         private readonly MLContext _mlContext;
         private readonly ISystemSettingService _systemSettingService;
 
-        public TrainService(ILogger<TrainService> logger, ISystemSettingService systemSettingService)
+        public TrainingService(ILogger<TrainingService> logger, ISystemSettingService systemSettingService)
         {
             _logger = logger;
             _mlContext = new MLContext(seed: 1);

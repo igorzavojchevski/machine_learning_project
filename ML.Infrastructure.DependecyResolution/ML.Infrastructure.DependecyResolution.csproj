@@ -13,7 +13,7 @@
     <ProjectReference Include="..\ML.BL.Mongo\ML.BL.Mongo.csproj" />
     <ProjectReference Include="..\ML.BL\ML.BL.csproj" />
     <ProjectReference Include="..\ML.Core\ML.Core.csproj" />
-    <ProjectReference Include="..\ML.ImageClassification.Train\ML.ImageClassification.Train.csproj" />
+    <ProjectReference Include="..\ML.ImageClassification.Train\ML.ImageClassification.Training.csproj" />
     <ProjectReference Include="..\ML.Infrastructure\ML.Infrastructure.csproj" />
   </ItemGroup>
 

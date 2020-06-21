@@ -23,7 +23,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ML.BL", "ML.BL\ML.BL.csproj
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ML.BL.Mongo", "ML.BL.Mongo\ML.BL.Mongo.csproj", "{298D6E07-FBDE-4114-85A8-D059868CCF30}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ML.ImageClassification.Train", "ML.ImageClassification.Train\ML.ImageClassification.Train.csproj", "{3D77E25D-CF37-4657-8D2F-38A2F3B8BD33}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ML.ImageClassification.Training", "ML.ImageClassification.Train\ML.ImageClassification.Training.csproj", "{3D77E25D-CF37-4657-8D2F-38A2F3B8BD33}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ML.TrainingService", "ML.TrainingService\ML.TrainingService.csproj", "{62F2F3C8-24A5-41AE-909C-DE8F69D7556F}"
 EndProject
