@@ -74,14 +74,14 @@ namespace ML.ImageClassification.Train.Concrete
                 _logger.LogInformation("TrainService - Train started");
 
                 string modelOutputFilePath = _systemSettingService.CUSTOMLOGOMODEL_OutputFilePath;
-                string imagesToTrainFolderPath = _systemSettingService.CUSTOMLOGOMODEL_ImagesToTrainFolderPath;
+                string imagesToReTrainFolderPath = _systemSettingService.CUSTOMLOGOMODEL_TrainedImagesFolderPath;
                 string imagesToTestAfterTrainingFolderPath = _systemSettingService.CUSTOMLOGOMODEL_ImagesToTestAfterTrainingFolderPath;
 
 
                 //
                 _logger.LogInformation("TrainService - Train - 2.Load the initial full image-set started");
                 // 2. Load the initial full image-set into an IDataView and shuffle so it will be better balanced
-                IEnumerable<ImageData> images = BaseExtensions.LoadImagesFromDirectory(folder: imagesToTrainFolderPath, useFolderNameAsLabel: true).Select(x => new ImageData(x.imagePath, x.label));
+                IEnumerable<ImageData> images = BaseExtensions.LoadImagesFromDirectory(folder: imagesToReTrainFolderPath, useFolderNameAsLabel: true).Select(x => new ImageData(x.imagePath, x.label));
                 IDataView fullImagesDataset = _mlContext.Data.LoadFromEnumerable(images);
                 IDataView shuffledFullImageFilePathsDataset = _mlContext.Data.ShuffleRows(fullImagesDataset);
 
@@ -96,7 +96,7 @@ namespace ML.ImageClassification.Train.Concrete
                         MapValueToKey(outputColumnName: "LabelAsKey", inputColumnName: "Label", keyOrdinality: Microsoft.ML.Transforms.ValueToKeyMappingEstimator.KeyOrdinality.ByValue)
                     .Append(_mlContext.Transforms.LoadRawImageBytes(
                                                     outputColumnName: "Image",
-                                                    imageFolder: imagesToTrainFolderPath,
+                                                    imageFolder: imagesToReTrainFolderPath,
                                                     inputColumnName: "ImagePath"))
                     .Fit(shuffledFullImageFilePathsDataset)
                     .Transform(shuffledFullImageFilePathsDataset);

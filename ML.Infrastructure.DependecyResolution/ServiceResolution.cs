@@ -56,7 +56,7 @@ namespace ML.Infrastructure.DependecyResolution
             services.AddTransient<ITrainingService, TrainingService>();
 
             services.AddTransient<IScoringServiceFactory, ScoringServiceFactory>();
-            services.AddTransient<ILogoScoringService, LogoScoringService>();
+            services.AddTransient<IAdvertisementScoringService, AdvertisementScoringService>();
             services.AddTransient<ILabelScoringService, LabelScoringService>();
 
             ServiceProviderHelper.ServiceProvider = services.BuildServiceProvider();

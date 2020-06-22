@@ -28,7 +28,7 @@ namespace ML.BL
             switch (type)
             {
                 case ScoringServiceType.LogoScoring:
-                    return (IScoringService)serviceProvider.GetRequiredService<ILogoScoringService>();
+                    return (IScoringService)serviceProvider.GetRequiredService<IAdvertisementScoringService>();
                 case ScoringServiceType.TensorFlowInception:
                     return (IScoringService)serviceProvider.GetRequiredService<ILabelScoringService>();
                 default:

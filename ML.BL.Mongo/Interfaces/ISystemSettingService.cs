@@ -10,6 +10,7 @@ namespace ML.BL.Mongo.Interfaces
     {
         int MaxChunksToProcessAtOnce { get; }
         bool IsTrainingServiceStarted { get; }
+        float ClassGroupThreshold { get; }
 
 
         float TF_LabelScoring_MaxProbabilityThreshold { get; }
@@ -20,7 +21,7 @@ namespace ML.BL.Mongo.Interfaces
 
         string CUSTOMLOGOMODEL_ModelFilePath { get; }
         string CUSTOMLOGOMODEL_OutputFilePath { get; }
-        string CUSTOMLOGOMODEL_ImagesToTrainFolderPath { get; }
+        string CUSTOMLOGOMODEL_TrainedImagesFolderPath { get; }
         string CUSTOMLOGOMODEL_ImagesToTestAfterTrainingFolderPath { get; }
         string CUSTOMLOGOMODEL_ExportedFromService_ImagesToEvaluateFolderPath { get; }
     }

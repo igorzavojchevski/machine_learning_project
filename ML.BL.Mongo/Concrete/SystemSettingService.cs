@@ -60,6 +60,15 @@ namespace ML.BL.Mongo.Concrete
             }
         }
 
+        public float ClassGroupThreshold
+        {
+            get
+            {
+                float threshold = float.TryParse(GetSettingValueByKey("ClassGroupThreshold"), out threshold) ? threshold : 0.7f;
+                return threshold;
+            }
+        }
+
 
         public float TF_LabelScoring_MaxProbabilityThreshold
         {
@@ -100,7 +109,8 @@ namespace ML.BL.Mongo.Concrete
         }
 
 
-
+        //Two different settings to overwrite one, due to training process which can be paralelly done with score evaluation
+        //After finishing, file should be transfered from one to another location
         public string CUSTOMLOGOMODEL_ModelFilePath
         {
             get
@@ -119,11 +129,11 @@ namespace ML.BL.Mongo.Concrete
             }
         }
 
-        public string CUSTOMLOGOMODEL_ImagesToTrainFolderPath
+        public string CUSTOMLOGOMODEL_TrainedImagesFolderPath
         {
             get
             {
-                return GetSettingValueByKey("CUSTOMLOGOMODEL_ImagesToTrainFolderPath");
+                return GetSettingValueByKey("CUSTOMLOGOMODEL_TrainedImagesFolderPath");
                 //@"C:\Users\igor.zavojchevski\Desktop\Master\ML\assets\Training\inputs\images_to_train";
             }
         }

@@ -30,18 +30,30 @@ namespace ML.BL
 
             Guid GroupGuid = Guid.NewGuid();
 
+            List<Task<ParallelLoopResult>> listOfTasks = new List<Task<ParallelLoopResult>>();
+
             List<List<InMemoryImageData>> chunkedList = ChunkImagesInGroups(Images);
             foreach (List<InMemoryImageData> chunk in chunkedList)
             {
-                Task.Factory.StartNew(() =>
+                var task = Task.Factory.StartNew(() =>
                 Parallel.ForEach<InMemoryImageData>(chunk, image =>
                 {
                     DoLabelScoring(GroupGuid, image);
                 }));
+                listOfTasks.Add(task);
             }
+
+            Task.WaitAll(listOfTasks.ToArray());
+
+            GroupByLabel(GroupGuid);
         }
 
         public virtual void DoLabelScoring(Guid GroupGuid, InMemoryImageData image)
+        {
+            throw new NotImplementedException();
+        }
+
+        public virtual void GroupByLabel(Guid GroupGuid)
         {
             throw new NotImplementedException();
         }

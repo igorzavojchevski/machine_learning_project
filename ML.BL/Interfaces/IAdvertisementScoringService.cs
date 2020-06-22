@@ -4,7 +4,7 @@ using System.Text;
 
 namespace ML.BL.Interfaces
 {
-    public interface ILogoScoringService
+    public interface IAdvertisementScoringService
     {
         void Score(string imagesToCheckPath);
     }

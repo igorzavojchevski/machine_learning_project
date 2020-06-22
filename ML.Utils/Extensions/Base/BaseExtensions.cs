@@ -59,7 +59,8 @@ namespace ML.Utils.Extensions.Base
                     image: File.ReadAllBytes(x.imagePath),
                     label: x.label,
                     imageFileName: Path.GetFileName(x.imagePath),
-                    imageFilePath: x.imagePath));
+                    imageFilePath: x.imagePath,
+                    imageDirPath: Path.GetDirectoryName(x.imagePath)));
 
 
         public static bool IsFileLocked(string filePath)
