@@ -1,33 +1,53 @@
-﻿using MediaToolkit;
-using MediaToolkit.Model;
-using MediaToolkit.Options;
+﻿using DnsClient.Internal;
+using Microsoft.Extensions.Logging;
 using ML.BL.Interfaces;
+using ML.BL.Mongo.Interfaces;
 using System;
+using System.Diagnostics;
+using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace ML.BL.Concrete
 {
     public class FrameExporterService : IFrameExporterService
     {
-        //TODO - Rework this part for dynamic export
-        public void Export()
+        private readonly ILogger<FrameExporterService> _logger;
+        private readonly ISystemSettingService _systemSettingService;
+
+        public FrameExporterService(ILogger<FrameExporterService> logger, ISystemSettingService systemSettingService)
         {
-            string filePath = @"C:\Users\igor.zavojchevski\Desktop\Master\TestMaterial\Videos\Oakley Ski & Snowboarding Prizm Commercial 2017.mp4";
-            string outputPath = @"C:\Users\igor.zavojchevski\Desktop\Master\TestMaterial\Frames\Ski";
+            _logger = logger;
+            _systemSettingService = systemSettingService;
+        }
 
-            using (var engine = new Engine())
+        public void Export(Process process)
+        {
+            try
             {
-                var mp4 = new MediaFile { Filename = filePath };
+                string dirName = _systemSettingService.CUSTOMLOGOMODEL_ExportedFromService_ImagesToEvaluateFolderPath;
+                process.StartInfo.RedirectStandardOutput = true;
+                process.StartInfo.RedirectStandardError = true;
+                process.StartInfo.FileName = @"C:\ffmpeg\bin\ffmpeg.exe";
 
-                engine.GetMetadata(mp4);
+                process.StartInfo.UseShellExecute = false;
+                process.StartInfo.CreateNoWindow = true;
 
-                var i = 0;
-                while (i < mp4.Metadata.Duration.TotalSeconds)
+                string hlsstream = _systemSettingService.HLSStream_URL;
+
+                process.StartInfo.Arguments = $"-skip_frame nokey -i {hlsstream} -vsync 0 -r 30 -f image2 {dirName}\\{Guid.NewGuid()}-%02d.jpeg";
+                process.Start();
+
+                while ((DateTime.UtcNow - process.StartTime.ToUniversalTime()).TotalMinutes <= 1)
                 {
-                    var options = new ConversionOptions { Seek = TimeSpan.FromSeconds(i) };
-                    var outputFile = new MediaFile { Filename = string.Format("{0}\\image-{1}.jpeg", outputPath, i) };
-                    engine.GetThumbnail(mp4, outputFile, options);
-                    i++;
                 }
+                process.Kill();
+                Export(new Process());
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("FrameExporterService - Export");
+                _logger.LogError(ex, "FrameExporterService - Export");
             }
         }
     }

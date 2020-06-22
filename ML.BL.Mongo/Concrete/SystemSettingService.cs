@@ -69,6 +69,14 @@ namespace ML.BL.Mongo.Concrete
             }
         }
 
+        public string HLSStream_URL
+        {
+            get
+            {
+                return GetSettingValueByKey("HLSStream_URL");
+            }
+        }
+
 
         public float TF_LabelScoring_MaxProbabilityThreshold
         {
@@ -156,6 +164,7 @@ namespace ML.BL.Mongo.Concrete
             }
         }
 
+        
         #endregion
     }
 }

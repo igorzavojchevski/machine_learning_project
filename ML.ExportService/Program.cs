@@ -5,7 +5,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.EventLog;
 using ML.Infrastructure.DependecyResolution;
 
-namespace ML.ClassificationService
+namespace ML.ExportService
 {
     public class Program
     {
@@ -26,15 +26,13 @@ namespace ML.ClassificationService
                 services.AddHostedService<Worker>()
                 .Configure<EventLogSettings>(config =>
                 {
-                    config.LogName = "ClassificationService Service";
-                    config.SourceName = "ClassificationService Service Source";
+                    config.LogName = "Export Service";
+                    config.SourceName = "Export Service Source";
                 });
 
-                services.RegisterServices(Configuration);
+                services.RegisterServices(Configuration, true);
 
             }).UseWindowsService();
         }
-
-        
     }
 }

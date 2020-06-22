@@ -11,6 +11,7 @@ namespace ML.BL.Mongo.Interfaces
         int MaxChunksToProcessAtOnce { get; }
         bool IsTrainingServiceStarted { get; }
         float ClassGroupThreshold { get; }
+        string HLSStream_URL { get; }
 
 
         float TF_LabelScoring_MaxProbabilityThreshold { get; }

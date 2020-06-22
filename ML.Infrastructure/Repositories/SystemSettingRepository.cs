@@ -39,8 +39,9 @@ namespace ML.Infrastructure.Repositories
             if (!GetAll().Any(t => t.SettingKey == "CUSTOMLOGOMODEL_ExportedFromService_ImagesToEvaluateFolderPath"))
                 InsertOne(new SystemSetting { SettingKey = "CUSTOMLOGOMODEL_ExportedFromService_ImagesToEvaluateFolderPath", SettingValue = @"C:\Users\igor.zavojchevski\Desktop\Master\ML\assets\Training\inputs\images_for_prediction", ModifiedBy = "SystemSettingRepository", ModifiedOn = DateTime.UtcNow });
 
+            if (!GetAll().Any(t => t.SettingKey == "HLSStream_URL"))
+                InsertOne(new SystemSetting { SettingKey = "HLSStream_URL", SettingValue = @"https://5b44cf20b0388.streamlock.net:8443/live/ngrp:live_all/playlist.m3u8", ModifiedBy = "SystemSettingRepository", ModifiedOn = DateTime.UtcNow });
 
-            
             first_time_executed = true;
         }
     }

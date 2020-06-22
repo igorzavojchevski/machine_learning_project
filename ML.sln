@@ -25,7 +25,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ML.BL.Mongo", "ML.BL.Mongo\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ML.ImageClassification.Training", "ML.ImageClassification.Train\ML.ImageClassification.Training.csproj", "{3D77E25D-CF37-4657-8D2F-38A2F3B8BD33}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ML.TrainingService", "ML.TrainingService\ML.TrainingService.csproj", "{62F2F3C8-24A5-41AE-909C-DE8F69D7556F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ML.TrainingService", "ML.TrainingService\ML.TrainingService.csproj", "{62F2F3C8-24A5-41AE-909C-DE8F69D7556F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ML.ExportService", "ML.ExportService\ML.ExportService.csproj", "{FF68E083-B73F-4FB1-990B-C0E7E8ADC832}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -81,6 +83,10 @@ Global
 		{62F2F3C8-24A5-41AE-909C-DE8F69D7556F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{62F2F3C8-24A5-41AE-909C-DE8F69D7556F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{62F2F3C8-24A5-41AE-909C-DE8F69D7556F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FF68E083-B73F-4FB1-990B-C0E7E8ADC832}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FF68E083-B73F-4FB1-990B-C0E7E8ADC832}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FF68E083-B73F-4FB1-990B-C0E7E8ADC832}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FF68E083-B73F-4FB1-990B-C0E7E8ADC832}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

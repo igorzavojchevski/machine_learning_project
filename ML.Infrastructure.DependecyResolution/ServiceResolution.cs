@@ -25,12 +25,16 @@ namespace ML.Infrastructure.DependecyResolution
 {
     public static class ServiceResolution
     {
-        public static IServiceCollection RegisterServices(this IServiceCollection services, IConfiguration Configuration)
+        public static IServiceCollection RegisterServices(this IServiceCollection services, IConfiguration Configuration, bool skipFuncServices = false)
         {
             services.AddSingleton<IMongoDbContext, MongoDbContext>();
 
             services.AddRepositories();
             services.AddServices();
+
+            if (skipFuncServices) return services;
+
+            services.AddFunctionalService();
 
             services.InstanceMLEngine();
 
@@ -53,14 +57,21 @@ namespace ML.Infrastructure.DependecyResolution
 
             services.AddTransient<IFrameExporterService, FrameExporterService>();
 
+            ServiceProviderHelper.ServiceProvider = services.BuildServiceProvider();
+
+            return services;
+        }
+
+
+
+        private static IServiceCollection AddFunctionalService(this IServiceCollection services)
+        {
             services.AddTransient<ITrainingService, TrainingService>();
 
             services.AddTransient<IScoringServiceFactory, ScoringServiceFactory>();
             services.AddTransient<IAdvertisementScoringService, AdvertisementScoringService>();
             services.AddTransient<ILabelScoringService, LabelScoringService>();
-
-            ServiceProviderHelper.ServiceProvider = services.BuildServiceProvider();
-
+         
             return services;
         }
 

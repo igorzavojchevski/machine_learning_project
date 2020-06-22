@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk.Worker">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <UserSecretsId>dotnet-ML.ExportService-1913B8B1-7238-48CB-AFE3-FB7B9D9FD00B</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Configuration" Version="3.1.5" />
+    <PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" Version="3.1.5" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ML.BL\ML.BL.csproj" />
+    <ProjectReference Include="..\ML.Infrastructure.DependecyResolution\ML.Infrastructure.DependecyResolution.csproj" />
+  </ItemGroup>
+</Project>
