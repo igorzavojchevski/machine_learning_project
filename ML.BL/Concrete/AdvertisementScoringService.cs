@@ -24,8 +24,9 @@ namespace ML.BL.Concrete
             ILogger<ScoringService> logger,
             PredictionEnginePool<InMemoryImageData, ImagePrediction> predictionEnginePool,
             IAdvertisementService advertisementService,
-            ISystemSettingService systemSettingService)
-            : base(logger, systemSettingService)
+            ISystemSettingService systemSettingService,
+            IEvaluationGroupService evaluationGroupService)
+            : base(logger, systemSettingService, evaluationGroupService)
         {
             _logger = logger;
             _predictionEnginePool = predictionEnginePool;
@@ -60,7 +61,7 @@ namespace ML.BL.Concrete
             if (((float)advGroups.Max(t => t.CountLabel) / advByGuid.Count) >= _systemSettingService.ClassGroupThreshold)
                 label = advGroups.Select(t => t.KeyLabel).FirstOrDefault();
 
-            if (string.IsNullOrWhiteSpace(label) || label.ToLower() == "none") label = "New_Item_";
+            if (string.IsNullOrWhiteSpace(label) || label.ToLower() == "none") label = $"New_Item_{GroupGuid}";
 
             label = label.Contains("_") ? label : $"{label}_{GroupGuid}";
 

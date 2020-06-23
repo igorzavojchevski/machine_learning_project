@@ -7,6 +7,6 @@ namespace ML.BL.Interfaces
 {
     public interface IFrameExporterService
     {
-        void Export(Process process);
+        void Export();
     }
 }

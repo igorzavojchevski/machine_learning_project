@@ -26,7 +26,7 @@ namespace ML.ExportService
             while (!stoppingToken.IsCancellationRequested)
             {
                 //_logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);
-                await Task.Delay(1000, stoppingToken);
+                //await Task.Delay(1000, stoppingToken);
                 await Task.CompletedTask;
             }
         }
@@ -41,18 +41,14 @@ namespace ML.ExportService
             return base.StartAsync(cancellationToken);
         }
 
-        public Task StopAsync(CancellationToken stoppingToken)
+        public override Task StopAsync(CancellationToken cancellationToken)
         {
-            _logger.LogInformation("Timed Hosted Service is stopping.");
-
-            return Task.CompletedTask;
+            return base.StopAsync(cancellationToken);
         }
 
         public void ExportService()
         {
-            Process process = new Process();
-            _frameExporterService.Export(process);
-
+            _frameExporterService.Export();
         }
     }
 }

@@ -28,8 +28,9 @@ namespace ML.BL.Concrete
             ILogger<LabelScoringService> logger,
             IAdvertisementService advertisementService,
             ISystemSettingService systemSettingService,
-            PredictionEnginePool<ImageInputData, ImageLabelPredictions> predictionEnginePool)
-            : base(logger, systemSettingService)
+            PredictionEnginePool<ImageInputData, ImageLabelPredictions> predictionEnginePool,
+            IEvaluationGroupService evaluationGroupService)
+            : base(logger, systemSettingService, evaluationGroupService)
         {
             _logger = logger;
             _advertisementService = advertisementService;

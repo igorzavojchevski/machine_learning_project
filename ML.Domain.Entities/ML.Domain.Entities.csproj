@@ -8,8 +8,4 @@
     <PackageReference Include="MongoDB.Bson" Version="2.10.4" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Enums\" />
-  </ItemGroup>
-
 </Project>

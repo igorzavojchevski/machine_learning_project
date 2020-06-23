@@ -1,6 +1,8 @@
 ﻿using Microsoft.Extensions.Logging;
 using ML.BL.Mongo.Interfaces;
 using ML.Domain.DataModels;
+using ML.Domain.Entities.Enums;
+using ML.Domain.Entities.Mongo;
 using ML.Utils.Extensions.Base;
 using System;
 using System.Collections.Generic;
@@ -13,20 +15,31 @@ namespace ML.BL
     {
         private readonly ILogger<ScoringService> _logger;
         private readonly ISystemSettingService _systemSettingService;
+        private readonly IEvaluationGroupService _evaluationGroupService;
 
         public ScoringService(
             ILogger<ScoringService> logger,
-            ISystemSettingService systemSettingService)
+            ISystemSettingService systemSettingService,
+            IEvaluationGroupService evaluationGroupService)
         {
             _logger = logger;
             _systemSettingService = systemSettingService;
+            _evaluationGroupService = evaluationGroupService;
         }
 
         public virtual void Score(string imagesToCheckPath)
         {
-            IEnumerable<InMemoryImageData> Images = BaseExtensions.LoadInMemoryImagesFromDirectory(imagesToCheckPath, false);
+            EvaluationGroup evaluationGroup = _evaluationGroupService.GetAll().Where(t => t.Status == TrainingStatus.New).OrderBy(t => t.ModifiedOn).FirstOrDefault();
+            if (evaluationGroup == null) { _logger.LogInformation("ScoringService - Score - No trainingGroup with NEW status"); return; }
 
-            if (Images == null || Images.Count() == 0) { _logger.LogDebug("ScoringService - Score - No Images provided"); return; }
+            if(string.IsNullOrWhiteSpace(evaluationGroup.EvaluationGroupDirPath)) { _logger.LogInformation("ScoringService - Score - Invalid EvaluationGroupDirPath"); return; }
+
+            evaluationGroup.Status = TrainingStatus.Processing;
+            _evaluationGroupService.Update(evaluationGroup);
+
+            IEnumerable<InMemoryImageData> Images = BaseExtensions.LoadInMemoryImagesFromDirectory(evaluationGroup.EvaluationGroupDirPath, false);
+
+            if (Images == null || Images.Count() == 0) { _logger.LogInformation("ScoringService - Score - No Images provided"); return; }
 
             Guid GroupGuid = Guid.NewGuid();
 
@@ -46,6 +59,9 @@ namespace ML.BL
             Task.WaitAll(listOfTasks.ToArray());
 
             GroupByLabel(GroupGuid);
+
+            evaluationGroup.Status = TrainingStatus.Processed;
+            _evaluationGroupService.Update(evaluationGroup);
         }
 
         public virtual void DoLabelScoring(Guid GroupGuid, InMemoryImageData image)
