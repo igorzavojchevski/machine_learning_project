@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.ML;
+using ML.BL.Interfaces;
 using ML.BL.Mongo.Interfaces;
 using ML.Domain.DataModels;
 using ML.Domain.DataModels.TFLabelScoringModel;
@@ -27,19 +28,21 @@ namespace ML.Web.Controllers
         private readonly ILogger<ImageClassificationController> _logger;
         private readonly string _labelsFilePath;
         private readonly ISystemSettingService _systemSettingService;
+        private readonly ILabelScoringService _labelScoringService;
         #endregion
 
         #region ctor
         public ImageClassificationController(PredictionEnginePool<ImageInputData, ImageLabelPredictions> predictionEnginePool,
                                              IConfiguration configuration,
                                              ILogger<ImageClassificationController> logger,
-                                             ISystemSettingService systemSettingService)
+                                             ISystemSettingService systemSettingService,
+                                             ILabelScoringService labelScoringService)
         {
             _logger = logger;
             Configuration = configuration;
             _systemSettingService = systemSettingService;
             _labelsFilePath = BaseExtensions.GetPath(_systemSettingService.TF_LabelsFilePath);
-
+            _labelScoringService = labelScoringService;
             // Get the ML Model Engine injected, for scoring.
             _predictionEnginePool = predictionEnginePool;
         }
@@ -62,92 +65,91 @@ namespace ML.Web.Controllers
             byte[] imageData = imageMemoryStream.ToArray();
             if (!imageData.IsValidImage()) return StatusCode(StatusCodes.Status415UnsupportedMediaType);
 
-            //Memory stream to Image (System.Drawing).
-            Image image = Image.FromStream(imageMemoryStream);
+            ////Memory stream to Image (System.Drawing).
+            //Image image = Image.FromStream(imageMemoryStream);
 
-            // Convert to Bitmap.
-            Bitmap bitmapImage = (Bitmap)image;
+            //// Convert to Bitmap.
+            //Bitmap bitmapImage = (Bitmap)image;
 
             _logger.LogInformation("Start processing image...");
-
-
 
             // Measure execution time.
             System.Diagnostics.Stopwatch watch = System.Diagnostics.Stopwatch.StartNew();
 
             // Set the specific image data into the ImageInputData type used in the DataView.
-            ImageInputData imageInputData = new ImageInputData { Image = bitmapImage };
+            //ImageInputData imageInputData = new ImageInputData { Image = bitmapImage };
+
+            InMemoryImageData imageInputData = new InMemoryImageData(imageData, null, null, null, null);
 
             // Predict code for provided image.
-            ImageLabelPredictions imageLabelPredictions = _predictionEnginePool.Predict(imageInputData);
-
+            ImagePredictedLabelWithProbability imageLabelPredictions = _labelScoringService.CheckImageForLabelScoring(imageInputData);
+            
             // Stop measuring time.
             watch.Stop();
             var elapsedMs = watch.ElapsedMilliseconds;
             _logger.LogInformation($"Image processed in {elapsedMs} miliseconds");
 
 
+            //// Predict the image's label (The one with highest probability).
+            //ImagePredictedLabelWithProbability imageLabelsPrediction = FindLabelsWithProbability(imageLabelPredictions, imageInputData);
 
-            // Predict the image's label (The one with highest probability).
-            ImagePredictedLabelWithProbability imageLabelsPrediction = FindLabelsWithProbability(imageLabelPredictions, imageInputData);
-
-            return Ok(imageLabelsPrediction);
+            return Ok(imageLabelPredictions);
         }
 
 
 
         #region Private Methods
-        private ImagePredictedLabelWithProbability FindLabelsWithProbability(ImageLabelPredictions imageLabelPredictions, ImageInputData imageInputData)
-        {
-            // Read TF model's labels (.txt with labels) to classify the image across those labels.
-            var labels = ReadLabels(_labelsFilePath);
+        //private ImagePredictedLabelWithProbability FindLabelsWithProbability(ImageLabelPredictions imageLabelPredictions, ImageInputData imageInputData)
+        //{
+        //    // Read TF model's labels (.txt with labels) to classify the image across those labels.
+        //    var labels = ReadLabels(_labelsFilePath);
 
-            float[] probabilities = imageLabelPredictions.PredictedLabels;
+        //    float[] probabilities = imageLabelPredictions.PredictedLabels;
 
-            // Set a single label as predicted or even none if probabilities are lower than 70%.
-            var imageBestLabelPrediction = new ImagePredictedLabelWithProbability()
-            {
-                ImageId = imageInputData.GetHashCode().ToString(), //This ID is not really needed, it could come from the application itself, etc.
-            };
+        //    // Set a single label as predicted or even none if probabilities are lower than 70%.
+        //    var imageBestLabelPrediction = new ImagePredictedLabelWithProbability()
+        //    {
+        //        ImageId = imageInputData.GetHashCode().ToString(), //This ID is not really needed, it could come from the application itself, etc.
+        //    };
 
-            (imageBestLabelPrediction.PredictedLabel, imageBestLabelPrediction.MaxProbability) = GetBestLabel(labels, probabilities);
+        //    (imageBestLabelPrediction.PredictedLabel, imageBestLabelPrediction.MaxProbability) = GetBestLabel(labels, probabilities);
 
-            //test take 5
-            imageBestLabelPrediction.TopProbabilities = GetAllLabels(labels, probabilities).OrderBy(t => t.Value).TakeLast(5).ToDictionary(pair => pair.Key, pair => pair.Value);
+        //    //test take 5
+        //    imageBestLabelPrediction.TopProbabilities = GetAllLabels(labels, probabilities).OrderBy(t => t.Value).TakeLast(5).ToDictionary(pair => pair.Key, pair => pair.Value);
 
-            return imageBestLabelPrediction;
-        }
-        private (string, float) GetBestLabel(string[] labels, float[] probs)
-        {
-            var max = probs.Max();
-            var index = probs.AsSpan().IndexOf(max);
+        //    return imageBestLabelPrediction;
+        //}
+        //private (string, float) GetBestLabel(string[] labels, float[] probs)
+        //{
+        //    var max = probs.Max();
+        //    var index = probs.AsSpan().IndexOf(max);
 
-            if (max > 0.7) 
-                return (labels[index], max);
+        //    if (max > 0.7) 
+        //        return (labels[index], max);
             
-            return ("None", max);
-        }
+        //    return ("None", max);
+        //}
 
-        //Used for testing only - not needed
-        private Dictionary<string, float> GetAllLabels(string[] labels, float[] probs)
-        {
-            Dictionary<string, float> d = new Dictionary<string, float>();
+        ////Used for testing only - not needed
+        //private Dictionary<string, float> GetAllLabels(string[] labels, float[] probs)
+        //{
+        //    Dictionary<string, float> d = new Dictionary<string, float>();
 
-            for (int i = 0; i < probs.Length; i++)
-            {
-                if (labels.Length == i) break;
-                var test = labels[probs.AsSpan().IndexOf(probs[i])];
-                if (d.ContainsKey(test)) continue;
-                d.Add(test, probs[i]);
-            }
-            return d;
-        }
+        //    for (int i = 0; i < probs.Length; i++)
+        //    {
+        //        if (labels.Length == i) break;
+        //        var test = labels[probs.AsSpan().IndexOf(probs[i])];
+        //        if (d.ContainsKey(test)) continue;
+        //        d.Add(test, probs[i]);
+        //    }
+        //    return d;
+        //}
 
-        //Read these in memory
-        private string[] ReadLabels(string labelsLocation)
-        {
-            return System.IO.File.ReadAllLines(labelsLocation);
-        }
+        ////Read these in memory
+        //private string[] ReadLabels(string labelsLocation)
+        //{
+        //    return System.IO.File.ReadAllLines(labelsLocation);
+        //}
         #endregion
 
         #region Test Methods

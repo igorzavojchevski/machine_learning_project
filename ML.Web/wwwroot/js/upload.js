@@ -46,19 +46,20 @@ form.addEventListener('submit', e => {
             //document.getElementById('listProbabilities').innerHTML = response.d;
             console.log(typeof(response.allProbabilities));
 
-            var allProbabilityArray = Object.keys(response.allProbabilities).map(function (key) {
-                return [String(key), response.allProbabilities[key]];
-            });
+            if (response.allProbabilities !== undefined) {
+                var allProbabilityArray = Object.keys(response.allProbabilities).map(function (key) {
+                    return [String(key), response.allProbabilities[key]];
+                });
 
-            for (var i = 0; i < allProbabilityArray.length; i++) {
-                var table = document.getElementById("tableProbabilities");
-                var row = table.insertRow(0);
-                var cell1 = row.insertCell(0);
-                var cell2 = row.insertCell(1);
-                cell1.innerHTML = allProbabilityArray[i][0];
-                cell2.innerHTML = ((allProbabilityArray[i][1] * 100).toFixed(3) + "%");
+                for (var i = 0; i < allProbabilityArray.length; i++) {
+                    var table = document.getElementById("tableProbabilities");
+                    var row = table.insertRow(0);
+                    var cell1 = row.insertCell(0);
+                    var cell2 = row.insertCell(1);
+                    cell1.innerHTML = allProbabilityArray[i][0];
+                    cell2.innerHTML = ((allProbabilityArray[i][1] * 100).toFixed(3) + "%");
+                }
             }
-
 
             return response;
         });

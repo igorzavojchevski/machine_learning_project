@@ -38,6 +38,12 @@ namespace ML.BL.Concrete
             _systemSettingService = systemSettingService;
         }
 
+        public ImagePredictedLabelWithProbability CheckImageForLabelScoring(InMemoryImageData image)
+        {
+            ImagePredictedLabelWithProbability prediction = DoWork(image);
+            return prediction;
+        }
+
         public override void Score()
         {
             _logger.LogInformation("LabelScoringService - Score started");
