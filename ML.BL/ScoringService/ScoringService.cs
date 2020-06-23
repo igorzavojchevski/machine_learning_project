@@ -27,7 +27,7 @@ namespace ML.BL
             _evaluationGroupService = evaluationGroupService;
         }
 
-        public virtual void Score(string imagesToCheckPath)
+        public virtual void Score()
         {
             EvaluationGroup evaluationGroup = _evaluationGroupService.GetAll().Where(t => t.Status == TrainingStatus.New).OrderBy(t => t.ModifiedOn).FirstOrDefault();
             if (evaluationGroup == null) { _logger.LogInformation("ScoringService - Score - No trainingGroup with NEW status"); return; }

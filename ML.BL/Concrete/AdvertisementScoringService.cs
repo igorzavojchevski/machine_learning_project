@@ -19,26 +19,29 @@ namespace ML.BL.Concrete
         private readonly PredictionEnginePool<InMemoryImageData, ImagePrediction> _predictionEnginePool;
         private readonly IAdvertisementService _advertisementService;
         private readonly ISystemSettingService _systemSettingService;
+        private readonly IAdvertisementClassService _advertisementClassService;
 
         public AdvertisementScoringService(
             ILogger<ScoringService> logger,
             PredictionEnginePool<InMemoryImageData, ImagePrediction> predictionEnginePool,
             IAdvertisementService advertisementService,
             ISystemSettingService systemSettingService,
-            IEvaluationGroupService evaluationGroupService)
+            IEvaluationGroupService evaluationGroupService,
+            IAdvertisementClassService advertisementClassService)
             : base(logger, systemSettingService, evaluationGroupService)
         {
             _logger = logger;
             _predictionEnginePool = predictionEnginePool;
             _advertisementService = advertisementService;
             _systemSettingService = systemSettingService;
+            _advertisementClassService = advertisementClassService;
         }
 
-        public override void Score(string imagesToCheckPath)
+        public override void Score()
         {
             _logger.LogInformation("AdvertisementScoringService - Score started");
 
-            base.Score(imagesToCheckPath);
+            base.Score();
 
             _logger.LogInformation("AdvertisementScoringService - Score finished");
         }
@@ -68,6 +71,8 @@ namespace ML.BL.Concrete
             string destOutputPath = Path.Combine(_systemSettingService.CUSTOMLOGOMODEL_TrainedImagesFolderPath, label);
             Directory.CreateDirectory(destOutputPath);
 
+            InsertAdvertisementClass(destOutputPath, label, GroupGuid);
+            
             string sourcePath = advByGuid.Select(t => t.ImageDirPath).FirstOrDefault();
             if (System.IO.Directory.Exists(sourcePath))
             {
@@ -82,6 +87,21 @@ namespace ML.BL.Concrete
                     System.IO.File.Copy(s, destFile, true);
                 }
             }
+        }
+
+        private void InsertAdvertisementClass(string destOutputPath, string label, Guid GroupGuid)
+        {
+            if (!_advertisementClassService.GetAll().Any(t => t.ClassName == label))
+                _advertisementClassService.InsertOne(new AdvertisementClass() 
+                {
+                    ClassName = label,
+                    CategoryType = "Default", //make this enum in future
+                    ImagesGroupGuid = GroupGuid,
+                    ParentGroupGuid = GroupGuid,
+                    DirectoryPath = destOutputPath,
+                    ModifiedBy = "GroupByLabel - InsertAdvertisementClass",
+                    ModifiedOn = DateTime.UtcNow
+                });
         }
 
         private void SaveImageScoringInfo(InMemoryImageData image, ImagePrediction prediction, Guid GroupGuid)

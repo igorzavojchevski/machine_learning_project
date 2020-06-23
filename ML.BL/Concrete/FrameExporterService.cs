@@ -71,7 +71,7 @@ namespace ML.BL.Concrete
             }
             finally
             {
-                _evaluationGroupService.InsertOne(new EvaluationGroup() { EvaluationGroupDirPath = newDir, EvaluationGroupGuid = newGuid, Status = status, ModifiedBy = "ExportService", ModifiedOn = DateTime.UtcNow });
+                _evaluationGroupService.InsertOne(new EvaluationGroup() { EvaluationGroupDirPath = newDir, EvaluationGroupGuid = newGuid, ParentGroupGuid = newGuid, Status = status, ModifiedBy = "ExportService", ModifiedOn = DateTime.UtcNow });
             }
 
             _logger.LogInformation("FrameExporterService - Export - DoWork finished");

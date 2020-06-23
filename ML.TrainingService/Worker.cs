@@ -12,12 +12,12 @@ namespace ML.TrainingService
     public class Worker : BackgroundService
     {
         private readonly ILogger<Worker> _logger;
-        private readonly ITrainingService _trainService;
+        private readonly ITrainingService _trainingService;
 
-        public Worker(ILogger<Worker> logger, ITrainingService trainService)
+        public Worker(ILogger<Worker> logger, ITrainingService trainingService)
         {
             _logger = logger;
-            _trainService = trainService;
+            _trainingService = trainingService;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -45,13 +45,13 @@ namespace ML.TrainingService
             while (true)
             {
                 //Do before training start activities - (set flag for start etc.)
-                _trainService.DoBeforeTrainingStart();
+                _trainingService.DoBeforeTrainingStart();
 
                 //Training for Logo Custom
-                _trainService.Train();
+                _trainingService.Train();
 
                 //Do after training finished activities- (set flag for start etc.)
-                _trainService.DoAfterTrainingFinished();
+                _trainingService.DoAfterTrainingFinished();
 
                 Thread.Sleep(TimeSpan.FromMinutes(10)); //make scheduled execution
             }

@@ -6,6 +6,6 @@ namespace ML.BL.Interfaces
 {
     public interface IAdvertisementScoringService
     {
-        void Score(string imagesToCheckPath);
+        void Score();
     }
 }

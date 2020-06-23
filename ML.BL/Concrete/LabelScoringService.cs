@@ -38,11 +38,11 @@ namespace ML.BL.Concrete
             _systemSettingService = systemSettingService;
         }
 
-        public override void Score(string imagesToCheckPath)
+        public override void Score()
         {
             _logger.LogInformation("LabelScoringService - Score started");
 
-            base.Score(imagesToCheckPath);
+            base.Score();
 
             _logger.LogInformation("LabelScoringService - Score finished");
         }

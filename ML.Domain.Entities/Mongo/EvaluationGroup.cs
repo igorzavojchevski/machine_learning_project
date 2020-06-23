@@ -10,6 +10,7 @@ namespace ML.Domain.Entities.Mongo
     {
         public string EvaluationGroupDirPath { get; set; }
         public Guid EvaluationGroupGuid { get; set; }
+        public Guid ParentGroupGuid { get; set; }
         public TrainingStatus Status { get; set; }
     }
 }

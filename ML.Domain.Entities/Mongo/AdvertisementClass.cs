@@ -9,5 +9,6 @@ namespace ML.Domain.Entities.Mongo
         public string CategoryType { get; set; } //Default, Banking, Beverage, Restaurants...
         public string DirectoryPath { get; set; }
         public Guid ImagesGroupGuid { get; set; }
+        public Guid ParentGroupGuid { get; set; }
     }
 }

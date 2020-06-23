@@ -25,7 +25,6 @@ namespace ML.ClassificationService
             ILogger<Worker> logger,
             IFrameExporterService frameExporterService,
             ILabelScoringService labelScoringService,
-            ITrainingService trainService,
             IScoringServiceFactory ScoringServiceFactory
             )
         {
@@ -65,16 +64,15 @@ namespace ML.ClassificationService
                     continue;
                 }
 
-                //TODO - REWORK THIS - place in separate service
-                //_frameExporterService.Export();
-
+                //Used for testing only
                 //LabelScoring on TensorFlowInception
                 //string imagesPath = @"C:\Users\igor.zavojchevski\Desktop\Master\TestMaterial\Frames\Panda"; //this should be output of frameexporterservice
                 //_labelScoringService.Score(imagesPath);
 
                 //Evaluation over Custom Logo
                 IScoringService sync = _ScoringServiceFactory.Create(ScoringServiceType.LogoScoring);
-                sync.Score(ServiceHelper.SystemSettingService.CUSTOMLOGOMODEL_ExportedFromService_ImagesToEvaluateFolderPath);
+                sync.Score();
+                //ServiceHelper.SystemSettingService.CUSTOMLOGOMODEL_ExportedFromService_ImagesToEvaluateFolderPath
 
                 Thread.Sleep(TimeSpan.FromMinutes(1));
             }

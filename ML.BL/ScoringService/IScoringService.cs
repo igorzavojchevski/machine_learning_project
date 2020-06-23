@@ -5,7 +5,7 @@ namespace ML.BL
 {
     public interface IScoringService
     {
-        void Score(string imagesToCheckPath);
+        void Score();
         void DoLabelScoring(Guid GroupGuid, InMemoryImageData image);
     }
 }
