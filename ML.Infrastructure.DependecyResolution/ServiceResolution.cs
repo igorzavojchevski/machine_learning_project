@@ -46,6 +46,7 @@ namespace ML.Infrastructure.DependecyResolution
         {
             services.AddTransient<ISystemSettingRepository, SystemSettingRepository>();
             services.AddTransient<IAdvertisementRepository, AdvertisementRepository>();
+            services.AddTransient<IAdvertisementClassRepository, AdvertisementClassRepository>();
             services.AddTransient<IEvaluationGroupRepository, EvaluationGroupRepository>();
             return services;
         }
@@ -55,6 +56,7 @@ namespace ML.Infrastructure.DependecyResolution
         {
             services.AddTransient<ISystemSettingService, SystemSettingService>();
             services.AddTransient<IAdvertisementService, AdvertisementService>();
+            services.AddTransient<IAdvertisementClassService, AdvertisementClassService>();
             services.AddTransient<IEvaluationGroupService, EvaluationGroupService>();
 
             services.AddTransient<IFrameExporterService, FrameExporterService>();
