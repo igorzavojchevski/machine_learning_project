@@ -68,6 +68,7 @@ namespace ML.Utils.Extensions.Base
             try
             {
                 FileInfo fileInfo = new FileInfo(filePath);
+                if (!fileInfo.Exists) return false;
 
                 using (FileStream stream = fileInfo.Open(FileMode.Open, FileAccess.Read, FileShare.None))
                 {
