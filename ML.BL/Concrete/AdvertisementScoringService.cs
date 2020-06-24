@@ -8,6 +8,7 @@ using ML.Domain.DataModels.Models;
 using ML.Domain.Entities.Mongo;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 
@@ -35,6 +36,28 @@ namespace ML.BL.Concrete
             _advertisementService = advertisementService;
             _systemSettingService = systemSettingService;
             _advertisementClassService = advertisementClassService;
+        }
+
+        public ImagePrediction CheckImageAndDoLabelScoring(InMemoryImageData image)
+        {
+            ImagePrediction prediction = _predictionEnginePool.Predict(image);
+
+            MemoryStream ms = new MemoryStream(image.Image);
+            Image i = Image.FromStream(ms);
+
+            string destOutputPath = Path.Combine(_systemSettingService.CUSTOMLOGOMODEL_TrainedImagesFolderPath, prediction.PredictedLabel);
+            Directory.CreateDirectory(destOutputPath);
+
+            string imageFilePath = Path.Combine(destOutputPath, image.ImageFileName);
+
+            i.Save(imageFilePath);
+
+            InMemoryImageData newImage = 
+                new InMemoryImageData(image.Image, prediction.PredictedLabel, image.ImageFileName, imageFilePath, destOutputPath);
+
+            SaveImageScoringInfo(newImage, prediction, Guid.NewGuid());
+
+            return prediction;
         }
 
         public override void Score()

@@ -4,17 +4,19 @@
     ViewData["Title"] = "Home page";
 }
 <style>
+
     #headerDiv {
-        color : blue;
-        text-align : center;
+        color: blue;
+        text-align: center;
     }
+
     #theImage {
         max-width: 300px;
     }
 </style>
 
 <div id="headerDiv"><h2>Image Classification</h2></div>
-<br/>
+<br />
 <div>
     <form method="post" enctype="multipart/form-data">
         <div>
@@ -37,9 +39,11 @@
 <div id="divPrediction" class="col-md-10"></div>
 <div id="divProbability" class="col-md-10"></div>
 
-<table id="tableProbabilities">
+@*<table id="tableProbabilities">
+</table>*@
 
-</table>
+<div id="divAdvertisements" class="col-md-12"></div>
+
 
 <script src="~/js/upload.js"></script>
 

@@ -5,6 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\ML.BL\ML.BL.csproj" />
     <ProjectReference Include="..\ML.Infrastructure.DependecyResolution\ML.Infrastructure.DependecyResolution.csproj" />
     <ProjectReference Include="..\ML.Utils\ML.Utils.csproj" />
   </ItemGroup>
