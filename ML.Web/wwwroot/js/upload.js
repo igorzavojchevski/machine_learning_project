@@ -5,6 +5,11 @@
 const serviceUrl = 'api/ImageClassification';
 const form = document.querySelector('form');
 
+function editLabel(elementid, firstPartOfLabelName) {
+    console.log(elementid, firstPartOfLabelName);
+    document.getElementById(elementid).contentEditable = true;
+}
+
 function loadImages()
 {
     fetch(serviceUrl + "/GetAllImages") // Call the fetch function passing the url of the API as a parameter
@@ -18,10 +23,43 @@ function loadImages()
                 var x = document.createElement("div");
                 var id = "advertisement" + i;
                 x.setAttribute("id", id);
-                var h3 = document.createElement("h3");
-                h3.textContent = response[i].predictedLabel;
 
-                x.appendChild(h3);
+                var lastIndex = response[i].predictedLabel.lastIndexOf('_');
+                var firstPartOfLabelName = response[i].predictedLabel.substr(0, lastIndex);
+                var guidpartofLabelName = response[i].predictedLabel.substr(lastIndex, response[i].predictedLabel.Length);
+
+                var h3 = document.createElement("h3");
+                var h3ElementID = "firstPartOfLabelName" + 1;
+                h3.setAttribute("id", h3ElementID)
+                h3.textContent = firstPartOfLabelName;
+                h3.style.display = "inline-block";
+                console.log(h3.style.fontsize);
+
+                var span = document.createElement("span");
+                span.textContent = guidpartofLabelName;
+                span.style.display = "inline-block";
+                span.style.fontSize = "1.75rem";
+                span.style.marginBottom = "0.5rem";
+                span.style.fontFamily = "inherit";
+                span.style.fontWeight = "500";
+                span.style.lineHeight = "1.2";
+                span.style.color = "inherit";
+
+                var editbutton = document.createElement("button");
+                editbutton.textContent = "Edit";
+                editbutton.classList = "btn";
+                editbutton.style.position = "absolute";
+                editbutton.style.marginLeft = "5%";
+                editbutton.value = response[i].id;
+                editbutton.addEventListener('click', function () {
+                    editLabel(h3ElementID, firstPartOfLabelName);
+                }, false);
+
+                var h3andEdit = document.createElement("div");
+                h3andEdit.appendChild(h3);
+                h3andEdit.appendChild(span);
+                h3andEdit.appendChild(editbutton);
+                x.appendChild(h3andEdit);
                 divAdvertisements.appendChild(x);
 
                 for (var j = 0; j < response[i].advertisements.length; j++) {

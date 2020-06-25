@@ -7,9 +7,9 @@ using System.Text;
 
 namespace ML.Infrastructure.Repositories
 {
-    public class AdvertisementClassRepository : MongoBaseRepository<AdvertisementClass>, IAdvertisementClassRepository
+    public class LabelClassRepository : MongoBaseRepository<LabelClass>, ILabelClassRepository
     {
-        public AdvertisementClassRepository(IMongoDbContext mongoDbContext) : base(mongoDbContext)
+        public LabelClassRepository(IMongoDbContext mongoDbContext) : base(mongoDbContext)
         {
         }
     }

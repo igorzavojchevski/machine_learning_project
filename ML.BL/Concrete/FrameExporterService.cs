@@ -32,7 +32,7 @@ namespace ML.BL.Concrete
 
             Process process = new Process();
             string dirName = _systemSettingService.CUSTOMLOGOMODEL_ExportedFromService_ImagesToEvaluateFolderPath;
-            process.StartInfo.FileName = @"C:\ffmpeg\bin\ffmpeg.exe"; //change this
+            process.StartInfo.FileName = _systemSettingService.FFMPEG_ExecutablePath;
 
             process.StartInfo.UseShellExecute = true;
             process.StartInfo.CreateNoWindow = true;

@@ -6,7 +6,7 @@ using System.Text;
 
 namespace ML.BL.Mongo.Interfaces
 {
-    public interface IAdvertisementClassService : IMongoBaseService<AdvertisementClass>
+    public interface ILabelClassService : IMongoBaseService<LabelClass>
     {
     }
 }

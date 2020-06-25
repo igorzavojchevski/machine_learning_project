@@ -23,13 +23,19 @@ namespace ML.ImageClassification.Train.Concrete
         private readonly MLContext _mlContext;
         private readonly ISystemSettingService _systemSettingService;
         private readonly IEvaluationGroupService _evaluationGroupService;
+        private readonly ILabelClassService _labelClassService;
 
-        public TrainingService(ILogger<TrainingService> logger, ISystemSettingService systemSettingService, IEvaluationGroupService evaluationGroupService)
+        public TrainingService(
+            ILogger<TrainingService> logger,
+            ISystemSettingService systemSettingService,
+            IEvaluationGroupService evaluationGroupService,
+            ILabelClassService labelClassService)
         {
             _logger = logger;
             _mlContext = new MLContext(seed: 1);
             _systemSettingService = systemSettingService;
             _evaluationGroupService = evaluationGroupService;
+            _labelClassService = labelClassService;
         }
 
         public void DoBeforeTrainingStart()
@@ -169,6 +175,7 @@ namespace ML.ImageClassification.Train.Concrete
                 _logger.LogInformation($"Model saved to: {modelOutputFilePath}");
                 //
 
+                InsertLabelsAsAdvertisementClasses(imagesToReTrainFolderPath);
 
                 // 9. Try a single prediction simulating an end-user app
                 TrySinglePrediction(_mlContext, trainedModel);
@@ -180,6 +187,51 @@ namespace ML.ImageClassification.Train.Concrete
                 _logger.LogError("TrainingService - exception", ex);
                 _logger.LogError(ex, "TrainingService - exception");
             }
+        }
+
+        private void InsertLabelsAsAdvertisementClasses(string imagesToReTrainFolderPath)
+        {
+            string[] subDirsAsLabels = Directory.GetDirectories(imagesToReTrainFolderPath).Select(Path.GetFileName).ToArray();
+            int lastTrainingVersion = _labelClassService.GetAll().Any() ? _labelClassService.GetAll().Max(t => t.TrainingVersion) : 0;
+            int newTrainingVersion = lastTrainingVersion + 1;
+
+            foreach (string label in subDirsAsLabels)
+            {
+                PrepareAndInsertLabelClass(imagesToReTrainFolderPath, label, newTrainingVersion);
+            }
+        }
+
+        private void PrepareAndInsertLabelClass(string imagesToReTrainFolderPath, string label, int newTrainingVersion)
+        {
+            string[] labelParts = label.Split("_");
+            Guid.TryParse(labelParts[1], out Guid labelGuid);
+
+            LabelClass labelClass = _labelClassService
+                .GetAll()
+                .Where(t => t.ClassName == label)
+                .OrderByDescending(t => t.TrainingVersion)
+                .ThenByDescending(t => t.Version)
+                .FirstOrDefault();
+
+            LabelClass newLabelClass = new LabelClass()
+            {
+                ClassName = label,
+                CategoryType = "Default", //make this enum in future
+                ImagesGroupGuid = labelGuid,
+                DirectoryPath = Path.Combine(imagesToReTrainFolderPath, label),
+                TrainingVersion = newTrainingVersion,
+                Version = labelClass == null ? 1 : labelClass.Version + 1,
+                IsChanged = false,
+                ModifiedBy = "InsertLabelsAsAdvertisementClasses",
+                ModifiedOn = DateTime.UtcNow
+            };
+
+            _labelClassService.InsertOne(newLabelClass);
+
+            newLabelClass.FirstVersionId = labelClass == null ? newLabelClass.Id : labelClass.FirstVersionId;
+            newLabelClass.ModifiedOn = DateTime.UtcNow;
+
+            _labelClassService.Update(newLabelClass);
         }
 
         private void EvaluateModel(MLContext mlContext, IDataView testDataset, ITransformer trainedModel)
@@ -220,29 +272,36 @@ namespace ML.ImageClassification.Train.Concrete
 
         private void TrySinglePrediction(MLContext mlContext, ITransformer trainedModel)
         {
-            // Create prediction function to try one prediction
-            PredictionEngine<InMemoryImageData, ImagePrediction> predictionEngine = mlContext.Model.CreatePredictionEngine<InMemoryImageData, ImagePrediction>(trainedModel);
-
-            EvaluationGroup evaluationGroup = _evaluationGroupService.GetAll().Where(t => t.Status == TrainingStatus.New).OrderBy(t => t.ModifiedOn).FirstOrDefault();
-            if (evaluationGroup == null) { _logger.LogInformation("TrainingService - TrySinglePrediction - No trainingGroup with NEW status"); return; }
-            if (string.IsNullOrWhiteSpace(evaluationGroup.EvaluationGroupDirPath)) { _logger.LogInformation("TrainingService - TrySinglePrediction - Invalid EvaluationGroupDirPath"); return; }
-
-            IEnumerable<InMemoryImageData> testImages = BaseExtensions.LoadInMemoryImagesFromDirectory(evaluationGroup.EvaluationGroupDirPath, false);
-
-            InMemoryImageData imageToPredict = testImages.FirstOrDefault();
-            if (imageToPredict == null)
+            try
             {
-                _logger.LogInformation("TrainingService - TrySinglePrediction - imageToPredict == null - no image to predict");
-                return;
+                // Create prediction function to try one prediction
+                PredictionEngine<InMemoryImageData, ImagePrediction> predictionEngine = mlContext.Model.CreatePredictionEngine<InMemoryImageData, ImagePrediction>(trainedModel);
+
+                EvaluationGroup evaluationGroup = _evaluationGroupService.GetAll().Where(t => t.Status == TrainingStatus.New).OrderBy(t => t.ModifiedOn).FirstOrDefault();
+                if (evaluationGroup == null) { _logger.LogInformation("TrainingService - TrySinglePrediction - No trainingGroup with NEW status"); return; }
+                if (string.IsNullOrWhiteSpace(evaluationGroup.EvaluationGroupDirPath)) { _logger.LogInformation("TrainingService - TrySinglePrediction - Invalid EvaluationGroupDirPath"); return; }
+
+                IEnumerable<InMemoryImageData> testImages = BaseExtensions.LoadInMemoryImagesFromDirectory(evaluationGroup.EvaluationGroupDirPath, false);
+
+                InMemoryImageData imageToPredict = testImages.FirstOrDefault();
+                if (imageToPredict == null)
+                {
+                    _logger.LogInformation("TrainingService - TrySinglePrediction - imageToPredict == null - no image to predict");
+                    return;
+                }
+
+                ImagePrediction prediction = predictionEngine.Predict(imageToPredict);
+
+                _logger.LogInformation(
+                    $"Image Filepath : [{imageToPredict.ImageFilePath}], " +
+                    $"Image Filename : [{imageToPredict.ImageFileName}], " +
+                    $"Scores : [{string.Join(",", prediction.Score)}], " +
+                    $"Predicted Label : {prediction.PredictedLabel}");
             }
-
-            ImagePrediction prediction = predictionEngine.Predict(imageToPredict);
-
-            _logger.LogInformation(
-                $"Image Filepath : [{imageToPredict.ImageFilePath}], " +
-                $"Image Filename : [{imageToPredict.ImageFileName}], " +
-                $"Scores : [{string.Join(",", prediction.Score)}], " +
-                $"Predicted Label : {prediction.PredictedLabel}");
+            catch (Exception ex)
+            {
+                _logger.LogInformation(ex, "TrainingService - TrySinglePrediction");
+            }
         }
     }
 }

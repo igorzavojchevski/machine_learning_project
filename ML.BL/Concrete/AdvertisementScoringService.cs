@@ -20,7 +20,7 @@ namespace ML.BL.Concrete
         private readonly PredictionEnginePool<InMemoryImageData, ImagePrediction> _predictionEnginePool;
         private readonly IAdvertisementService _advertisementService;
         private readonly ISystemSettingService _systemSettingService;
-        private readonly IAdvertisementClassService _advertisementClassService;
+        private readonly ILabelClassService _labelClassService;
 
         public AdvertisementScoringService(
             ILogger<ScoringService> logger,
@@ -28,14 +28,14 @@ namespace ML.BL.Concrete
             IAdvertisementService advertisementService,
             ISystemSettingService systemSettingService,
             IEvaluationGroupService evaluationGroupService,
-            IAdvertisementClassService advertisementClassService)
+            ILabelClassService labelClassService)
             : base(logger, systemSettingService, evaluationGroupService)
         {
             _logger = logger;
             _predictionEnginePool = predictionEnginePool;
             _advertisementService = advertisementService;
             _systemSettingService = systemSettingService;
-            _advertisementClassService = advertisementClassService;
+            _labelClassService = labelClassService;
         }
 
         public ImagePrediction CheckImageAndDoLabelScoring(InMemoryImageData image)
@@ -52,7 +52,7 @@ namespace ML.BL.Concrete
 
             i.Save(imageFilePath);
 
-            InMemoryImageData newImage = 
+            InMemoryImageData newImage =
                 new InMemoryImageData(image.Image, prediction.PredictedLabel, image.ImageFileName, imageFilePath, destOutputPath);
 
             SaveImageScoringInfo(newImage, prediction, Guid.NewGuid());
@@ -91,11 +91,10 @@ namespace ML.BL.Concrete
 
             label = label.Contains("_") ? label : $"{label}_{GroupGuid}";
 
-            string destOutputPath = Path.Combine(_systemSettingService.CUSTOMLOGOMODEL_TrainedImagesFolderPath, label);
+            string destOutputPath = CheckLabelClassOutputDirectory(label);
+            //string destOutputPath = Path.Combine(_systemSettingService.CUSTOMLOGOMODEL_TrainedImagesFolderPath, label)
             Directory.CreateDirectory(destOutputPath);
 
-            InsertAdvertisementClass(destOutputPath, label, GroupGuid);
-            
             string sourcePath = advByGuid.Select(t => t.ImageDirPath).FirstOrDefault();
             if (System.IO.Directory.Exists(sourcePath))
             {
@@ -112,20 +111,43 @@ namespace ML.BL.Concrete
             }
         }
 
-        private void InsertAdvertisementClass(string destOutputPath, string label, Guid GroupGuid)
+        private string CheckLabelClassOutputDirectory(string label)
         {
-            if (!_advertisementClassService.GetAll().Any(t => t.ClassName == label))
-                _advertisementClassService.InsertOne(new AdvertisementClass() 
-                {
-                    ClassName = label,
-                    CategoryType = "Default", //make this enum in future
-                    ImagesGroupGuid = GroupGuid,
-                    ParentGroupGuid = GroupGuid,
-                    DirectoryPath = destOutputPath,
-                    ModifiedBy = "GroupByLabel - InsertAdvertisementClass",
-                    ModifiedOn = DateTime.UtcNow
-                });
+            LabelClass lastOldLabelClass = 
+                _labelClassService
+                .GetAll()
+                .Where(t => t.ClassName == label)
+                .OrderByDescending(t => t.TrainingVersion)
+                .OrderByDescending(t => t.Version)
+                .FirstOrDefault();
+
+            if (!lastOldLabelClass.IsChanged) return lastOldLabelClass.DirectoryPath;
+
+            //this case should not happen
+            LabelClass labelClassAfterEdit = 
+                _labelClassService
+                .GetAll()
+                .Where(t => t.FirstVersionId == lastOldLabelClass.FirstVersionId)
+                .OrderByDescending(t => t.TrainingVersion)
+                .OrderByDescending(t => t.Version)
+                .FirstOrDefault();
+
+            return labelClassAfterEdit.DirectoryPath;
         }
+
+        //private void InsertAdvertisementClass(string destOutputPath, string label, Guid GroupGuid)
+        //{
+        //    if (!_labelClassService.GetAll().Any(t => t.ClassName == label))
+        //        _labelClassService.InsertOne(new LabelClass() 
+        //        {
+        //            ClassName = label,
+        //            CategoryType = "Default", //make this enum in future
+        //            ImagesGroupGuid = GroupGuid,
+        //            DirectoryPath = destOutputPath,
+        //            ModifiedBy = "GroupByLabel - InsertAdvertisementClass",
+        //            ModifiedOn = DateTime.UtcNow
+        //        });
+        //}
 
         private void SaveImageScoringInfo(InMemoryImageData image, ImagePrediction prediction, Guid GroupGuid)
         {

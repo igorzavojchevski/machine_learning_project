@@ -12,6 +12,7 @@ namespace ML.BL.Mongo.Interfaces
         bool IsTrainingServiceStarted { get; }
         float ClassGroupThreshold { get; }
         string HLSStream_URL { get; }
+        string FFMPEG_ExecutablePath { get; }
 
 
         float TF_LabelScoring_MaxProbabilityThreshold { get; }

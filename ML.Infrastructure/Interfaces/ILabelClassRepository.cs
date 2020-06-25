@@ -5,7 +5,7 @@ using System.Text;
 
 namespace ML.Infrastructure.Interfaces
 {
-    public interface IAdvertisementClassRepository : IMongoBaseRepository<AdvertisementClass>
+    public interface ILabelClassRepository : IMongoBaseRepository<LabelClass>
     {
     }
 }

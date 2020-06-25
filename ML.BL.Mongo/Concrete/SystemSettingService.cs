@@ -77,6 +77,15 @@ namespace ML.BL.Mongo.Concrete
             }
         }
 
+        public string FFMPEG_ExecutablePath
+        {
+            get
+            {
+                return GetSettingValueByKey("FFMPEG_ExecutablePath");
+                //@"C:\ffmpeg\bin\ffmpeg.exe"
+            }
+        }
+
 
         public float TF_LabelScoring_MaxProbabilityThreshold
         {

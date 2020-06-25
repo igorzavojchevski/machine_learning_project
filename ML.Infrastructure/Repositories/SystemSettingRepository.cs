@@ -18,11 +18,19 @@ namespace ML.Infrastructure.Repositories
 
         public void FirstInsert()
         {
+            if (!GetAll().Any(t => t.SettingKey == "HLSStream_URL"))
+                InsertOne(new SystemSetting { SettingKey = "HLSStream_URL", SettingValue = @"https://5b44cf20b0388.streamlock.net:8443/live/ngrp:live_all/playlist.m3u8", ModifiedBy = "SystemSettingRepository", ModifiedOn = DateTime.UtcNow });
+
+            if (!GetAll().Any(t => t.SettingKey == "FFMPEG_ExecutablePath"))
+                InsertOne(new SystemSetting { SettingKey = "FFMPEG_ExecutablePath", SettingValue = @"C:\ffmpeg\bin\ffmpeg.exe", ModifiedBy = "SystemSettingRepository", ModifiedOn = DateTime.UtcNow });
+
+
             if (!GetAll().Any(t => t.SettingKey == "TF_LabelsFilePath"))
                 InsertOne(new SystemSetting { SettingKey = "TF_LabelsFilePath", SettingValue = "C:\\Users\\igor.zavojchevski\\Desktop\\Master\\ML\\assets\\MLModels\\TensorFlowModel\\imagenet_comp_graph_label_strings.txt", ModifiedBy = "SystemSettingRepository", ModifiedOn = DateTime.UtcNow });
             
             if (!GetAll().Any(t => t.SettingKey == "TF_TensorFlowModelFilePath"))
                 InsertOne(new SystemSetting { SettingKey = "TF_TensorFlowModelFilePath", SettingValue = "C:\\Users\\igor.zavojchevski\\Desktop\\Master\\ML\\assets\\MLModels\\TensorFlowModel\\tensorflow_inception_graph.pb", ModifiedBy = "SystemSettingRepository", ModifiedOn = DateTime.UtcNow });
+
             
             if (!GetAll().Any(t => t.SettingKey == "CUSTOMLOGOMODEL_ModelFilePath"))
                 InsertOne(new SystemSetting { SettingKey = "CUSTOMLOGOMODEL_ModelFilePath", SettingValue = "C:\\Users\\igor.zavojchevski\\Desktop\\Master\\ML\\assets\\Training\\outputs\\imageClassifier.zip", ModifiedBy = "SystemSettingRepository", ModifiedOn = DateTime.UtcNow });
@@ -38,9 +46,7 @@ namespace ML.Infrastructure.Repositories
 
             if (!GetAll().Any(t => t.SettingKey == "CUSTOMLOGOMODEL_ExportedFromService_ImagesToEvaluateFolderPath"))
                 InsertOne(new SystemSetting { SettingKey = "CUSTOMLOGOMODEL_ExportedFromService_ImagesToEvaluateFolderPath", SettingValue = @"C:\Users\igor.zavojchevski\Desktop\Master\ML\assets\Training\inputs\images_for_prediction", ModifiedBy = "SystemSettingRepository", ModifiedOn = DateTime.UtcNow });
-
-            if (!GetAll().Any(t => t.SettingKey == "HLSStream_URL"))
-                InsertOne(new SystemSetting { SettingKey = "HLSStream_URL", SettingValue = @"https://5b44cf20b0388.streamlock.net:8443/live/ngrp:live_all/playlist.m3u8", ModifiedBy = "SystemSettingRepository", ModifiedOn = DateTime.UtcNow });
+            
 
             first_time_executed = true;
         }

@@ -13,6 +13,8 @@ using ML.BL.Helpers;
 using ML.Domain.Entities.Mongo;
 using System.Collections.Generic;
 using ML.Domain.DataModels.CustomLogoTrainingModel;
+using MongoDB.Bson;
+using System;
 
 namespace ML.Web.Controllers
 {
@@ -25,6 +27,7 @@ namespace ML.Web.Controllers
         private readonly ILabelScoringService _labelScoringService;
         private readonly IAdvertisementService _advertisementService;
         private readonly IAdvertisementScoringService _advertisementScoringService;
+        private readonly ILabelClassService _labelClassService;
         #endregion
 
         #region ctor
@@ -32,12 +35,14 @@ namespace ML.Web.Controllers
             ILogger<ImageClassificationController> logger,
             ILabelScoringService labelScoringService,
             IAdvertisementService advertisementService,
-            IAdvertisementScoringService advertisementScoringService)
+            IAdvertisementScoringService advertisementScoringService,
+            ILabelClassService labelClassService)
         {
             _logger = logger;
             _labelScoringService = labelScoringService;
             _advertisementService = advertisementService;
             _advertisementScoringService = advertisementScoringService;
+            _labelClassService = labelClassService;
         }
         #endregion
 
@@ -94,7 +99,7 @@ namespace ML.Web.Controllers
         [HttpPost]
         [ProducesResponseType(200)]
         [ProducesResponseType(400)]
-        [Route("classifyimagecustom")]
+        [Route("ClassifyImageCustom")]
         public async Task<IActionResult> ClassifyImageCustom(IFormFile imageFile)
         {
             if (imageFile.Length == 0) return BadRequest();
@@ -130,11 +135,22 @@ namespace ML.Web.Controllers
         [Route("GetAllImages")]
         public IActionResult GetAllImages()
         {
-            var labels = _advertisementService.GetAll().Select(t => t.PredictedLabel).Distinct().ToList();
+            var lastTrainingVersion = _labelClassService.GetAll().Max(t => t.TrainingVersion);
+
+            var lastTrainingVersionLabels = _labelClassService
+                .GetAll()
+                .Where(t => t.TrainingVersion == lastTrainingVersion)
+                .ToList();
+
+            var labels =
+            lastTrainingVersionLabels.GroupBy(r => r.ClassName)
+                .Select(g => g.OrderByDescending(r => r.Version).First())
+                .Select(t=>t.ClassName)
+                .ToList();
 
             List<AdvertisementImagesGroupModel> groupList = new List<AdvertisementImagesGroupModel>();
 
-            foreach(var item in labels)
+            foreach (var item in labels)
             {
                 var list = _advertisementService.GetAll().Where(t => t.PredictedLabel == item).ToList();
                 groupList.Add(new AdvertisementImagesGroupModel() { PredictedLabel = item, Advertisements = list.Select(t => t.ToAdvertisementModel()).ToList() });
@@ -142,6 +158,47 @@ namespace ML.Web.Controllers
 
             return Ok(groupList);
 
+        }
+
+
+        [HttpPost]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(404)]
+        [Route("EditLabelClassName")]
+        public IActionResult EditLabelClassName(string id, string name)
+        {
+            if (string.IsNullOrWhiteSpace(name)) return BadRequest();
+
+            ObjectId.TryParse(id, out ObjectId labelClassID);
+
+            LabelClass existingLabelClass = _labelClassService.GetAll().Where(t => t.Id == labelClassID).FirstOrDefault();
+            if (existingLabelClass == null) return NotFound();
+
+            LabelClass newLabelClass = new LabelClass()
+            {
+                ClassName = name,
+                CategoryType = "Default", //make this enum in future
+                ImagesGroupGuid = existingLabelClass.ImagesGroupGuid,
+                DirectoryPath = Path.Combine(Directory.GetParent(existingLabelClass.DirectoryPath).FullName, name),
+                TrainingVersion = existingLabelClass.TrainingVersion,
+                Version = existingLabelClass.Version + 1,
+                FirstVersionId = existingLabelClass.FirstVersionId,
+                IsChanged = false,
+                ModifiedBy = "EditLabelClassName - by admin",
+                ModifiedOn = DateTime.UtcNow
+            };
+
+            _labelClassService.InsertOne(newLabelClass);
+
+            existingLabelClass.IsChanged = true;
+            existingLabelClass.ModifiedOn = DateTime.UtcNow;
+            _labelClassService.Update(existingLabelClass);
+
+            Directory.CreateDirectory(newLabelClass.DirectoryPath);
+            System.IO.File.Move(existingLabelClass.DirectoryPath, newLabelClass.DirectoryPath, true);
+
+            return Ok();
         }
         #region Test Methods
         ////Test Method
