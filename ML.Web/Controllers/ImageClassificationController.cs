@@ -15,6 +15,7 @@ using System.Collections.Generic;
 using ML.Domain.DataModels.CustomLogoTrainingModel;
 using MongoDB.Bson;
 using System;
+using ML.Web.Models;
 
 namespace ML.Web.Controllers
 {
@@ -142,45 +143,51 @@ namespace ML.Web.Controllers
                 .Where(t => t.TrainingVersion == lastTrainingVersion)
                 .ToList();
 
-            var labels =
-            lastTrainingVersionLabels.GroupBy(r => r.ClassName)
+            var labelClasses = lastTrainingVersionLabels
+                .GroupBy(r => r.FirstVersionId)
                 .Select(g => g.OrderByDescending(r => r.Version).First())
-                .Select(t=>t.ClassName)
+                .Select(t => new LabelClass { Id = t.Id, ClassName = t.ClassName, FirstVersionId = t.FirstVersionId })
                 .ToList();
 
             List<AdvertisementImagesGroupModel> groupList = new List<AdvertisementImagesGroupModel>();
 
-            foreach (var item in labels)
+            foreach (var item in labelClasses)
             {
-                var list = _advertisementService.GetAll().Where(t => t.PredictedLabel == item).ToList();
-                groupList.Add(new AdvertisementImagesGroupModel() { PredictedLabel = item, Advertisements = list.Select(t => t.ToAdvertisementModel()).ToList() });
+                string id = item.Id.ToString();
+                List<string> classNamesFromAllVersions = _labelClassService.GetAll().Where(t => t.FirstVersionId == item.FirstVersionId).Select(t => t.ClassName).ToList();
+                List<Advertisement> list = _advertisementService.GetAll().Where(t => classNamesFromAllVersions.Contains(t.PredictedLabel)).ToList();
+                groupList.Add(new AdvertisementImagesGroupModel() { ID = id, PredictedLabel = item.ClassName, Advertisements = list.Select(t => t.ToAdvertisementModel()).ToList() });
             }
 
             return Ok(groupList);
-
         }
 
 
+
         [HttpPost]
+        [Route("EditLabelClassName")]
         [ProducesResponseType(200)]
         [ProducesResponseType(400)]
         [ProducesResponseType(404)]
-        [Route("EditLabelClassName")]
-        public IActionResult EditLabelClassName(string id, string name)
+        public IActionResult EditLabelClassName(LabelItem labelItem)
         {
-            if (string.IsNullOrWhiteSpace(name)) return BadRequest();
+            if (labelItem == null) return BadRequest();
 
-            ObjectId.TryParse(id, out ObjectId labelClassID);
+            if (string.IsNullOrWhiteSpace(labelItem.Name)) return BadRequest();
+
+            ObjectId.TryParse(labelItem.Id, out ObjectId labelClassID);
 
             LabelClass existingLabelClass = _labelClassService.GetAll().Where(t => t.Id == labelClassID).FirstOrDefault();
             if (existingLabelClass == null) return NotFound();
 
+            if (labelItem.Name == existingLabelClass.ClassName) return Ok();
+
             LabelClass newLabelClass = new LabelClass()
             {
-                ClassName = name,
+                ClassName = labelItem.Name,
                 CategoryType = "Default", //make this enum in future
                 ImagesGroupGuid = existingLabelClass.ImagesGroupGuid,
-                DirectoryPath = Path.Combine(Directory.GetParent(existingLabelClass.DirectoryPath).FullName, name),
+                DirectoryPath = Path.Combine(Directory.GetParent(existingLabelClass.DirectoryPath).FullName, labelItem.Name),
                 TrainingVersion = existingLabelClass.TrainingVersion,
                 Version = existingLabelClass.Version + 1,
                 FirstVersionId = existingLabelClass.FirstVersionId,
@@ -195,8 +202,14 @@ namespace ML.Web.Controllers
             existingLabelClass.ModifiedOn = DateTime.UtcNow;
             _labelClassService.Update(existingLabelClass);
 
-            Directory.CreateDirectory(newLabelClass.DirectoryPath);
-            System.IO.File.Move(existingLabelClass.DirectoryPath, newLabelClass.DirectoryPath, true);
+            Directory.Move(existingLabelClass.DirectoryPath, newLabelClass.DirectoryPath);                
+            //Directory.CreateDirectory(newLabelClass.DirectoryPath);
+
+            //IEnumerable<FileInfo> files = Directory.GetFiles(existingLabelClass.DirectoryPath).Select(f => new FileInfo(f));
+            //foreach (var file in files)
+            //{
+            //    System.IO.File.Move(file.FullName, Path.Combine(newLabelClass.DirectoryPath, file.Name), true);
+            //}
 
             return Ok();
         }

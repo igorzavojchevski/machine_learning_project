@@ -95,7 +95,7 @@ namespace ML.BL.Concrete
             //string destOutputPath = Path.Combine(_systemSettingService.CUSTOMLOGOMODEL_TrainedImagesFolderPath, label)
             Directory.CreateDirectory(destOutputPath);
 
-            string sourcePath = advByGuid.Select(t => t.ImageDirPath).FirstOrDefault();
+            string sourcePath = advByGuid.Select(t => t.OriginalImageDirPath).FirstOrDefault();
             if (System.IO.Directory.Exists(sourcePath))
             {
                 string[] files = System.IO.Directory.GetFiles(sourcePath);
@@ -107,8 +107,18 @@ namespace ML.BL.Concrete
                     string fileName = System.IO.Path.GetFileName(s);
                     string destFile = System.IO.Path.Combine(destOutputPath, fileName);
                     System.IO.File.Copy(s, destFile, true);
+
+                    UpdateAdvertisement(advByGuid, destOutputPath, destFile, fileName);
                 }
             }
+        }
+
+        private void UpdateAdvertisement(List<Advertisement> advByGuid, string destOutputPath, string destFile, string fileName)
+        {
+            var advertisementItem = advByGuid.First(t => t.ImageId == fileName);
+            advertisementItem.ImageFilePath = destFile;
+            advertisementItem.ImageDirPath = destOutputPath;
+            _advertisementService.Update(advertisementItem);
         }
 
         private string CheckLabelClassOutputDirectory(string label)
@@ -121,9 +131,10 @@ namespace ML.BL.Concrete
                 .OrderByDescending(t => t.Version)
                 .FirstOrDefault();
 
+            if (lastOldLabelClass == null) Path.Combine(_systemSettingService.CUSTOMLOGOMODEL_TrainedImagesFolderPath, label);
+            
             if (!lastOldLabelClass.IsChanged) return lastOldLabelClass.DirectoryPath;
 
-            //this case should not happen
             LabelClass labelClassAfterEdit = 
                 _labelClassService
                 .GetAll()
@@ -155,8 +166,8 @@ namespace ML.BL.Concrete
             {
                 GroupGuid = GroupGuid,
                 ImageId = image.ImageFileName,
-                ImageFilePath = image.ImageFilePath,
-                ImageDirPath = image.ImageDirPath,
+                OriginalImageFilePath = image.ImageFilePath,
+                OriginalImageDirPath = image.ImageDirPath,
                 PredictedLabel = prediction.PredictedLabel,
                 MaxProbability = prediction.Score.Max(),
                 ModifiedBy = "AdvertisementScoringService",

@@ -9,6 +9,8 @@ namespace ML.Domain.ReturnModels
         public string ImageId { get; set; }
         public string ImageFilePath { get; set; }
         public string ImageDirPath { get; set; }
+        public string OriginalImageFilePath { get; set; }
+        public string OriginalImageDirPath { get; set; }
         public string PredictedLabel { get; set; }
         public float MaxProbability { get; set; }
         public long PredictionExecutionTime { get; set; }

@@ -18,6 +18,8 @@ namespace ML.BL.Helpers
                 ImageId = entity.ImageId,
                 ImageFilePath = entity.ImageFilePath,
                 ImageDirPath = entity.ImageDirPath,
+                OriginalImageFilePath = entity.OriginalImageFilePath,
+                OriginalImageDirPath = entity.OriginalImageDirPath,
                 GroupGuid = entity.GroupGuid,
                 MaxProbability = entity.MaxProbability,
 
