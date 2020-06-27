@@ -1,4 +1,6 @@
 ﻿using ML.Domain.Entities.Mongo.Base;
+using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Attributes;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -15,6 +17,8 @@ namespace ML.Domain.Entities.Mongo
         public string OriginalImageDirPath { get; set; }
 
         public string PredictedLabel { get; set; }
+        
+        [BsonRepresentation(BsonType.Double, AllowTruncation = true)]
         public float MaxProbability { get; set; }
         public long PredictionExecutionTime { get; set; }
         public Guid GroupGuid { get; set; }

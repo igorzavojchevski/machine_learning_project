@@ -14,6 +14,7 @@ namespace ML.BL.Helpers
 
             return new AdvertisementModel()
             {
+                Id = entity.Id.ToString(),
                 PredictedLabel = entity.PredictedLabel,
                 ImageId = entity.ImageId,
                 ImageFilePath = entity.ImageFilePath,

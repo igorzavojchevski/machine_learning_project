@@ -6,6 +6,7 @@ namespace ML.Domain.ReturnModels
 {
     public class AdvertisementModel
     {
+        public string Id { get; set; }
         public string ImageId { get; set; }
         public string ImageFilePath { get; set; }
         public string ImageDirPath { get; set; }

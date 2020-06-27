@@ -29,6 +29,7 @@ namespace ML.Web.Controllers
         private readonly IAdvertisementService _advertisementService;
         private readonly IAdvertisementScoringService _advertisementScoringService;
         private readonly ILabelClassService _labelClassService;
+        private readonly ISystemSettingService _systemSettingService;
         #endregion
 
         #region ctor
@@ -37,13 +38,15 @@ namespace ML.Web.Controllers
             ILabelScoringService labelScoringService,
             IAdvertisementService advertisementService,
             IAdvertisementScoringService advertisementScoringService,
-            ILabelClassService labelClassService)
+            ILabelClassService labelClassService,
+            ISystemSettingService systemSettingService)
         {
             _logger = logger;
             _labelScoringService = labelScoringService;
             _advertisementService = advertisementService;
             _advertisementScoringService = advertisementScoringService;
             _labelClassService = labelClassService;
+            _systemSettingService = systemSettingService;
         }
         #endregion
 
@@ -163,6 +166,25 @@ namespace ML.Web.Controllers
         }
 
 
+        [Route("GetAllAvailableLabels")]
+        public IActionResult GetAllAvailableLabels()
+        {
+            var lastTrainingVersion = _labelClassService.GetAll().Max(t => t.TrainingVersion);
+
+            var lastTrainingVersionLabels = _labelClassService
+                .GetAll()
+                .Where(t => t.TrainingVersion == lastTrainingVersion)
+                .ToList();
+
+            var labelClasses = lastTrainingVersionLabels
+                .GroupBy(r => r.FirstVersionId)
+                .Select(g => g.OrderByDescending(r => r.Version).First())
+                .Select(t => new LabelClassReturnModel { Id = t.Id.ToString(), ClassName = t.ClassName })
+                .ToList();
+
+            return Ok(labelClasses);
+        }
+
 
         [HttpPost]
         [Route("EditLabelClassName")]
@@ -213,6 +235,56 @@ namespace ML.Web.Controllers
 
             return Ok();
         }
+
+
+
+        [HttpPost]
+        [Route("MoveImages")]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(404)]
+        public IActionResult MoveImages(MoveImagesModel moveImagesModel)
+        {
+            if (moveImagesModel == null) return BadRequest();
+
+            if (string.IsNullOrWhiteSpace(moveImagesModel.NewClassNameId)) return BadRequest();
+            
+            if (moveImagesModel.ImagesIds == null || moveImagesModel.ImagesIds.Count == 0) return BadRequest();
+
+            ObjectId.TryParse(moveImagesModel.NewClassNameId, out ObjectId labelClassID);
+
+            LabelClass newLabel = _labelClassService.GetAll().Where(t => t.Id == labelClassID).FirstOrDefault();
+            if (newLabel == null) return NotFound();
+
+            List<ObjectId> ImagesToMove = moveImagesModel.ImagesIds.Select(t => ObjectId.Parse(t)).ToList();
+
+            List<Advertisement> allAdsFromList = _advertisementService.GetAll().Where(t => ImagesToMove.Contains(t.Id)).ToList();
+            if (allAdsFromList == null || allAdsFromList.Count == 0) return NotFound();
+
+            string newDirPath = Path.Combine(_systemSettingService.CUSTOMLOGOMODEL_TrainedImagesFolderPath, newLabel.ClassName);
+            
+            allAdsFromList.ForEach(t =>
+            {
+                string newFilePath = Path.Combine(newDirPath, string.Format("{0}_{1}", t.PredictedLabel, t.ImageId));
+
+                Directory.Move(t.ImageFilePath, newFilePath);
+
+                t.ImageId = string.Format("{0}_{1}", t.PredictedLabel, t.ImageId);
+                t.PredictedLabel = newLabel.ClassName;
+                t.ImageDirPath = newDirPath;
+                t.ImageFilePath = newFilePath;
+                t.ModifiedBy = "MoveImages";
+                t.ModifiedOn = DateTime.UtcNow;
+
+                _advertisementService.Update(t);
+            });
+
+            return Ok("Success");
+        }
+
+
+
+
         #region Test Methods
         ////Test Method
         //// GET api/ImageClassification

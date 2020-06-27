@@ -87,6 +87,13 @@
 <div id="headerDiv"><h2>ML Advertisement Recognition Platform</h2></div>
 <br />
 
+@*<select multiple="multiple" class="image-picker">
+    <option style="height:200px; width:200px;" data-img-src="images_to_train/NLB_Nova_Reklama_b899275d-87ba-44e1-816e-474cbf08818f/11.jpeg" value="42"> NEKOJ TEST </option>
+    <option data-img-src="test.png" data-img-alt="Page 2" value="2">  Page 2  </option>
+    <option data-img-src="test.png" data-img-alt="Page 3" value="3">  Page 3  </option>
+    <option data-img-src="tst.png" data-img-alt="Page 4" data-img-class="last" value="4"> Page 4 </option>
+</select>*@
+
 <div id="tab">
     <button class="tablinks btn-light" onclick="openTab(event, 'Labels')">Advertisements</button>
     <button class="tablinks btn-light" onclick="openTab(event, 'ImageCheck')">Image Check</button>
@@ -126,15 +133,17 @@
     <div id="divProbability" class="col-md-10"></div>
 </div>
 
-
-<script src="~/js/upload.js"></script>
-
 <br />
 <br />
 <br />
 
-<script type="text/javascript">
-    window.onload = function hello() {
-        document.getElementById('divPrediction').innerHTML = 'Area to show the awesome prediction!';
-    };
-</script>
+@section Scripts {
+    <script src="~/js/upload.js"></script>
+    <script src="~/js/image-picker.min.js"></script>
+
+    <script type="text/javascript">
+        window.onload = function hello() {
+            document.getElementById('divPrediction').innerHTML = 'Area to show the awesome prediction!';
+        };
+    </script>
+}

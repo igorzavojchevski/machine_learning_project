@@ -4,8 +4,10 @@
 
 const serviceUrl = 'api/ImageClassification';
 const form = document.querySelector('form');
+var allLabels = new Array();
 
 function collapse(id) {
+
     var labelDIVid = "labelHeadingAndEdit_" + id;
     var element = document.getElementById(labelDIVid);
     element.classList.toggle("active");
@@ -20,6 +22,9 @@ function collapse(id) {
 function openTab(evt, tabName) {
     console.log(evt);
     console.log(tabName);
+
+    if (tabName === "Labels")
+        loadImages();
 
     var i, tabcontent, tablinks;
     tabcontent = document.getElementsByClassName("tabcontent");
@@ -101,10 +106,59 @@ function labelCancelEditEsc(e) {
     }
 }
 
+function saveMoveImages(advertisementid) {
+    var arrayOfSelected = $(".image-picker").find("option:selected").toArray();
+    var arrayImagesOfAdvertisement = arrayOfSelected.filter((x) => { return x.parentElement.getAttribute("id") === "advertisementImagesDivSelect_" + advertisementid; });
+    var result = arrayImagesOfAdvertisement.map(a => a.value);
+    console.log(result);
+    console.log(document.getElementById("advertisementImagesDiv_SELECTForMove_" + advertisementid));
+
+    var selectElement = document.getElementById("advertisementImagesDiv_SELECTForMove_" + advertisementid);
+    var selectedValue = selectElement.options[selectElement.selectedIndex].value;
+
+    const moveImagesModel = {
+        newClassNameId: selectedValue,
+        imagesIds: result
+    };
+
+    console.log(moveImagesModel);
+
+    fetch(serviceUrl + "/MoveImages",
+        {
+            method: 'POST',
+            headers: { 'Accept':'application/json', 'Content-Type': 'application/json' },
+            body: JSON.stringify(moveImagesModel),
+        })
+        .then((resp) => resp.json())
+        .then(function (response) {
+            console.log(response);
+            location.reload();
+        });
+}
+
 function loadImages() {
     fetch(serviceUrl + "/GetAllImages") // Call the fetch function passing the url of the API as a parameter
         .then((resp) => resp.json())
         .then(function (response) {
+
+            //fetch(serviceUrl + "/GetAllAvailableLabels") // Call the fetch function passing the url of the API as a parameter
+            //    .then((labelResp) => labelResp.json())
+            //    .then(function (labelResponse)
+            //    {
+            //        console.log(labelResponse);
+            //        allLabels = new Array();
+            //        allLabels.concat(labelResponse);
+            //    });
+
+            jQuery.ajax({
+                url: serviceUrl + "/GetAllAvailableLabels",
+                success: function (allLabelResponse) {
+                    console.log(allLabelResponse);
+                    allLabels = new Array();
+                    allLabels = allLabelResponse;
+                },
+                async: false
+            });
 
             console.log(response);
 
@@ -199,40 +253,137 @@ function loadImages() {
                 var advertisementImagesDiv = document.createElement("div");
                 advertisementImagesDiv.setAttribute("id", "advertisementImagesDiv_" + id);
 
-                for (var j = 0; j < response[i].advertisements.length; j++) {
-                    //var y = document.createElement("div");
-                    //var idy = "advertisementImage" + j;
-                    //y.setAttribute("id", idy);
-                    var imageId = response[i].advertisements[j].imageId;
-                    var figure = document.createElement("figure");
-                    figure.style.height = "180px";
-                    figure.style.width = "180px";
 
-                    var img = document.createElement("img");
-                    var idimg = "advertisementImageIMG" + j;
-                    img.setAttribute("id", idimg);
-                    img.setAttribute("src", "images_to_train/" + response[i].predictedLabel + "/" + imageId);
-                    img.setAttribute("height", "180px");
-                    img.setAttribute("width", "180px");
-                    //y.appendChild(img);
-                    //divAdvertisements.appendChild(y);
-                    figure.style.display = "inline-block";
-                    figure.style.marginRight = "2%";
-                    figure.style.marginLeft = "2%";
 
-                    figure.appendChild(img);
+                var advertisementImagesDiv_DIVForMove = document.createElement("div");
+                advertisementImagesDiv_DIVForMove.setAttribute("id", "advertisementImagesDiv_DIVForMove_" + id);
+                advertisementImagesDiv_DIVForMove.style.marginBottom = "1%";
+                var span_advertisementImagesDiv_SELECTForMove = document.createElement("span");
+                span_advertisementImagesDiv_SELECTForMove.textContent = "Move to: ";
+                var advertisementImagesDiv_SELECTForMove = document.createElement("select");
+                advertisementImagesDiv_SELECTForMove.setAttribute("id", "advertisementImagesDiv_SELECTForMove_" + id);
+                for (var li = 0; li < allLabels.length; li++) {
+                    if (allLabels[li].className === response[i].predictedLabel) continue;
 
-                    var figCaption = document.createElement("figcaption");
-                    figCaption.textContent = (response[i].advertisements[j].maxProbability * 100).toFixed(3) + "%";
-                    figCaption.style.textAlign = "center";
-                    figure.appendChild(figCaption);
+                    var opt = document.createElement("option");
+                    opt.value = allLabels[li].id;
+                    opt.textContent = allLabels[li].className;
 
-                    advertisementImagesDiv.appendChild(figure);
+                    advertisementImagesDiv_SELECTForMove.appendChild(opt);
                 }
+                advertisementImagesDiv_DIVForMove.hidden = true;
+
+                var advertisementImagesSaveButton = document.createElement("button");
+                advertisementImagesSaveButton.setAttribute("id", "buttonSaveForMoveImages_" + id);
+                advertisementImagesSaveButton.classList = "btn btn-success";
+                advertisementImagesSaveButton.textContent = "Save";
+                advertisementImagesSaveButton.style.fontSize = "12px";
+                advertisementImagesSaveButton.style.position = "absolute";
+                advertisementImagesSaveButton.style.marginLeft = "2%";
+                advertisementImagesSaveButton.style.marginTop = "-0.25%";
+                advertisementImagesSaveButton.setAttribute("onMouseDown", "saveMoveImages('" + id + "')");
+
+                advertisementImagesDiv_DIVForMove.appendChild(span_advertisementImagesDiv_SELECTForMove)
+                advertisementImagesDiv_DIVForMove.appendChild(advertisementImagesDiv_SELECTForMove);
+                advertisementImagesDiv_DIVForMove.appendChild(advertisementImagesSaveButton);
+                advertisementImagesDiv.appendChild(advertisementImagesDiv_DIVForMove);
+
+
+                var advertisementImagesDivSelect = document.createElement("select");
+                advertisementImagesDivSelect.setAttribute("id", "advertisementImagesDivSelect_" + id);
+                advertisementImagesDivSelect.classList = "image-picker";
+                advertisementImagesDivSelect.setAttribute("multiple", "multiple");
+
+                for (var j = 0; j < response[i].advertisements.length; j++) {
+
+                    var imageId = response[i].advertisements[j].imageId;
+                    var selectOption = document.createElement("option");
+                    selectOption.setAttribute("data-img-src", "images_to_train/" + response[i].predictedLabel + "/" + imageId);
+                    selectOption.setAttribute("data-img-label", (response[i].advertisements[j].maxProbability * 100).toFixed(3) + "%");
+                    selectOption.setAttribute("value", response[i].advertisements[j].id);
+                    advertisementImagesDivSelect.append(selectOption);
+
+                    //data - img - src='http://www.example.com/image.jpg'
+                    //data - img - label='Just an image!'
+                    //data - img - class="custom-class"
+                    //data - img - alt="Just an image alt!"
+                    //value = '42'
+
+                    //var imageId = response[i].advertisements[j].imageId;
+                    //var figure = document.createElement("figure");
+                    //figure.style.height = "180px";
+                    //figure.style.width = "180px";
+                    //figure.style.display = "inline-block";
+                    //figure.style.marginRight = "2%";
+                    //figure.style.marginLeft = "2%";
+
+                    //var img = document.createElement("img");
+                    //var idimg = "advertisementImageIMG" + j;
+                    //img.setAttribute("id", idimg);
+                    //img.setAttribute("src", "images_to_train/" + response[i].predictedLabel + "/" + imageId);
+                    //img.setAttribute("height", "180px");
+                    //img.setAttribute("width", "180px");
+
+                    //figure.appendChild(img);
+
+                    //var figCaption = document.createElement("figcaption");
+                    //figCaption.textContent = (response[i].advertisements[j].maxProbability * 100).toFixed(3) + "%";
+                    //figCaption.style.textAlign = "center";
+                    //figure.appendChild(figCaption);
+
+                    //advertisementImagesDiv.appendChild(figure);
+                }
+                advertisementImagesDiv.appendChild(advertisementImagesDivSelect);
                 x.appendChild(advertisementImagesDiv);
             }
+
+            InitializeImagePicker();
         })
 }
+
+function InitializeImagePicker() {
+    $(".image-picker").imagepicker({
+        show_label: true,
+        clicked: function () {
+            //console.log(this.find("option:selected"));
+            //console.log(this.find("option:selected").length);
+            //console.log(this.find("option:selected").prevObject[0].getAttribute("id"));
+            var selectID = this.find("option:selected").prevObject[0].getAttribute("id");
+            var lastIndex = selectID.lastIndexOf('_');
+            var advertisementID = selectID.substr(lastIndex + 1, selectID.Length);
+
+            var element = document.getElementById("advertisementImagesDiv_DIVForMove_" + advertisementID);
+            if (this.find("option:selected").length > 0) {
+                //console.log('testtt');
+                element.hidden = false;
+            }
+            else {
+                //console.log('testtt123123');
+                element.hidden = true;
+            }
+        }
+    });
+}
+
+
+//function imageSelector(elementid) {
+//    console.log(elementid);
+//    var el = $(elementid);
+//    console.log(el);
+//    el.addEventListener('click', imageClicked);
+//}
+
+//function imageClicked(e) {
+//    if ($(e.target.id).find(".selected").length > 0) {
+//        console.log('test123123');
+//        //advertisementImagesDiv_DIVForMove.hidden = false;
+//        //advertisementImagesDiv_DIVForMove_
+//    }
+//    else {
+//        console.log('nekojtest');
+//        //advertisementImagesDiv_DIVForMove.hidden = true;
+//    }
+//}
 
 function preview_image_reader(id, src) {
     var reader = new FileReader();
@@ -242,8 +393,6 @@ function preview_image_reader(id, src) {
     }
     reader.readAsDataURL(src);
 }
-
-loadImages();
 
 function preview_image(event) {
     var reader = new FileReader();
