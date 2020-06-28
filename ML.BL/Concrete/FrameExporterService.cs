@@ -60,8 +60,9 @@ namespace ML.BL.Concrete
             try
             {
                 Directory.CreateDirectory(newDir);
-                process.StartInfo.Arguments = $"-skip_frame nokey -i {hlsstream} -vsync 0 -r 30 -f image2 {newDir}\\{newGuid}-%02d.jpeg";
+                process.StartInfo.Arguments = $"-skip_frame nokey -i {hlsstream} -vsync 0 -r 30 -f image2 -strftime 1 {newDir}\\{newGuid}_%Y%m%d%H%M%S.jpeg";
                 process.Start();
+
             }
             catch (Exception ex)
             {

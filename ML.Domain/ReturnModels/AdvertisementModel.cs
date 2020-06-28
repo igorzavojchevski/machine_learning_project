@@ -16,6 +16,8 @@ namespace ML.Domain.ReturnModels
         public float MaxProbability { get; set; }
         public long PredictionExecutionTime { get; set; }
         public Guid GroupGuid { get; set; }
+        public DateTime ImageDateTime { get; set; }
+
         public bool IsMerged { get; set; }
         public string MergeParentDirPath { get; set; }
         public Dictionary<string, float> TopProbabilities { get; set; }

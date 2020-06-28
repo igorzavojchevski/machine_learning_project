@@ -95,14 +95,21 @@
 </select>*@
 
 <div id="tab">
-    <button class="tablinks btn-light" onclick="openTab(event, 'Labels')">Advertisements</button>
-    <button class="tablinks btn-light" onclick="openTab(event, 'ImageCheck')">Image Check</button>
+    <button id="btnAdvertisements" class="tablinks btn-light" onclick="openTab(event, 'Labels')">Advertisements</button>
+    <button id="btnAdvertisementTimeFrames" class="tablinks btn-light" onclick="openTab(event, 'LabelTimeFrames')">Time Frames</button>
+    <button id="btnImageCheck" class="tablinks btn-light" onclick="openTab(event, 'ImageCheck')">Image Check</button>
 </div>
 
 <div id="Labels" class="tabcontent">
     <h3>Advertisements (Labels)</h3>
     <br />
     <div id="divAdvertisements" class="col-md-12"></div>
+</div>
+
+<div id="LabelTimeFrames" class="tabcontent">
+    <h3>Time Frames</h3>
+    <br />
+    <div id="timeFramesDiv" class="col-md-12"></div>
 </div>
 
 <div id="ImageCheck" class="tabcontent">

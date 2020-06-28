@@ -53,9 +53,10 @@ namespace ML.BL.Concrete
             i.Save(imageFilePath);
 
             InMemoryImageData newImage =
-                new InMemoryImageData(image.Image, prediction.PredictedLabel, image.ImageFileName, imageFilePath, destOutputPath);
+                new InMemoryImageData(image.Image, prediction.PredictedLabel, image.ImageFileName, imageFilePath, destOutputPath, image.ImageDateTime);
 
-            SaveImageScoringInfo(newImage, prediction, Guid.NewGuid());
+            //do separate logic for saving
+            SaveImageScoringInfo(newImage, prediction, Guid.NewGuid(), true);
 
             return prediction;
         }
@@ -131,7 +132,7 @@ namespace ML.BL.Concrete
                 .OrderByDescending(t => t.Version)
                 .FirstOrDefault();
 
-            if (lastOldLabelClass == null) Path.Combine(_systemSettingService.CUSTOMLOGOMODEL_TrainedImagesFolderPath, label);
+            if (lastOldLabelClass == null) return Path.Combine(_systemSettingService.CUSTOMLOGOMODEL_TrainedImagesFolderPath, label);
             
             if (!lastOldLabelClass.IsChanged) return lastOldLabelClass.DirectoryPath;
 
@@ -160,7 +161,7 @@ namespace ML.BL.Concrete
         //        });
         //}
 
-        private void SaveImageScoringInfo(InMemoryImageData image, ImagePrediction prediction, Guid GroupGuid)
+        private void SaveImageScoringInfo(InMemoryImageData image, ImagePrediction prediction, Guid GroupGuid, bool isCustom = false)
         {
             Advertisement ad = new Advertisement
             {
@@ -168,8 +169,12 @@ namespace ML.BL.Concrete
                 ImageId = image.ImageFileName,
                 OriginalImageFilePath = image.ImageFilePath,
                 OriginalImageDirPath = image.ImageDirPath,
+                ImageFilePath = image.ImageFilePath,
+                ImageDirPath = image.ImageDirPath,
+                ImageDateTime = image.ImageDateTime,
                 PredictedLabel = prediction.PredictedLabel,
                 MaxProbability = prediction.Score.Max(),
+                IsCustom = isCustom,
                 ModifiedBy = "AdvertisementScoringService",
                 ModifiedOn = DateTime.UtcNow
             };

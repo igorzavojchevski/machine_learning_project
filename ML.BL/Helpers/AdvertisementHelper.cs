@@ -23,6 +23,7 @@ namespace ML.BL.Helpers
                 OriginalImageDirPath = entity.OriginalImageDirPath,
                 GroupGuid = entity.GroupGuid,
                 MaxProbability = entity.MaxProbability,
+                ImageDateTime = entity.ImageDateTime,
 
                 IsMerged = entity.IsMerged,
                 MergeParentDirPath = entity.MergeParentDirPath,

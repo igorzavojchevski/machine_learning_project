@@ -81,7 +81,7 @@ namespace ML.Web.Controllers
             // Set the specific image data into the ImageInputData type used in the DataView.
             //ImageInputData imageInputData = new ImageInputData { Image = bitmapImage };
 
-            InMemoryImageData imageInputData = new InMemoryImageData(imageData, null, null, null, null);
+            InMemoryImageData imageInputData = new InMemoryImageData(imageData, null, null, null, null, DateTime.UtcNow);
 
             // Predict code for provided image.
             ImagePredictedLabelWithProbability imageLabelPredictions = _labelScoringService.CheckImageForLabelScoring(imageInputData);
@@ -121,7 +121,7 @@ namespace ML.Web.Controllers
             // Measure execution time.
             System.Diagnostics.Stopwatch watch = System.Diagnostics.Stopwatch.StartNew();
 
-            InMemoryImageData imageInputData = new InMemoryImageData(imageData, null, imageFile.FileName, null, null);
+            InMemoryImageData imageInputData = new InMemoryImageData(imageData, null, imageFile.FileName, null, null, DateTime.UtcNow);
 
             // Predict code for provided image.
             ImagePrediction imagePrediction = _advertisementScoringService.CheckImageAndDoLabelScoring(imageInputData);
@@ -158,7 +158,7 @@ namespace ML.Web.Controllers
             {
                 string id = item.Id.ToString();
                 List<string> classNamesFromAllVersions = _labelClassService.GetAll().Where(t => t.FirstVersionId == item.FirstVersionId).Select(t => t.ClassName).ToList();
-                List<Advertisement> list = _advertisementService.GetAll().Where(t => classNamesFromAllVersions.Contains(t.PredictedLabel)).ToList();
+                List<Advertisement> list = _advertisementService.GetAll().Where(t => classNamesFromAllVersions.Contains(t.PredictedLabel)).OrderByDescending(t => t.ModifiedOn).ToList();
                 groupList.Add(new AdvertisementImagesGroupModel() { ID = id, PredictedLabel = item.ClassName, Advertisements = list.Select(t => t.ToAdvertisementModel()).ToList() });
             }
 
@@ -184,6 +184,113 @@ namespace ML.Web.Controllers
 
             return Ok(labelClasses);
         }
+
+
+        [Route("GetLabelTimeFrames")]
+        public IActionResult GetLabelTimeFrames()
+        {
+            var lastTrainingVersion = _labelClassService.GetAll().Max(t => t.TrainingVersion);
+
+            var lastTrainingVersionLabels = _labelClassService
+                .GetAll()
+                .Where(t => t.TrainingVersion == lastTrainingVersion)
+                .ToList();
+
+            var labelClasses = lastTrainingVersionLabels
+                .GroupBy(r => r.FirstVersionId)
+                .Select(g => g.OrderByDescending(r => r.Version).First())
+                .Select(t => new LabelClass { Id = t.Id, ClassName = t.ClassName, FirstVersionId = t.FirstVersionId })
+                .ToList();
+
+            List<AdvertisementTimeFrameModel> listOfAdvertisementsForTimeFrames = new List<AdvertisementTimeFrameModel>();
+
+            foreach (var item in labelClasses)
+            {
+                List<string> classNamesFromAllVersions = _labelClassService.GetAll().Where(t => t.FirstVersionId == item.FirstVersionId).Select(t => t.ClassName).ToList();
+                List<AdvertisementTimeFrameModel> listByClassName =
+                    _advertisementService
+                    .GetAll()
+                    .Where(t => classNamesFromAllVersions.Contains(t.PredictedLabel))
+                    .OrderByDescending(t => t.ModifiedOn)
+                    .Select(t => new AdvertisementTimeFrameModel
+                    {
+                        Id = t.Id.ToString(),
+                        ClassName = item.ClassName,
+                        GroupGuid = t.GroupGuid,
+                        ImageDateTime = t.ImageDateTime
+                    })
+                    .ToList();
+
+                //List<LabelTimeFramesReturnModel>
+                //    test =
+                //    list
+                //    .GroupBy(t => t.GroupGuid)
+                //    .Select(g =>
+                //    new LabelTimeFramesReturnModel
+                //    {
+                //        ClassName = item.ClassName,
+                //        GroupGuid = g.Key,
+                //        StartDate = g.Min(t => t.ImageDateTime),
+                //        EndDate = g.Max(t => t.ImageDateTime),
+                //    })
+                //    .ToList();
+
+                //List<LabelTimeFramesReturnModel>
+                //    test =
+                //    list
+                //    .GroupBy(t => t.ImageDateTime.Date)
+                //    .Select(g =>
+                //    new LabelTimeFramesReturnModel
+                //    {
+                //        DateTimeKey = g.Key,
+                //        LabelTimeFrameGroups = 
+                //            g.GroupBy(t => t.GroupGuid)
+                //            .Select(gsg =>
+                //            new LabelTimeFrameGroup
+                //            {
+                //                ClassName = item.ClassName,
+                //                GroupGuid = gsg.Key,
+                //                StartDate = gsg.Min(t => t.ImageDateTime),
+                //                EndDate = gsg.Max(t => t.ImageDateTime),
+                //            }).ToList()
+                //    })
+                //    .ToList();
+
+                listOfAdvertisementsForTimeFrames.AddRange(listByClassName);
+            }
+
+            List<LabelTimeFramesReturnModel>
+                    groupList =
+                    listOfAdvertisementsForTimeFrames
+                    .GroupBy(t => t.ImageDateTime.Date)
+                    .Select(g =>
+                    new LabelTimeFramesReturnModel
+                    {
+                        DateTimeKey = g.Key,
+                        LabelTimeFrameGroups =
+                            g.OrderBy(t=>t.ImageDateTime).GroupBy(t => new { t.ClassName, t.GroupGuid })
+                            .Select(gsg =>
+                            new LabelTimeFrameGroup
+                            {
+                                ClassName = gsg.Key.ClassName,
+                                GroupGuid = gsg.Key.GroupGuid,
+                                StartDate = gsg.Min(t => t.ImageDateTime),
+                                EndDate = gsg.Max(t => t.ImageDateTime),
+                            }).ToList()
+                    })
+                    .ToList();
+
+            //groupList
+            //    .GroupBy(t => t.DateTimeKey)
+            //    .Select(t => new LabelTimeFramesReturnModel
+            //    {
+            //        DateTimeKey = t.Key,
+            //        LabelTimeFrameGroups = t.Select(g=>g.LabelTimeFrameGroups.Select(gs=>gs)).ToList()
+            //    });
+
+            return Ok(groupList);
+        }
+
 
 
         [HttpPost]
@@ -224,7 +331,7 @@ namespace ML.Web.Controllers
             existingLabelClass.ModifiedOn = DateTime.UtcNow;
             _labelClassService.Update(existingLabelClass);
 
-            Directory.Move(existingLabelClass.DirectoryPath, newLabelClass.DirectoryPath);                
+            Directory.Move(existingLabelClass.DirectoryPath, newLabelClass.DirectoryPath);
             //Directory.CreateDirectory(newLabelClass.DirectoryPath);
 
             //IEnumerable<FileInfo> files = Directory.GetFiles(existingLabelClass.DirectoryPath).Select(f => new FileInfo(f));
@@ -248,7 +355,7 @@ namespace ML.Web.Controllers
             if (moveImagesModel == null) return BadRequest();
 
             if (string.IsNullOrWhiteSpace(moveImagesModel.NewClassNameId)) return BadRequest();
-            
+
             if (moveImagesModel.ImagesIds == null || moveImagesModel.ImagesIds.Count == 0) return BadRequest();
 
             ObjectId.TryParse(moveImagesModel.NewClassNameId, out ObjectId labelClassID);
@@ -262,7 +369,7 @@ namespace ML.Web.Controllers
             if (allAdsFromList == null || allAdsFromList.Count == 0) return NotFound();
 
             string newDirPath = Path.Combine(_systemSettingService.CUSTOMLOGOMODEL_TrainedImagesFolderPath, newLabel.ClassName);
-            
+
             allAdsFromList.ForEach(t =>
             {
                 string newFilePath = Path.Combine(newDirPath, string.Format("{0}_{1}", t.PredictedLabel, t.ImageId));

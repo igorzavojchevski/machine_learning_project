@@ -22,9 +22,13 @@ namespace ML.Domain.Entities.Mongo
         public float MaxProbability { get; set; }
         public long PredictionExecutionTime { get; set; }
         public Guid GroupGuid { get; set; }
+        public DateTime ImageDateTime { get; set; }
+
+        public bool IsCustom { get; set; }
+
+        // not needed at this moment
         public bool IsMerged { get; set; }
         public string MergeParentDirPath { get; set; }
-
         public Dictionary<string, float> TopProbabilities { get; set; }
     }
 }

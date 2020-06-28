@@ -3,6 +3,7 @@ using ML.Domain.DataModels.CustomLogoTrainingModel;
 using ML.Utils.Enums;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -51,17 +52,18 @@ namespace ML.Utils.Extensions.Base
                 });
         }
 
-        public static IEnumerable<InMemoryImageData> LoadInMemoryImagesFromDirectory(
-            string folder,
-            bool useFolderNameAsLabel = true)
-            => LoadImagesFromDirectory(folder, useFolderNameAsLabel)
-                .Select(x => new InMemoryImageData(
-                    image: File.ReadAllBytes(x.imagePath),
-                    label: x.label,
-                    imageFileName: Path.GetFileName(x.imagePath),
-                    imageFilePath: x.imagePath,
-                    imageDirPath: Path.GetDirectoryName(x.imagePath)));
-
+        public static IEnumerable<InMemoryImageData> LoadInMemoryImagesFromDirectory(string folder, bool useFolderNameAsLabel = true)
+        {
+            return LoadImagesFromDirectory(folder, useFolderNameAsLabel)
+                           .Select(x => new InMemoryImageData(
+                               image: File.ReadAllBytes(x.imagePath),
+                               label: x.label,
+                               imageFileName: Path.GetFileName(x.imagePath),
+                               imageFilePath: x.imagePath,
+                               imageDirPath: Path.GetDirectoryName(x.imagePath),
+                               imageDateTime: DateTime.ParseExact(Path.GetFileNameWithoutExtension(x.imagePath).Split("_")[1], "yyyyMMddHHmmss", CultureInfo.InvariantCulture)
+                               ));
+        }
 
         public static bool IsFileLocked(string filePath)
         {

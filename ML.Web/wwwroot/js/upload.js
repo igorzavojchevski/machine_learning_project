@@ -6,6 +6,10 @@ const serviceUrl = 'api/ImageClassification';
 const form = document.querySelector('form');
 var allLabels = new Array();
 
+$(document).ready(function () {
+    $('#btnAdvertisements').trigger('click');
+});
+
 function collapse(id) {
 
     var labelDIVid = "labelHeadingAndEdit_" + id;
@@ -23,8 +27,15 @@ function openTab(evt, tabName) {
     console.log(evt);
     console.log(tabName);
 
-    if (tabName === "Labels")
+    $("#divAdvertisements").html("");
+    $("#timeFramesDiv").html("");
+
+    if (tabName === "Labels") {
         loadImages();
+    }
+    else if (tabName === "LabelTimeFrames") {
+        getLabelTimeFrames();
+    }
 
     var i, tabcontent, tablinks;
     tabcontent = document.getElementsByClassName("tabcontent");
@@ -36,7 +47,7 @@ function openTab(evt, tabName) {
         tablinks[i].className = tablinks[i].className.replace(" active", "");
     }
     document.getElementById(tabName).style.display = "block";
-    evt.currentTarget.className += " active";
+    evt.target.className += " active";
 }
 
 function labelEdit(elementid) {
@@ -126,13 +137,12 @@ function saveMoveImages(advertisementid) {
     fetch(serviceUrl + "/MoveImages",
         {
             method: 'POST',
-            headers: { 'Accept':'application/json', 'Content-Type': 'application/json' },
+            headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
             body: JSON.stringify(moveImagesModel),
         })
-        .then((resp) => resp.json())
         .then(function (response) {
             console.log(response);
-            location.reload();
+            $('#btnAdvertisements').trigger('click');
         });
 }
 
@@ -195,6 +205,17 @@ function loadImages() {
                 span.style.lineHeight = "1.2";
                 span.style.color = "inherit";
 
+                var spanForCount = document.createElement("span");
+                spanForCount.textContent = "(" + response[i].advertisements.length + " items)";
+                spanForCount.style.classList = "noselect";
+                spanForCount.style.display = "block";
+                spanForCount.style.fontSize = "1rem";
+                spanForCount.style.fontFamily = "inherit";
+                spanForCount.style.fontWeight = "500";
+                spanForCount.style.lineHeight = "1.2";
+                spanForCount.style.color = "inherit";
+
+
                 var editbutton = document.createElement("button");
                 editbutton.setAttribute("id", "buttonEditForLabel_" + labelHeadingElementID);
                 editbutton.textContent = "Edit";
@@ -233,6 +254,7 @@ function loadImages() {
                 labelHeadingAndEdit.appendChild(editbutton);
                 labelHeadingAndEdit.appendChild(saveButton);
                 labelHeadingAndEdit.appendChild(cancelButton);
+                labelHeadingAndEdit.appendChild(spanForCount);
                 x.appendChild(labelHeadingAndEdit);
                 divAdvertisements.appendChild(x);
 
@@ -252,7 +274,7 @@ function loadImages() {
                 //}
                 var advertisementImagesDiv = document.createElement("div");
                 advertisementImagesDiv.setAttribute("id", "advertisementImagesDiv_" + id);
-
+                advertisementImagesDiv.style.display = "none";
 
 
                 var advertisementImagesDiv_DIVForMove = document.createElement("div");
@@ -365,7 +387,69 @@ function InitializeImagePicker() {
     });
 }
 
+function getLabelTimeFrames() {
 
+    fetch(serviceUrl + "/GetLabelTimeFrames",
+        {
+            method: 'GET',
+            headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
+        })
+        .then((resp) => resp.json())
+        .then(function (response) {
+            console.log(response);
+            var timeFramesDiv = document.getElementById("timeFramesDiv");
+            var table = document.createElement("table");
+            table.style.width = '100%';
+            table.setAttribute('border', '1');
+            var tbody = document.createElement('tbody');
+
+            for (var i = 0; i < response.length; i++) {
+
+                var tr = document.createElement('tr');
+                var td = document.createElement('td');
+                td.setAttribute("colspan", "3");
+                var date = new Date(response[i].dateTimeKey);
+                td.textContent = formatDate(date);
+                td.style.textAlign = "center";
+                tr.appendChild(td);
+                tbody.appendChild(tr);
+
+                for (var j = 0; j < response[i].labelTimeFrameGroups.length; j++) {
+                    var tr1 = document.createElement('tr');
+                    console.log('test');
+                    var td1 = document.createElement('td');
+                    td1.textContent = response[i].labelTimeFrameGroups[j].className;
+                    var td2 = document.createElement('td');
+                    td2.textContent = formatDateAndTime(response[i].labelTimeFrameGroups[j].startDate);
+                    var td3 = document.createElement('td');
+                    td3.textContent = formatDateAndTime(response[i].labelTimeFrameGroups[j].endDate);
+                    tr1.appendChild(td1);
+                    tr1.appendChild(td2);
+                    tr1.appendChild(td3);
+                    tbody.appendChild(tr1);
+                }
+            }
+            table.appendChild(tbody);
+            timeFramesDiv.appendChild(table);
+        });
+}
+
+function formatDate(date) {
+
+    const d = new Date(date)
+    const ye = new Intl.DateTimeFormat('en', { year: 'numeric' }).format(d);
+    const mo = new Intl.DateTimeFormat('en', { month: 'short' }).format(d);
+    const da = new Intl.DateTimeFormat('en', { day: '2-digit' }).format(d);
+
+    return `${da}-${mo}-${ye}`;
+}
+
+function formatDateAndTime(date) {
+
+    const d = new Date(date)
+
+    return `${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()} ${(d.getUTCHours() < 10 ? '0' : '') + d.getUTCHours()}:${(d.getMinutes() < 10 ? '0' : '') + d.getMinutes()}:${(d.getSeconds() < 10 ? '0' : '') + d.getSeconds()}`;
+}
 //function imageSelector(elementid) {
 //    console.log(elementid);
 //    var el = $(elementid);

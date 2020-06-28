@@ -6,19 +6,21 @@ namespace ML.Domain.DataModels
 {
     public class InMemoryImageData
     {
-        public InMemoryImageData(byte[] image, string label, string imageFileName, string imageFilePath, string imageDirPath)
+        public InMemoryImageData(byte[] image, string label, string imageFileName, string imageFilePath, string imageDirPath, DateTime imageDateTime)
         {
             Image = image;
             Label = label;
             ImageFileName = imageFileName;
             ImageFilePath = imageFilePath;
             ImageDirPath = imageDirPath;
+            ImageDateTime = imageDateTime;
         }
 
-        public readonly byte[] Image;
-        public readonly string Label;
-        public readonly string ImageFileName;
-        public readonly string ImageFilePath;
-        public readonly string ImageDirPath;
+        public byte[] Image { get; set; }
+        public string Label { get; set; }
+        public string ImageFileName { get; set; }
+        public string ImageFilePath { get; set; }
+        public string ImageDirPath { get; set; }
+        public DateTime ImageDateTime { get; set; }
     }
 }

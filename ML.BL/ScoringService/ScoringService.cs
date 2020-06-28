@@ -41,7 +41,7 @@ namespace ML.BL
 
             if (Images == null || Images.Count() == 0) { _logger.LogInformation("ScoringService - Score - No Images provided"); return; }
 
-            Guid GroupGuid = Guid.NewGuid();
+            Guid GroupGuid = evaluationGroup.EvaluationGroupGuid; //Guid.NewGuid();
 
             List<Task<ParallelLoopResult>> listOfTasks = new List<Task<ParallelLoopResult>>();
 
