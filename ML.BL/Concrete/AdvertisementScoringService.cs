@@ -38,29 +38,6 @@ namespace ML.BL.Concrete
             _labelClassService = labelClassService;
         }
 
-        public ImagePrediction CheckImageAndDoLabelScoring(InMemoryImageData image)
-        {
-            ImagePrediction prediction = _predictionEnginePool.Predict(image);
-
-            MemoryStream ms = new MemoryStream(image.Image);
-            Image i = Image.FromStream(ms);
-
-            string destOutputPath = Path.Combine(_systemSettingService.CUSTOMLOGOMODEL_TrainedImagesFolderPath, prediction.PredictedLabel);
-            Directory.CreateDirectory(destOutputPath);
-
-            string imageFilePath = Path.Combine(destOutputPath, image.ImageFileName);
-
-            i.Save(imageFilePath);
-
-            InMemoryImageData newImage =
-                new InMemoryImageData(image.Image, prediction.PredictedLabel, image.ImageFileName, imageFilePath, destOutputPath, image.ImageDateTime);
-
-            //do separate logic for saving
-            SaveImageScoringInfo(newImage, prediction, Guid.NewGuid(), true);
-
-            return prediction;
-        }
-
         public override void Score()
         {
             _logger.LogInformation("AdvertisementScoringService - Score started");
@@ -72,8 +49,35 @@ namespace ML.BL.Concrete
 
         public override void DoLabelScoring(Guid GroupGuid, InMemoryImageData image)
         {
-            ImagePrediction prediction = _predictionEnginePool.Predict(image);
+            ImagePrediction prediction = PredictImage(image);
             SaveImageScoringInfo(image, prediction, GroupGuid);
+        }
+
+        public ImagePrediction PredictImage(InMemoryImageData image)
+        {
+            ImagePrediction prediction = _predictionEnginePool.Predict(image);
+            return prediction;
+        }
+
+        public void SaveImageScoringInfo(InMemoryImageData image, ImagePrediction prediction, Guid GroupGuid, bool isCustom = false)
+        {
+            Advertisement ad = new Advertisement
+            {
+                GroupGuid = GroupGuid,
+                ImageId = image.ImageFileName,
+                OriginalImageFilePath = image.ImageFilePath,
+                OriginalImageDirPath = image.ImageDirPath,
+                ImageFilePath = image.ImageFilePath,
+                ImageDirPath = image.ImageDirPath,
+                ImageDateTime = image.ImageDateTime,
+                PredictedLabel = prediction.PredictedLabel,
+                MaxProbability = prediction.Score.Max(),
+                IsCustom = isCustom,
+                ModifiedBy = "AdvertisementScoringService",
+                ModifiedOn = DateTime.UtcNow
+            };
+
+            _advertisementService.InsertOne(ad);
         }
 
         public override void GroupByLabel(Guid GroupGuid)
@@ -145,41 +149,6 @@ namespace ML.BL.Concrete
                 .FirstOrDefault();
 
             return labelClassAfterEdit.DirectoryPath;
-        }
-
-        //private void InsertAdvertisementClass(string destOutputPath, string label, Guid GroupGuid)
-        //{
-        //    if (!_labelClassService.GetAll().Any(t => t.ClassName == label))
-        //        _labelClassService.InsertOne(new LabelClass() 
-        //        {
-        //            ClassName = label,
-        //            CategoryType = "Default", //make this enum in future
-        //            ImagesGroupGuid = GroupGuid,
-        //            DirectoryPath = destOutputPath,
-        //            ModifiedBy = "GroupByLabel - InsertAdvertisementClass",
-        //            ModifiedOn = DateTime.UtcNow
-        //        });
-        //}
-
-        private void SaveImageScoringInfo(InMemoryImageData image, ImagePrediction prediction, Guid GroupGuid, bool isCustom = false)
-        {
-            Advertisement ad = new Advertisement
-            {
-                GroupGuid = GroupGuid,
-                ImageId = image.ImageFileName,
-                OriginalImageFilePath = image.ImageFilePath,
-                OriginalImageDirPath = image.ImageDirPath,
-                ImageFilePath = image.ImageFilePath,
-                ImageDirPath = image.ImageDirPath,
-                ImageDateTime = image.ImageDateTime,
-                PredictedLabel = prediction.PredictedLabel,
-                MaxProbability = prediction.Score.Max(),
-                IsCustom = isCustom,
-                ModifiedBy = "AdvertisementScoringService",
-                ModifiedOn = DateTime.UtcNow
-            };
-
-            _advertisementService.InsertOne(ad);
         }
     }
 }

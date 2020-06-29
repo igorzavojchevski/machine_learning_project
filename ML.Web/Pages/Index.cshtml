@@ -88,11 +88,11 @@
 <br />
 
 @*<select multiple="multiple" class="image-picker">
-    <option style="height:200px; width:200px;" data-img-src="images_to_train/NLB_Nova_Reklama_b899275d-87ba-44e1-816e-474cbf08818f/11.jpeg" value="42"> NEKOJ TEST </option>
-    <option data-img-src="test.png" data-img-alt="Page 2" value="2">  Page 2  </option>
-    <option data-img-src="test.png" data-img-alt="Page 3" value="3">  Page 3  </option>
-    <option data-img-src="tst.png" data-img-alt="Page 4" data-img-class="last" value="4"> Page 4 </option>
-</select>*@
+        <option style="height:200px; width:200px;" data-img-src="images_to_train/NLB_Nova_Reklama_b899275d-87ba-44e1-816e-474cbf08818f/11.jpeg" value="42"> NEKOJ TEST </option>
+        <option data-img-src="test.png" data-img-alt="Page 2" value="2">  Page 2  </option>
+        <option data-img-src="test.png" data-img-alt="Page 3" value="3">  Page 3  </option>
+        <option data-img-src="tst.png" data-img-alt="Page 4" data-img-class="last" value="4"> Page 4 </option>
+    </select>*@
 
 <div id="tab">
     <button id="btnAdvertisements" class="tablinks btn-light" onclick="openTab(event, 'Labels')">Advertisements</button>
@@ -113,31 +113,35 @@
 </div>
 
 <div id="ImageCheck" class="tabcontent">
-    <h3>File Check</h3>
+    <h3>Image Check</h3>
 
     <br />
 
     <div>
-        <form method="post" enctype="multipart/form-data">
+        <form id="formCheckLabel" method="post" enctype="multipart/form-data">
             <div>
-                <p>Upload a file image using this form to predict its label:</p>
+                <p>Select a file image using this form to predict its label:</p>
             </div>
             <div>
                 <input type="file" id="imgFile" name="imageFile" onchange="preview_image(event)">
                 <img id="theImage" src="#" alt="image" />
-            </div>
-            <div>
                 <br />
-                <input type="submit" value="Upload & Check File" name="submit">
+                <br />
+                <input type="submit" value="Check Label" name="submit">
             </div>
+            <br />
 
+            <div id="divPrediction" class="col-md-10"></div>
+            <div id="divProbability" class="col-md-10"></div>
+            <div id="divSaveCustomImage" class="col-md-10"></div>
+            <br />
+            <input id="buttonSaveCustomImage" hidden type="button" onclick="SaveCustomImage()" value="Save Custom Image" name="buttonSaveCustomImage">
         </form>
     </div>
     <br />
     <br />
 
-    <div id="divPrediction" class="col-md-10"></div>
-    <div id="divProbability" class="col-md-10"></div>
+
 </div>
 
 <br />

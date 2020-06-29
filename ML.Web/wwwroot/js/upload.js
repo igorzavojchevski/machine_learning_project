@@ -3,7 +3,7 @@
 //const serviceUrl = 'http://localhost:5000/api/ImageClassification/classifyImage';
 
 const serviceUrl = 'api/ImageClassification';
-const form = document.querySelector('form');
+const form = document.querySelector('#formCheckLabel');
 var allLabels = new Array();
 
 $(document).ready(function () {
@@ -35,6 +35,9 @@ function openTab(evt, tabName) {
     }
     else if (tabName === "LabelTimeFrames") {
         getLabelTimeFrames();
+    }
+    else if (tabName === "ImageCheck") {
+        loadImageCheck();
     }
 
     var i, tabcontent, tablinks;
@@ -402,12 +405,28 @@ function getLabelTimeFrames() {
             table.style.width = '100%';
             table.setAttribute('border', '1');
             var tbody = document.createElement('tbody');
+            var th1 = document.createElement('th');
+            var th2 = document.createElement('th');
+            var th3 = document.createElement('th');
+            var th4 = document.createElement('th');
+            th1.textContent = "Advertisement Name";
+            th1.style.textAlign = "center";
+            th2.textContent = "Start Time";
+            th2.style.textAlign = "center";
+            th3.textContent = "End Time";
+            th3.style.textAlign = "center";
+            th4.textContent = "Custom Evaluation";
+            th4.style.textAlign = "center";
+            tbody.appendChild(th1);
+            tbody.appendChild(th2);
+            tbody.appendChild(th3);
+            tbody.appendChild(th4);
 
             for (var i = 0; i < response.length; i++) {
 
                 var tr = document.createElement('tr');
                 var td = document.createElement('td');
-                td.setAttribute("colspan", "3");
+                td.setAttribute("colspan", "4");
                 var date = new Date(response[i].dateTimeKey);
                 td.textContent = formatDate(date);
                 td.style.textAlign = "center";
@@ -423,9 +442,12 @@ function getLabelTimeFrames() {
                     td2.textContent = formatDateAndTime(response[i].labelTimeFrameGroups[j].startDate);
                     var td3 = document.createElement('td');
                     td3.textContent = formatDateAndTime(response[i].labelTimeFrameGroups[j].endDate);
+                    var td4 = document.createElement('td');
+                    td4.textContent = response[i].labelTimeFrameGroups[j].isCustom ? "true" : "";
                     tr1.appendChild(td1);
                     tr1.appendChild(td2);
                     tr1.appendChild(td3);
+                    tr1.appendChild(td4);
                     tbody.appendChild(tr1);
                 }
             }
@@ -450,24 +472,6 @@ function formatDateAndTime(date) {
 
     return `${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()} ${(d.getUTCHours() < 10 ? '0' : '') + d.getUTCHours()}:${(d.getMinutes() < 10 ? '0' : '') + d.getMinutes()}:${(d.getSeconds() < 10 ? '0' : '') + d.getSeconds()}`;
 }
-//function imageSelector(elementid) {
-//    console.log(elementid);
-//    var el = $(elementid);
-//    console.log(el);
-//    el.addEventListener('click', imageClicked);
-//}
-
-//function imageClicked(e) {
-//    if ($(e.target.id).find(".selected").length > 0) {
-//        console.log('test123123');
-//        //advertisementImagesDiv_DIVForMove.hidden = false;
-//        //advertisementImagesDiv_DIVForMove_
-//    }
-//    else {
-//        console.log('nekojtest');
-//        //advertisementImagesDiv_DIVForMove.hidden = true;
-//    }
-//}
 
 function preview_image_reader(id, src) {
     var reader = new FileReader();
@@ -487,8 +491,42 @@ function preview_image(event) {
     reader.readAsDataURL(event.target.files[0]);
 }
 
+function SaveCustomImage() {
+
+    const files = document.querySelector('[type=file]').files;
+    var element = document.getElementById("select_divSaveCustomImage");
+    var selectedValue = element.options[element.selectedIndex].value;
+
+    var formDataObj = new FormData();
+    formDataObj.append('labelID', selectedValue);
+    formDataObj.append('image', files[0]);
+
+    fetch(serviceUrl + "/SaveCustomImage",
+        {
+            method: 'POST',
+            body: formDataObj
+        })
+        .then(function (response) {
+            console.log(response);
+            if (response.status === 200) {
+                $('#btnImageCheck').trigger('click');
+            }
+        });
+}
+
+function loadImageCheck() {
+    $('#imgFile').val("");
+    $('#theImage').attr('src', "");
+    $('#divPrediction').html("");
+    $('#divProbability').html("");
+    $('#divSaveCustomImage').html("");
+    $("#buttonSaveCustomImage").attr("hidden", true);
+}
+
 form.addEventListener('submit', e => {
     e.preventDefault();
+
+    console.log('TestSubmit');
 
     const files = document.querySelector('[type=file]').files;
     const formData = new FormData();
@@ -502,7 +540,7 @@ form.addEventListener('submit', e => {
     //    formData.append('imageFile[]', file);
     //}
 
-    fetch(serviceUrl + "/classifyimagecustom", {
+    fetch(serviceUrl + "/PredictCustomImage", {
         method: 'POST',
         body: formData
     }).then((resp) => resp.json())
@@ -514,45 +552,37 @@ form.addEventListener('submit', e => {
             document.getElementById('divPrediction').innerHTML = "Predicted label is: " + response.predictedLabel;
             document.getElementById('divProbability').innerHTML = "Probability is: " + (response.maxScore * 100).toFixed(3) + "%";
 
-            loadImages();
+            document.getElementById('buttonSaveCustomImage').hidden = false;
+
+            jQuery.ajax({
+                url: serviceUrl + "/GetAllAvailableLabels",
+                success: function (allLabelResponse) {
+                    console.log(allLabelResponse);
+                    allLabels = new Array();
+                    allLabels = allLabelResponse;
+                },
+                async: false
+            });
+
+            var span_divSaveCustomImage = document.createElement("span");
+            span_divSaveCustomImage.textContent = "Save to: ";
+            var select_divSaveCustomImage = document.createElement("select");
+            select_divSaveCustomImage.setAttribute("id", "select_divSaveCustomImage");
+            for (var li = 0; li < allLabels.length; li++) {
+                var opt = document.createElement("option");
+                opt.value = allLabels[li].id;
+                opt.textContent = allLabels[li].className;
+
+                if (allLabels[li].className === response.predictedLabel) opt.selected = true;
+
+                select_divSaveCustomImage.appendChild(opt);
+
+            }
+
+            var divSaveCustomImage = document.getElementById("divSaveCustomImage");
+            divSaveCustomImage.appendChild(span_divSaveCustomImage)
+            divSaveCustomImage.appendChild(select_divSaveCustomImage);
 
             return response;
         });
-
-
-    //fetch(serviceUrl + "/classifyImage", {
-    //    method: 'POST',
-    //    body: formData
-    //}).then((resp) => resp.json())
-    //    .then(function (response) {
-    //        console.info('Response', response);
-    //        console.log('Response', response);
-
-    //        console.log('Prediction is: ' + 'Label: ' + response.predictedLabel + ' Probability: ' + response.probability);
-
-    //        document.getElementById('divPrediction').innerHTML = "Predicted label is: " + response.predictedLabel;
-    //        document.getElementById('divProbability').innerHTML = "Probability is: " + (response.maxProbability * 100).toFixed(3) + "%";
-
-    //        //document.getElementById('listProbabilities').innerHTML = response.d;
-    //        //console.log(typeof(response.allProbabilities));
-
-    //        //if (response.allProbabilities !== undefined) {
-    //        //    var allProbabilityArray = Object.keys(response.allProbabilities).map(function (key) {
-    //        //        return [String(key), response.allProbabilities[key]];
-    //        //    });
-
-    //        //    for (var i = 0; i < allProbabilityArray.length; i++) {
-    //        //        var table = document.getElementById("tableProbabilities");
-    //        //        var row = table.insertRow(0);
-    //        //        var cell1 = row.insertCell(0);
-    //        //        var cell2 = row.insertCell(1);
-    //        //        cell1.innerHTML = allProbabilityArray[i][0];
-    //        //        cell2.innerHTML = ((allProbabilityArray[i][1] * 100).toFixed(3) + "%");
-    //        //    }
-    //        //}
-
-    //        return response;
-    //    });
-
-
 });

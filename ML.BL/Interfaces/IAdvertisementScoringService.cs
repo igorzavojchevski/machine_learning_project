@@ -9,7 +9,7 @@ namespace ML.BL.Interfaces
     public interface IAdvertisementScoringService
     {
         void Score();
-
-        ImagePrediction CheckImageAndDoLabelScoring(InMemoryImageData image);
+        ImagePrediction PredictImage(InMemoryImageData image);
+        void SaveImageScoringInfo(InMemoryImageData image, ImagePrediction prediction, Guid GroupGuid, bool isCustom = false);
     }
 }

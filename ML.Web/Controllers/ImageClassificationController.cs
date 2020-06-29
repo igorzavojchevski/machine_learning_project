@@ -16,6 +16,7 @@ using ML.Domain.DataModels.CustomLogoTrainingModel;
 using MongoDB.Bson;
 using System;
 using ML.Web.Models;
+using System.Drawing;
 
 namespace ML.Web.Controllers
 {
@@ -50,92 +51,6 @@ namespace ML.Web.Controllers
         }
         #endregion
 
-
-        [HttpPost]
-        [ProducesResponseType(200)]
-        [ProducesResponseType(400)]
-        [Route("classifyimage")]
-        public async Task<IActionResult> ClassifyImage(IFormFile imageFile)
-        {
-            if (imageFile.Length == 0) return BadRequest();
-
-            //Image to stream.
-            var imageMemoryStream = new MemoryStream();
-            await imageFile.CopyToAsync(imageMemoryStream);
-
-            // Check that image is valid.
-            byte[] imageData = imageMemoryStream.ToArray();
-            if (!imageData.IsValidImage()) return StatusCode(StatusCodes.Status415UnsupportedMediaType);
-
-            ////Memory stream to Image (System.Drawing).
-            //Image image = Image.FromStream(imageMemoryStream);
-
-            //// Convert to Bitmap.
-            //Bitmap bitmapImage = (Bitmap)image;
-
-            _logger.LogInformation("Start processing image...");
-
-            // Measure execution time.
-            System.Diagnostics.Stopwatch watch = System.Diagnostics.Stopwatch.StartNew();
-
-            // Set the specific image data into the ImageInputData type used in the DataView.
-            //ImageInputData imageInputData = new ImageInputData { Image = bitmapImage };
-
-            InMemoryImageData imageInputData = new InMemoryImageData(imageData, null, null, null, null, DateTime.UtcNow);
-
-            // Predict code for provided image.
-            ImagePredictedLabelWithProbability imageLabelPredictions = _labelScoringService.CheckImageForLabelScoring(imageInputData);
-
-            // Stop measuring time.
-            watch.Stop();
-            var elapsedMs = watch.ElapsedMilliseconds;
-            _logger.LogInformation($"Image processed in {elapsedMs} miliseconds");
-
-
-            //// Predict the image's label (The one with highest probability).
-            //ImagePredictedLabelWithProbability imageLabelsPrediction = FindLabelsWithProbability(imageLabelPredictions, imageInputData);
-
-            return Ok(imageLabelPredictions);
-        }
-
-
-
-        [HttpPost]
-        [ProducesResponseType(200)]
-        [ProducesResponseType(400)]
-        [Route("ClassifyImageCustom")]
-        public async Task<IActionResult> ClassifyImageCustom(IFormFile imageFile)
-        {
-            if (imageFile.Length == 0) return BadRequest();
-
-            //Image to stream.
-            var imageMemoryStream = new MemoryStream();
-            await imageFile.CopyToAsync(imageMemoryStream);
-
-            // Check that image is valid.
-            byte[] imageData = imageMemoryStream.ToArray();
-            if (!imageData.IsValidImage()) return StatusCode(StatusCodes.Status415UnsupportedMediaType);
-
-            _logger.LogInformation("Start processing image...");
-
-            // Measure execution time.
-            System.Diagnostics.Stopwatch watch = System.Diagnostics.Stopwatch.StartNew();
-
-            InMemoryImageData imageInputData = new InMemoryImageData(imageData, null, imageFile.FileName, null, null, DateTime.UtcNow);
-
-            // Predict code for provided image.
-            ImagePrediction imagePrediction = _advertisementScoringService.CheckImageAndDoLabelScoring(imageInputData);
-            ImagePredictionReturnModel returnModel = new ImagePredictionReturnModel() { MaxScore = imagePrediction.Score.Max(), PredictedLabel = imagePrediction.PredictedLabel };
-
-            // Stop measuring time.
-            watch.Stop();
-            var elapsedMs = watch.ElapsedMilliseconds;
-            _logger.LogInformation($"Image processed in {elapsedMs} miliseconds");
-
-            return Ok(returnModel);
-        }
-
-
         [Route("GetAllImages")]
         public IActionResult GetAllImages()
         {
@@ -165,7 +80,6 @@ namespace ML.Web.Controllers
             return Ok(groupList);
         }
 
-
         [Route("GetAllAvailableLabels")]
         public IActionResult GetAllAvailableLabels()
         {
@@ -184,7 +98,6 @@ namespace ML.Web.Controllers
 
             return Ok(labelClasses);
         }
-
 
         [Route("GetLabelTimeFrames")]
         public IActionResult GetLabelTimeFrames()
@@ -217,44 +130,10 @@ namespace ML.Web.Controllers
                         Id = t.Id.ToString(),
                         ClassName = item.ClassName,
                         GroupGuid = t.GroupGuid,
-                        ImageDateTime = t.ImageDateTime
+                        ImageDateTime = t.ImageDateTime,
+                        IsCustom = t.IsCustom
                     })
                     .ToList();
-
-                //List<LabelTimeFramesReturnModel>
-                //    test =
-                //    list
-                //    .GroupBy(t => t.GroupGuid)
-                //    .Select(g =>
-                //    new LabelTimeFramesReturnModel
-                //    {
-                //        ClassName = item.ClassName,
-                //        GroupGuid = g.Key,
-                //        StartDate = g.Min(t => t.ImageDateTime),
-                //        EndDate = g.Max(t => t.ImageDateTime),
-                //    })
-                //    .ToList();
-
-                //List<LabelTimeFramesReturnModel>
-                //    test =
-                //    list
-                //    .GroupBy(t => t.ImageDateTime.Date)
-                //    .Select(g =>
-                //    new LabelTimeFramesReturnModel
-                //    {
-                //        DateTimeKey = g.Key,
-                //        LabelTimeFrameGroups = 
-                //            g.GroupBy(t => t.GroupGuid)
-                //            .Select(gsg =>
-                //            new LabelTimeFrameGroup
-                //            {
-                //                ClassName = item.ClassName,
-                //                GroupGuid = gsg.Key,
-                //                StartDate = gsg.Min(t => t.ImageDateTime),
-                //                EndDate = gsg.Max(t => t.ImageDateTime),
-                //            }).ToList()
-                //    })
-                //    .ToList();
 
                 listOfAdvertisementsForTimeFrames.AddRange(listByClassName);
             }
@@ -276,21 +155,13 @@ namespace ML.Web.Controllers
                                 GroupGuid = gsg.Key.GroupGuid,
                                 StartDate = gsg.Min(t => t.ImageDateTime),
                                 EndDate = gsg.Max(t => t.ImageDateTime),
+                                IsCustom = gsg.Select(t => t.IsCustom).First()
                             }).ToList()
                     })
                     .ToList();
 
-            //groupList
-            //    .GroupBy(t => t.DateTimeKey)
-            //    .Select(t => new LabelTimeFramesReturnModel
-            //    {
-            //        DateTimeKey = t.Key,
-            //        LabelTimeFrameGroups = t.Select(g=>g.LabelTimeFrameGroups.Select(gs=>gs)).ToList()
-            //    });
-
             return Ok(groupList);
         }
-
 
 
         [HttpPost]
@@ -343,8 +214,6 @@ namespace ML.Web.Controllers
             return Ok();
         }
 
-
-
         [HttpPost]
         [Route("MoveImages")]
         [ProducesResponseType(200)]
@@ -389,7 +258,128 @@ namespace ML.Web.Controllers
             return Ok("Success");
         }
 
+        [HttpPost]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(400)]
+        [Route("classifyimage")]
+        public async Task<IActionResult> ClassifyImage(IFormFile imageFile)
+        {
+            if (imageFile.Length == 0) return BadRequest();
 
+            //Image to stream.
+            var imageMemoryStream = new MemoryStream();
+            await imageFile.CopyToAsync(imageMemoryStream);
+
+            // Check that image is valid.
+            byte[] imageData = imageMemoryStream.ToArray();
+            if (!imageData.IsValidImage()) return StatusCode(StatusCodes.Status415UnsupportedMediaType);
+
+            ////Memory stream to Image (System.Drawing).
+            //Image image = Image.FromStream(imageMemoryStream);
+
+            //// Convert to Bitmap.
+            //Bitmap bitmapImage = (Bitmap)image;
+
+            _logger.LogInformation("Start processing image...");
+
+            // Measure execution time.
+            System.Diagnostics.Stopwatch watch = System.Diagnostics.Stopwatch.StartNew();
+
+            // Set the specific image data into the ImageInputData type used in the DataView.
+            //ImageInputData imageInputData = new ImageInputData { Image = bitmapImage };
+
+            InMemoryImageData imageInputData = new InMemoryImageData(imageData, null, null, null, null, DateTime.UtcNow);
+
+            // Predict code for provided image.
+            ImagePredictedLabelWithProbability imageLabelPredictions = _labelScoringService.CheckImageForLabelScoring(imageInputData);
+
+            // Stop measuring time.
+            watch.Stop();
+            var elapsedMs = watch.ElapsedMilliseconds;
+            _logger.LogInformation($"Image processed in {elapsedMs} miliseconds");
+
+
+            //// Predict the image's label (The one with highest probability).
+            //ImagePredictedLabelWithProbability imageLabelsPrediction = FindLabelsWithProbability(imageLabelPredictions, imageInputData);
+
+            return Ok(imageLabelPredictions);
+        }
+
+        [HttpPost]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(400)]
+        [Route("PredictCustomImage")]
+        public async Task<IActionResult> PredictCustomImage(IFormFile imageFile)
+        {
+            if (imageFile.Length == 0) return BadRequest();
+
+            //Image to stream.
+            var imageMemoryStream = new MemoryStream();
+            await imageFile.CopyToAsync(imageMemoryStream);
+
+            // Check that image is valid.
+            byte[] imageData = imageMemoryStream.ToArray();
+            if (!imageData.IsValidImage()) return StatusCode(StatusCodes.Status415UnsupportedMediaType);
+
+            _logger.LogTrace("PredictCustomImage - Start processing image...");
+
+            // Measure execution time.
+            System.Diagnostics.Stopwatch watch = System.Diagnostics.Stopwatch.StartNew();
+
+            InMemoryImageData imageInputData = new InMemoryImageData(imageData, null, imageFile.FileName, null, null, DateTime.UtcNow);
+            // Predict code for provided image.
+            ImagePrediction imagePrediction = _advertisementScoringService.PredictImage(imageInputData);
+            ImagePredictionReturnModel returnModel = new ImagePredictionReturnModel() { MaxScore = imagePrediction.Score.Max(), PredictedLabel = imagePrediction.PredictedLabel };
+
+            // Stop measuring time.
+            watch.Stop();
+            var elapsedMs = watch.ElapsedMilliseconds;
+            _logger.LogTrace($"PredictCustomImage - Image processed in {elapsedMs} miliseconds");
+
+            return Ok(returnModel);
+        }
+
+        [HttpPost]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(400)]
+        [Route("SaveCustomImage")]
+        public IActionResult SaveCustomImage([FromForm]CustomImageDetails imageDetails)
+        {
+            _logger.LogInformation("ClassifyCustomImage - Start");
+            if (imageDetails == null || imageDetails.ImageFile == null || imageDetails.ImageFile.Length == 0) return BadRequest();
+
+            //Image to stream.
+            var imageMemoryStream = new MemoryStream();
+            imageDetails.ImageFile.CopyToAsync(imageMemoryStream);
+
+            // Check that image is valid.
+            byte[] imageData = imageMemoryStream.ToArray();
+            if (!imageData.IsValidImage()) return StatusCode(StatusCodes.Status415UnsupportedMediaType);
+
+            MemoryStream ms = new MemoryStream(imageData);
+            Image i = Image.FromStream(ms);
+
+            ObjectId.TryParse(imageDetails.LabelID, out ObjectId labelID);
+            LabelClass labelClass = _labelClassService.GetAll().Where(t => t.Id == labelID).FirstOrDefault();
+            if (labelClass == null) return NotFound();
+
+            string destOutputPath = Path.Combine(_systemSettingService.CUSTOMLOGOMODEL_TrainedImagesFolderPath, labelClass.ClassName);
+            Directory.CreateDirectory(destOutputPath);
+
+            string imageFilePath = Path.Combine(destOutputPath, imageDetails.ImageFile.FileName);
+            i.Save(imageFilePath);
+
+            InMemoryImageData imageInputData = 
+                new InMemoryImageData(imageData, labelClass.ClassName, imageDetails.ImageFile.FileName, imageFilePath, destOutputPath, DateTime.UtcNow);
+
+            ImagePrediction prediction = new ImagePrediction() { PredictedLabel = labelClass.ClassName, Score = new float[] { 1f } }; //100% score due to custom eval.
+            
+            _advertisementScoringService.SaveImageScoringInfo(imageInputData, prediction, Guid.NewGuid(), true);
+
+            _logger.LogInformation("ClassifyCustomImage - Finished");
+
+            return Ok();
+        }
 
 
         #region Test Methods

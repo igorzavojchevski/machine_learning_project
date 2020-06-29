@@ -11,5 +11,6 @@ namespace ML.Web.Models
         public string ClassName { get; set; }
         public Guid GroupGuid { get; set; }
         public DateTime ImageDateTime { get; set; }
+        public bool IsCustom { get; set; }
     }
 }
