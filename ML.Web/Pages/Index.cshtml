@@ -3,107 +3,39 @@
 @{
     ViewData["Title"] = "Home page";
 }
-<style>
-
-    #headerDiv {
-        color: black;
-        text-align: center;
-    }
-
-    #theImage {
-        max-width: 300px;
-    }
-
-    /* Style the tab */
-    #tab {
-        overflow: hidden;
-        border: 1px solid #ccc;
-        background-color: #f1f1f1;
-    }
-
-        /* Style the buttons inside the tab */
-        #tab button {
-            background-color: inherit;
-            float: left;
-            border: none;
-            outline: none;
-            cursor: pointer;
-            padding: 14px 16px;
-            transition: 0.3s;
-            font-size: 17px;
-        }
-
-            /* Change background color of buttons on hover */
-            #tab button:hover {
-                background-color: #ddd;
-            }
-
-            /* Create an active/current tablink class */
-            #tab button.active {
-                background-color: #ccc;
-            }
-
-    /* Style the tab content */
-    .tabcontent {
-        display: none;
-        padding: 6px 12px;
-        border: 1px solid #ccc;
-        border-top: none;
-    }
-
-    .collapsible {
-        background-color: #777;
-        color: white;
-        cursor: pointer;
-        padding: 18px;
-        width: 100%;
-        border: none;
-        text-align: left;
-        outline: none;
-        font-size: 15px;
-    }
-
-        .active, .collapsible:hover {
-            background-color: #555;
-        }
-
-    .content {
-        padding: 0 18px;
-        display: none;
-        overflow: hidden;
-        background-color: #f1f1f1;
-    }
-
-    .noselect {
-        -webkit-touch-callout: none; /* iOS Safari */
-        -webkit-user-select: none; /* Safari */
-        -moz-user-select: none; /* Old versions of Firefox */
-        -ms-user-select: none; /* Internet Explorer/Edge */
-        user-select: none; /* Non-prefixed version, currently
-                                  supported by Chrome, Edge, Opera and Firefox */
-    }
-</style>
 
 <div id="headerDiv"><h2>ML Advertisement Recognition Platform</h2></div>
 <br />
-
-@*<select multiple="multiple" class="image-picker">
-        <option style="height:200px; width:200px;" data-img-src="images_to_train/NLB_Nova_Reklama_b899275d-87ba-44e1-816e-474cbf08818f/11.jpeg" value="42"> NEKOJ TEST </option>
-        <option data-img-src="test.png" data-img-alt="Page 2" value="2">  Page 2  </option>
-        <option data-img-src="test.png" data-img-alt="Page 3" value="3">  Page 3  </option>
-        <option data-img-src="tst.png" data-img-alt="Page 4" data-img-class="last" value="4"> Page 4 </option>
-    </select>*@
 
 <div id="tab">
     <button id="btnAdvertisements" class="tablinks btn-light" onclick="openTab(event, 'Labels')">Advertisements</button>
     <button id="btnAdvertisementTimeFrames" class="tablinks btn-light" onclick="openTab(event, 'LabelTimeFrames')">Time Frames</button>
     <button id="btnImageCheck" class="tablinks btn-light" onclick="openTab(event, 'ImageCheck')">Image Check</button>
+    <button id="btnManageCustomAdvertisements" class="tablinks btn-light" onclick="openTab(event, 'ManageCustomAds')">Manage Custom Ads</button>
 </div>
 
 <div id="Labels" class="tabcontent">
-    <h3>Advertisements (Labels)</h3>
+    <div id="divAdvertisementsHeader">
+        <h3 id="advertismentsHeader">Advertisements (Labels)</h3>
+        <button id="buttonCreateAdvertisement" onclick="OpenCreateAdvertisementModal()">Create Label</button>
+    </div>
     <br />
     <div id="divAdvertisements" class="col-md-12"></div>
+    <div id="divAdvertisementsPagination" class="col-md-12" style="margin-bottom:3%">
+        <div id="labelPagination" class="float-right"></div>
+    </div>
+
+    <div id="createAdvertisementModal" class="advertisement-modal">
+        <div class="advertisement-modal-content">
+            <span id="createAdvertisementModalXSpan" class="closeX" onclick="CloseCreateAdvertisementModal()">&times;</span>
+            <div class="advertisement-modal-content-form">
+                <span>New Advertisement Name:</span>
+                <input id="newAdvertisementInput" type="text" name="newAdvertisementInput" />
+                <button id="buttonCreateNewAdvertisement" onclick="CreateNewAdvertisement()" class="btn btn-success">Create</button>
+            </div>
+        </div>
+
+    </div>
 </div>
 
 <div id="LabelTimeFrames" class="tabcontent">
@@ -144,6 +76,12 @@
 
 </div>
 
+<div id="ManageCustomAds" class="tabcontent">
+    <h3>Manage Custom Ads</h3>
+    <br />
+    <div id="manageCustomAdsDiv" class="col-md-12"></div>
+</div>
+
 <br />
 <br />
 <br />
@@ -151,6 +89,7 @@
 @section Scripts {
     <script src="~/js/upload.js"></script>
     <script src="~/js/image-picker.min.js"></script>
+    <script src="~/js/jquery.simplePagination.js"></script>
 
     <script type="text/javascript">
         window.onload = function hello() {

@@ -52,29 +52,32 @@ namespace ML.Web.Controllers
         #endregion
 
         [Route("GetAllImages")]
-        public IActionResult GetAllImages()
+        public IActionResult GetAllImages(int size, int page)
         {
             var lastTrainingVersion = _labelClassService.GetAll().Max(t => t.TrainingVersion);
 
-            var lastTrainingVersionLabels = _labelClassService
+            List<LabelClass> lastTrainingVersionLabels = _labelClassService
                 .GetAll()
                 .Where(t => t.TrainingVersion == lastTrainingVersion)
                 .ToList();
 
-            var labelClasses = lastTrainingVersionLabels
+            List<LabelClass> labelClasses = lastTrainingVersionLabels
                 .GroupBy(r => r.FirstVersionId)
                 .Select(g => g.OrderByDescending(r => r.Version).First())
                 .Select(t => new LabelClass { Id = t.Id, ClassName = t.ClassName, FirstVersionId = t.FirstVersionId })
                 .ToList();
 
-            List<AdvertisementImagesGroupModel> groupList = new List<AdvertisementImagesGroupModel>();
+            AdvertisementGroupModel groupList = new AdvertisementGroupModel();
+            groupList.Count = labelClasses.Count;
 
-            foreach (var item in labelClasses)
+            List<LabelClass> labelClassesFinal = labelClasses.OrderBy(t => t.ClassName).Skip(size * (page - 1)).Take(size).ToList();
+
+            foreach (var item in labelClassesFinal)
             {
                 string id = item.Id.ToString();
                 List<string> classNamesFromAllVersions = _labelClassService.GetAll().Where(t => t.FirstVersionId == item.FirstVersionId).Select(t => t.ClassName).ToList();
                 List<Advertisement> list = _advertisementService.GetAll().Where(t => classNamesFromAllVersions.Contains(t.PredictedLabel)).OrderByDescending(t => t.ModifiedOn).ToList();
-                groupList.Add(new AdvertisementImagesGroupModel() { ID = id, PredictedLabel = item.ClassName, Advertisements = list.Select(t => t.ToAdvertisementModel()).ToList() });
+                groupList.Group.Add(new AdvertisementImagesGroupModel() { ID = id, PredictedLabel = item.ClassName, Advertisements = list.Select(t => t.ToAdvertisementModel()).ToList() });
             }
 
             return Ok(groupList);
@@ -163,6 +166,45 @@ namespace ML.Web.Controllers
             return Ok(groupList);
         }
 
+        [HttpPost]
+        [Route("CreateLabelClassName")]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(404)]
+        public IActionResult CreateLabelClassName(LabelItem labelItem)
+        {
+            if (labelItem == null) return BadRequest();
+
+            if (string.IsNullOrWhiteSpace(labelItem.Name)) return BadRequest();
+
+            Guid newGuid = Guid.NewGuid();
+
+            LabelClass newLabelClass = new LabelClass()
+            {
+                ClassName = string.Format("{0}_{1}", labelItem.Name, newGuid),
+                CategoryType = "Default", //make this enum in future
+                ImagesGroupGuid = newGuid,
+                DirectoryPath = Path.Combine(_systemSettingService.CUSTOMLOGOMODEL_TrainedImagesFolderPath, labelItem.Name, newGuid.ToString()),
+                TrainingVersion = _labelClassService.GetAll().Any() ? _labelClassService.GetAll().Max(t => t.TrainingVersion) : 0,
+                Version = 1,
+                IsChanged = false,
+                IsCustom = true,
+                ModifiedBy = "CreateLabelClassName - by admin",
+                ModifiedOn = DateTime.UtcNow
+            };
+
+            _labelClassService.InsertOne(newLabelClass);
+
+            newLabelClass.FirstVersionId = newLabelClass.Id;
+            newLabelClass.ModifiedOn = DateTime.UtcNow;
+            _labelClassService.Update(newLabelClass);
+
+            Directory.CreateDirectory(newLabelClass.DirectoryPath);
+
+            return Ok();
+        }
+
+        
 
         [HttpPost]
         [Route("EditLabelClassName")]

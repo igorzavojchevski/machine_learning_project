@@ -14,5 +14,6 @@ namespace ML.Domain.Entities.Mongo
         public int TrainingVersion { get; set; } //Training version - after each training, this is incremented, does not depend on label name change
         public ObjectId FirstVersionId { get; set; }
         public bool IsChanged { get; set; }
+        public bool IsCustom { get; set; }
     }
 }

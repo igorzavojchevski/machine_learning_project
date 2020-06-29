@@ -5,6 +5,7 @@
 const serviceUrl = 'api/ImageClassification';
 const form = document.querySelector('#formCheckLabel');
 var allLabels = new Array();
+var paginationInitialized = false;
 
 $(document).ready(function () {
     $('#btnAdvertisements').trigger('click');
@@ -31,13 +32,14 @@ function openTab(evt, tabName) {
     $("#timeFramesDiv").html("");
 
     if (tabName === "Labels") {
-        loadImages();
+        paginationInitialized = false;
+        LoadLabelsAndImages(4, 1);
     }
     else if (tabName === "LabelTimeFrames") {
-        getLabelTimeFrames();
+        GetLabelTimeFrames();
     }
     else if (tabName === "ImageCheck") {
-        loadImageCheck();
+        LoadImageCheck();
     }
 
     var i, tabcontent, tablinks;
@@ -149,221 +151,200 @@ function saveMoveImages(advertisementid) {
         });
 }
 
-function loadImages() {
-    fetch(serviceUrl + "/GetAllImages") // Call the fetch function passing the url of the API as a parameter
+function LoadLabelsAndImages(size, page) {
+    fetch(serviceUrl + "/GetAllImages?size=" + size + "&page=" + page,
+        {
+            headers: { 'Accept': 'application/json', 'Content-Type': 'application/x-www-form-urlencoded' }
+        }) // Call the fetch function passing the url of the API as a parameter
         .then((resp) => resp.json())
         .then(function (response) {
 
-            //fetch(serviceUrl + "/GetAllAvailableLabels") // Call the fetch function passing the url of the API as a parameter
-            //    .then((labelResp) => labelResp.json())
-            //    .then(function (labelResponse)
-            //    {
-            //        console.log(labelResponse);
-            //        allLabels = new Array();
-            //        allLabels.concat(labelResponse);
-            //    });
-
-            jQuery.ajax({
-                url: serviceUrl + "/GetAllAvailableLabels",
-                success: function (allLabelResponse) {
-                    console.log(allLabelResponse);
-                    allLabels = new Array();
-                    allLabels = allLabelResponse;
-                },
-                async: false
-            });
+            GetAllLabels();
 
             console.log(response);
 
-            for (var i = 0; i < response.length; i++) {
-                var divAdvertisements = document.getElementById("divAdvertisements");
-                var x = document.createElement("div");
-                var id = "advertisement" + i;
-                x.setAttribute("id", id);
-
-                var lastIndex = response[i].predictedLabel.lastIndexOf('_');
-                var firstPartOfLabelName = response[i].predictedLabel.substr(0, lastIndex);
-                var guidpartofLabelName = response[i].predictedLabel.substr(lastIndex, response[i].predictedLabel.Length);
-
-                var labelHeading = document.createElement("h4");
-                var labelHeadingElementID = "firstPartOfLabelName" + i;
-                labelHeading.setAttribute("id", labelHeadingElementID);
-                labelHeading.textContent = firstPartOfLabelName;
-                labelHeading.setAttribute('data-init', firstPartOfLabelName);
-                labelHeading.setAttribute('data-guid', guidpartofLabelName);
-                labelHeading.style.classList = "noselect";
-                labelHeading.style.display = "inline-block";
-                labelHeading.setAttribute("onblur", "labelCancelEdit('" + labelHeading.id + "')");
-                labelHeading.addEventListener('keydown', labelCancelEditEsc);
-
-                var span = document.createElement("span");
-                span.textContent = guidpartofLabelName;
-                span.style.classList = "noselect";
-                span.style.display = "inline-block";
-                span.style.fontSize = "1.5rem";
-                span.style.marginTop = "0.32rem";
-                //span.style.marginBottom = "1rem";
-                span.style.fontFamily = "inherit";
-                span.style.fontWeight = "500";
-                span.style.lineHeight = "1.2";
-                span.style.color = "inherit";
-
-                var spanForCount = document.createElement("span");
-                spanForCount.textContent = "(" + response[i].advertisements.length + " items)";
-                spanForCount.style.classList = "noselect";
-                spanForCount.style.display = "block";
-                spanForCount.style.fontSize = "1rem";
-                spanForCount.style.fontFamily = "inherit";
-                spanForCount.style.fontWeight = "500";
-                spanForCount.style.lineHeight = "1.2";
-                spanForCount.style.color = "inherit";
-
-
-                var editbutton = document.createElement("button");
-                editbutton.setAttribute("id", "buttonEditForLabel_" + labelHeadingElementID);
-                editbutton.textContent = "Edit";
-                editbutton.classList = "btn";
-                editbutton.style.position = "absolute";
-                editbutton.style.marginLeft = "2%";
-                editbutton.setAttribute("onClick", "labelEdit('" + labelHeadingElementID + "')");
-
-                var saveButton = document.createElement("button");
-                saveButton.setAttribute("id", "buttonSaveForLabel_" + labelHeadingElementID);
-                saveButton.textContent = "Save";
-                saveButton.classList = "btn btn-success";
-                saveButton.hidden = true;
-                saveButton.style.position = "absolute";
-                saveButton.style.marginLeft = "2%";
-                saveButton.setAttribute("onMouseDown", "labelSaveEdit('" + labelHeadingElementID + "','" + response[i].id + "')");
-
-                var cancelButton = document.createElement("button");
-                cancelButton.setAttribute("id", "buttonCancelForLabel_" + labelHeadingElementID);
-                cancelButton.textContent = "Cancel";
-                cancelButton.classList = "btn btn-danger";
-                cancelButton.hidden = true;
-                cancelButton.style.position = "absolute";
-                cancelButton.style.marginLeft = "8%";
-                cancelButton.setAttribute("onMouseDown", "labelCancelEdit('" + labelHeadingElementID + "')");
-
-                var labelHeadingAndEdit = document.createElement("div");
-                labelHeadingAndEdit.setAttribute("id", "labelHeadingAndEdit_" + labelHeadingElementID);
-                labelHeadingAndEdit.classList = "collapsible";
-                labelHeadingAndEdit.setAttribute("onClick", "collapse('" + labelHeadingElementID + "')");
-                labelHeadingAndEdit.style.cursor = "pointer";
-                labelHeadingAndEdit.style.marginBottom = "0.6%";
-
-                labelHeadingAndEdit.appendChild(labelHeading);
-                labelHeadingAndEdit.appendChild(span);
-                labelHeadingAndEdit.appendChild(editbutton);
-                labelHeadingAndEdit.appendChild(saveButton);
-                labelHeadingAndEdit.appendChild(cancelButton);
-                labelHeadingAndEdit.appendChild(spanForCount);
-                x.appendChild(labelHeadingAndEdit);
-                divAdvertisements.appendChild(x);
-
-                //var coll = document.getElementsByClassName("collapsible");
-                //var i;
-
-                //for (i = 0; i < coll.length; i++) {
-                //    coll[i].addEventListener("click", function () {
-                //        this.classList.toggle("active");
-                //        var content = this.nextElementSibling;
-                //        if (content.style.display === "block") {
-                //            content.style.display = "none";
-                //        } else {
-                //            content.style.display = "block";
-                //        }
-                //    });
-                //}
-                var advertisementImagesDiv = document.createElement("div");
-                advertisementImagesDiv.setAttribute("id", "advertisementImagesDiv_" + id);
-                advertisementImagesDiv.style.display = "none";
-
-
-                var advertisementImagesDiv_DIVForMove = document.createElement("div");
-                advertisementImagesDiv_DIVForMove.setAttribute("id", "advertisementImagesDiv_DIVForMove_" + id);
-                advertisementImagesDiv_DIVForMove.style.marginBottom = "1%";
-                var span_advertisementImagesDiv_SELECTForMove = document.createElement("span");
-                span_advertisementImagesDiv_SELECTForMove.textContent = "Move to: ";
-                var advertisementImagesDiv_SELECTForMove = document.createElement("select");
-                advertisementImagesDiv_SELECTForMove.setAttribute("id", "advertisementImagesDiv_SELECTForMove_" + id);
-                for (var li = 0; li < allLabels.length; li++) {
-                    if (allLabels[li].className === response[i].predictedLabel) continue;
-
-                    var opt = document.createElement("option");
-                    opt.value = allLabels[li].id;
-                    opt.textContent = allLabels[li].className;
-
-                    advertisementImagesDiv_SELECTForMove.appendChild(opt);
-                }
-                advertisementImagesDiv_DIVForMove.hidden = true;
-
-                var advertisementImagesSaveButton = document.createElement("button");
-                advertisementImagesSaveButton.setAttribute("id", "buttonSaveForMoveImages_" + id);
-                advertisementImagesSaveButton.classList = "btn btn-success";
-                advertisementImagesSaveButton.textContent = "Save";
-                advertisementImagesSaveButton.style.fontSize = "12px";
-                advertisementImagesSaveButton.style.position = "absolute";
-                advertisementImagesSaveButton.style.marginLeft = "2%";
-                advertisementImagesSaveButton.style.marginTop = "-0.25%";
-                advertisementImagesSaveButton.setAttribute("onMouseDown", "saveMoveImages('" + id + "')");
-
-                advertisementImagesDiv_DIVForMove.appendChild(span_advertisementImagesDiv_SELECTForMove)
-                advertisementImagesDiv_DIVForMove.appendChild(advertisementImagesDiv_SELECTForMove);
-                advertisementImagesDiv_DIVForMove.appendChild(advertisementImagesSaveButton);
-                advertisementImagesDiv.appendChild(advertisementImagesDiv_DIVForMove);
-
-
-                var advertisementImagesDivSelect = document.createElement("select");
-                advertisementImagesDivSelect.setAttribute("id", "advertisementImagesDivSelect_" + id);
-                advertisementImagesDivSelect.classList = "image-picker";
-                advertisementImagesDivSelect.setAttribute("multiple", "multiple");
-
-                for (var j = 0; j < response[i].advertisements.length; j++) {
-
-                    var imageId = response[i].advertisements[j].imageId;
-                    var selectOption = document.createElement("option");
-                    selectOption.setAttribute("data-img-src", "images_to_train/" + response[i].predictedLabel + "/" + imageId);
-                    selectOption.setAttribute("data-img-label", (response[i].advertisements[j].maxProbability * 100).toFixed(3) + "%");
-                    selectOption.setAttribute("value", response[i].advertisements[j].id);
-                    advertisementImagesDivSelect.append(selectOption);
-
-                    //data - img - src='http://www.example.com/image.jpg'
-                    //data - img - label='Just an image!'
-                    //data - img - class="custom-class"
-                    //data - img - alt="Just an image alt!"
-                    //value = '42'
-
-                    //var imageId = response[i].advertisements[j].imageId;
-                    //var figure = document.createElement("figure");
-                    //figure.style.height = "180px";
-                    //figure.style.width = "180px";
-                    //figure.style.display = "inline-block";
-                    //figure.style.marginRight = "2%";
-                    //figure.style.marginLeft = "2%";
-
-                    //var img = document.createElement("img");
-                    //var idimg = "advertisementImageIMG" + j;
-                    //img.setAttribute("id", idimg);
-                    //img.setAttribute("src", "images_to_train/" + response[i].predictedLabel + "/" + imageId);
-                    //img.setAttribute("height", "180px");
-                    //img.setAttribute("width", "180px");
-
-                    //figure.appendChild(img);
-
-                    //var figCaption = document.createElement("figcaption");
-                    //figCaption.textContent = (response[i].advertisements[j].maxProbability * 100).toFixed(3) + "%";
-                    //figCaption.style.textAlign = "center";
-                    //figure.appendChild(figCaption);
-
-                    //advertisementImagesDiv.appendChild(figure);
-                }
-                advertisementImagesDiv.appendChild(advertisementImagesDivSelect);
-                x.appendChild(advertisementImagesDiv);
-            }
+            CreateLabelAndImageSection(response);
 
             InitializeImagePicker();
+            InitializePaginationPlaceholder(response);
         })
+}
+
+function GetAllLabels() {
+    jQuery.ajax({
+        url: serviceUrl + "/GetAllAvailableLabels",
+        success: function (allLabelResponse) {
+            console.log(allLabelResponse);
+            allLabels = new Array();
+            allLabels = allLabelResponse;
+        },
+        async: false
+    });
+}
+
+function CreateLabelAndImageSection(groupList) {
+    var divAdvertisements = document.getElementById("divAdvertisements");
+    divAdvertisements.innerHTML = "";
+
+    for (var i = 0; i < groupList.group.length; i++) {
+        var x = document.createElement("div");
+        var id = "advertisement" + i;
+        x.setAttribute("id", id);
+
+        var lastIndex = groupList.group[i].predictedLabel.lastIndexOf('_');
+        var firstPartOfLabelName = groupList.group[i].predictedLabel;
+        var guidpartofLabelName = "";
+        if (lastIndex !== -1) {
+            firstPartOfLabelName = groupList.group[i].predictedLabel.substr(0, lastIndex);
+            guidpartofLabelName = groupList.group[i].predictedLabel.substr(lastIndex, groupList.group[i].predictedLabel.Length);
+        }
+
+        var labelHeading = document.createElement("h4");
+        var labelHeadingElementID = "firstPartOfLabelName" + i;
+        labelHeading.setAttribute("id", labelHeadingElementID);
+        labelHeading.textContent = firstPartOfLabelName;
+        labelHeading.setAttribute('data-init', firstPartOfLabelName);
+        labelHeading.setAttribute('data-guid', guidpartofLabelName);
+        labelHeading.style.classList = "noselect";
+        labelHeading.style.display = "inline-block";
+        labelHeading.setAttribute("onblur", "labelCancelEdit('" + labelHeading.id + "')");
+        labelHeading.addEventListener('keydown', labelCancelEditEsc);
+
+        var span = document.createElement("span");
+        span.textContent = guidpartofLabelName;
+        span.style.classList = "noselect";
+        span.style.display = "inline-block";
+        span.style.fontSize = "1.5rem";
+        span.style.marginTop = "0.32rem";
+        //span.style.marginBottom = "1rem";
+        span.style.fontFamily = "inherit";
+        span.style.fontWeight = "500";
+        span.style.lineHeight = "1.2";
+        span.style.color = "inherit";
+
+        var spanForCount = document.createElement("span");
+        spanForCount.textContent = "(" + groupList.group[i].advertisements.length + " items)";
+        spanForCount.style.classList = "noselect";
+        spanForCount.style.display = "block";
+        spanForCount.style.fontSize = "1rem";
+        spanForCount.style.fontFamily = "inherit";
+        spanForCount.style.fontWeight = "500";
+        spanForCount.style.lineHeight = "1.2";
+        spanForCount.style.color = "inherit";
+
+
+        var editbutton = document.createElement("button");
+        editbutton.setAttribute("id", "buttonEditForLabel_" + labelHeadingElementID);
+        editbutton.textContent = "Edit";
+        editbutton.classList = "btn";
+        editbutton.style.position = "absolute";
+        editbutton.style.marginLeft = "2%";
+        editbutton.setAttribute("onClick", "labelEdit('" + labelHeadingElementID + "')");
+
+        var saveButton = document.createElement("button");
+        saveButton.setAttribute("id", "buttonSaveForLabel_" + labelHeadingElementID);
+        saveButton.textContent = "Save";
+        saveButton.classList = "btn btn-success";
+        saveButton.hidden = true;
+        saveButton.style.position = "absolute";
+        saveButton.style.marginLeft = "2%";
+        saveButton.setAttribute("onMouseDown", "labelSaveEdit('" + labelHeadingElementID + "','" + groupList.group[i].id + "')");
+
+        var cancelButton = document.createElement("button");
+        cancelButton.setAttribute("id", "buttonCancelForLabel_" + labelHeadingElementID);
+        cancelButton.textContent = "Cancel";
+        cancelButton.classList = "btn btn-danger";
+        cancelButton.hidden = true;
+        cancelButton.style.position = "absolute";
+        cancelButton.style.marginLeft = "8%";
+        cancelButton.setAttribute("onMouseDown", "labelCancelEdit('" + labelHeadingElementID + "')");
+
+        var labelHeadingAndEdit = document.createElement("div");
+        labelHeadingAndEdit.setAttribute("id", "labelHeadingAndEdit_" + labelHeadingElementID);
+        labelHeadingAndEdit.classList = "collapsible";
+        labelHeadingAndEdit.setAttribute("onClick", "collapse('" + labelHeadingElementID + "')");
+        labelHeadingAndEdit.style.cursor = "pointer";
+        labelHeadingAndEdit.style.marginBottom = "0.6%";
+
+        labelHeadingAndEdit.appendChild(labelHeading);
+        labelHeadingAndEdit.appendChild(span);
+        labelHeadingAndEdit.appendChild(editbutton);
+        labelHeadingAndEdit.appendChild(saveButton);
+        labelHeadingAndEdit.appendChild(cancelButton);
+        labelHeadingAndEdit.appendChild(spanForCount);
+        x.appendChild(labelHeadingAndEdit);
+        divAdvertisements.appendChild(x);
+
+        var advertisementImagesDiv = document.createElement("div");
+        advertisementImagesDiv.setAttribute("id", "advertisementImagesDiv_" + id);
+        advertisementImagesDiv.style.display = "none";
+
+        var advertisementImagesDiv_DIVForMove = document.createElement("div");
+        advertisementImagesDiv_DIVForMove.setAttribute("id", "advertisementImagesDiv_DIVForMove_" + id);
+        advertisementImagesDiv_DIVForMove.style.marginBottom = "1%";
+        var span_advertisementImagesDiv_SELECTForMove = document.createElement("span");
+        span_advertisementImagesDiv_SELECTForMove.textContent = "Move to: ";
+        var advertisementImagesDiv_SELECTForMove = document.createElement("select");
+        advertisementImagesDiv_SELECTForMove.setAttribute("id", "advertisementImagesDiv_SELECTForMove_" + id);
+        for (var li = 0; li < allLabels.length; li++) {
+            if (allLabels[li].className === groupList.group[i].predictedLabel) continue;
+
+            var opt = document.createElement("option");
+            opt.value = allLabels[li].id;
+            opt.textContent = allLabels[li].className;
+
+            advertisementImagesDiv_SELECTForMove.appendChild(opt);
+        }
+        advertisementImagesDiv_DIVForMove.hidden = true;
+
+        var advertisementImagesSaveButton = document.createElement("button");
+        advertisementImagesSaveButton.setAttribute("id", "buttonSaveForMoveImages_" + id);
+        advertisementImagesSaveButton.classList = "btn btn-success";
+        advertisementImagesSaveButton.textContent = "Save";
+        advertisementImagesSaveButton.style.fontSize = "12px";
+        advertisementImagesSaveButton.style.position = "absolute";
+        advertisementImagesSaveButton.style.marginLeft = "2%";
+        advertisementImagesSaveButton.style.marginTop = "-0.25%";
+        advertisementImagesSaveButton.setAttribute("onMouseDown", "saveMoveImages('" + id + "')");
+
+        advertisementImagesDiv_DIVForMove.appendChild(span_advertisementImagesDiv_SELECTForMove)
+        advertisementImagesDiv_DIVForMove.appendChild(advertisementImagesDiv_SELECTForMove);
+        advertisementImagesDiv_DIVForMove.appendChild(advertisementImagesSaveButton);
+        advertisementImagesDiv.appendChild(advertisementImagesDiv_DIVForMove);
+
+
+        var advertisementImagesDivSelect = document.createElement("select");
+        advertisementImagesDivSelect.setAttribute("id", "advertisementImagesDivSelect_" + id);
+        advertisementImagesDivSelect.classList = "image-picker";
+        advertisementImagesDivSelect.setAttribute("multiple", "multiple");
+
+        for (var j = 0; j < groupList.group[i].advertisements.length; j++) {
+
+            var imageId = groupList.group[i].advertisements[j].imageId;
+            var selectOption = document.createElement("option");
+            selectOption.setAttribute("data-img-src", "images_to_train/" + groupList.group[i].predictedLabel + "/" + imageId);
+            selectOption.setAttribute("data-img-label", (groupList.group[i].advertisements[j].maxProbability * 100).toFixed(3) + "%");
+            selectOption.setAttribute("value", groupList.group[i].advertisements[j].id);
+            advertisementImagesDivSelect.append(selectOption);
+        }
+        advertisementImagesDiv.appendChild(advertisementImagesDivSelect);
+        x.appendChild(advertisementImagesDiv);
+    }
+}
+
+function InitializePaginationPlaceholder(responseImages) {
+    if (paginationInitialized) return;
+
+    var size = 3;
+    $("#labelPagination").pagination({
+        items: responseImages.count,
+        itemsOnPage: size,
+        cssStyle: 'light-theme',
+        onPageClick: function (e) {
+            LoadLabelsAndImages(size, e);
+        }
+    });
+    paginationInitialized = true;
 }
 
 function InitializeImagePicker() {
@@ -390,7 +371,7 @@ function InitializeImagePicker() {
     });
 }
 
-function getLabelTimeFrames() {
+function GetLabelTimeFrames() {
 
     fetch(serviceUrl + "/GetLabelTimeFrames",
         {
@@ -428,7 +409,7 @@ function getLabelTimeFrames() {
                 var td = document.createElement('td');
                 td.setAttribute("colspan", "4");
                 var date = new Date(response[i].dateTimeKey);
-                td.textContent = formatDate(date);
+                td.textContent = FormatDate(date);
                 td.style.textAlign = "center";
                 tr.appendChild(td);
                 tbody.appendChild(tr);
@@ -439,9 +420,9 @@ function getLabelTimeFrames() {
                     var td1 = document.createElement('td');
                     td1.textContent = response[i].labelTimeFrameGroups[j].className;
                     var td2 = document.createElement('td');
-                    td2.textContent = formatDateAndTime(response[i].labelTimeFrameGroups[j].startDate);
+                    td2.textContent = FormatDateAndTime(response[i].labelTimeFrameGroups[j].startDate);
                     var td3 = document.createElement('td');
-                    td3.textContent = formatDateAndTime(response[i].labelTimeFrameGroups[j].endDate);
+                    td3.textContent = FormatDateAndTime(response[i].labelTimeFrameGroups[j].endDate);
                     var td4 = document.createElement('td');
                     td4.textContent = response[i].labelTimeFrameGroups[j].isCustom ? "true" : "";
                     tr1.appendChild(td1);
@@ -456,7 +437,7 @@ function getLabelTimeFrames() {
         });
 }
 
-function formatDate(date) {
+function FormatDate(date) {
 
     const d = new Date(date)
     const ye = new Intl.DateTimeFormat('en', { year: 'numeric' }).format(d);
@@ -466,20 +447,11 @@ function formatDate(date) {
     return `${da}-${mo}-${ye}`;
 }
 
-function formatDateAndTime(date) {
+function FormatDateAndTime(date) {
 
     const d = new Date(date)
 
     return `${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()} ${(d.getUTCHours() < 10 ? '0' : '') + d.getUTCHours()}:${(d.getMinutes() < 10 ? '0' : '') + d.getMinutes()}:${(d.getSeconds() < 10 ? '0' : '') + d.getSeconds()}`;
-}
-
-function preview_image_reader(id, src) {
-    var reader = new FileReader();
-    reader.onload = function () {
-        var output = document.getElementById(id);
-        output.src = reader.result;
-    }
-    reader.readAsDataURL(src);
 }
 
 function preview_image(event) {
@@ -514,7 +486,7 @@ function SaveCustomImage() {
         });
 }
 
-function loadImageCheck() {
+function LoadImageCheck() {
     $('#imgFile').val("");
     $('#theImage').attr('src', "");
     $('#divPrediction').html("");
@@ -523,6 +495,46 @@ function loadImageCheck() {
     $("#buttonSaveCustomImage").attr("hidden", true);
 }
 
+function OpenCreateAdvertisementModal() {
+
+    var modal = document.getElementById("createAdvertisementModal");
+
+    modal.style.display = "block";
+
+    window.onclick = function (event) {
+        if (event.target == modal) {
+            modal.style.display = "none";
+        }
+    }
+}
+
+function CloseCreateAdvertisementModal() {
+    var modal = document.getElementById("createAdvertisementModal");
+
+    modal.style.display = "none";
+}
+
+function CreateNewAdvertisement() {
+    var inputValue = document.getElementById("newAdvertisementInput").value;
+
+    var newAdvertisementClass = {
+        name: inputValue
+    };
+
+    console.log(newAdvertisementClass);
+
+    fetch(serviceUrl + "/CreateLabelClassName",
+        {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(newAdvertisementClass),
+        })
+        .then(function (response) {
+            console.log(response);
+            CloseCreateAdvertisementModal();
+            $('#btnAdvertisements').trigger('click');
+        });
+}
 form.addEventListener('submit', e => {
     e.preventDefault();
 
