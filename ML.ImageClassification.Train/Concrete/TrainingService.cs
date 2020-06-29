@@ -175,7 +175,7 @@ namespace ML.ImageClassification.Train.Concrete
                 _logger.LogInformation($"Model saved to: {modelOutputFilePath}");
                 //
 
-                InsertLabelsAsAdvertisementClasses(imagesToReTrainFolderPath);
+                InsertLabelsAsCommercialClasses(imagesToReTrainFolderPath);
 
                 // 9. Try a single prediction simulating an end-user app
                 TrySinglePrediction(_mlContext, trainedModel);
@@ -189,7 +189,7 @@ namespace ML.ImageClassification.Train.Concrete
             }
         }
 
-        private void InsertLabelsAsAdvertisementClasses(string imagesToReTrainFolderPath)
+        private void InsertLabelsAsCommercialClasses(string imagesToReTrainFolderPath)
         {
             string[] subDirsAsLabels = Directory.GetDirectories(imagesToReTrainFolderPath).Select(Path.GetFileName).ToArray();
             int lastTrainingVersion = _labelClassService.GetAll().Any() ? _labelClassService.GetAll().Max(t => t.TrainingVersion) : 0;
@@ -222,7 +222,7 @@ namespace ML.ImageClassification.Train.Concrete
                 TrainingVersion = newTrainingVersion,
                 Version = labelClass == null ? 1 : labelClass.Version + 1,
                 IsChanged = false,
-                ModifiedBy = "InsertLabelsAsAdvertisementClasses",
+                ModifiedBy = "InsertLabelsAsCommercialClasses",
                 ModifiedOn = DateTime.UtcNow
             };
 

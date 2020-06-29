@@ -6,7 +6,7 @@ using System.Text;
 
 namespace ML.BL.Interfaces
 {
-    public interface IAdvertisementScoringService
+    public interface ICommercialScoringService
     {
         void Score();
         ImagePrediction PredictImage(InMemoryImageData image);

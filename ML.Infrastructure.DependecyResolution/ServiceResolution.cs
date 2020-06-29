@@ -45,7 +45,7 @@ namespace ML.Infrastructure.DependecyResolution
         private static IServiceCollection AddRepositories(this IServiceCollection services)
         {
             services.AddTransient<ISystemSettingRepository, SystemSettingRepository>();
-            services.AddTransient<IAdvertisementRepository, AdvertisementRepository>();
+            services.AddTransient<ICommercialRepository, CommercialRepository>();
             services.AddTransient<ILabelClassRepository, LabelClassRepository>();
             services.AddTransient<IEvaluationGroupRepository, EvaluationGroupRepository>();
             return services;
@@ -55,7 +55,7 @@ namespace ML.Infrastructure.DependecyResolution
         private static IServiceCollection AddServices(this IServiceCollection services)
         {
             services.AddTransient<ISystemSettingService, SystemSettingService>();
-            services.AddTransient<IAdvertisementService, AdvertisementService>();
+            services.AddTransient<ICommercialService, CommercialService>();
             services.AddTransient<ILabelClassService, LabelClassService>();
             services.AddTransient<IEvaluationGroupService, EvaluationGroupService>();
 
@@ -73,7 +73,7 @@ namespace ML.Infrastructure.DependecyResolution
             services.AddTransient<ITrainingService, TrainingService>();
 
             services.AddTransient<IScoringServiceFactory, ScoringServiceFactory>();
-            services.AddTransient<IAdvertisementScoringService, AdvertisementScoringService>();
+            services.AddTransient<ICommercialScoringService, CommercialScoringService>();
             services.AddTransient<ILabelScoringService, LabelScoringService>();
          
             return services;

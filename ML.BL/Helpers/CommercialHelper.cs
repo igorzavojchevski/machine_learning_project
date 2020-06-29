@@ -6,13 +6,13 @@ using System.Text;
 
 namespace ML.BL.Helpers
 {
-    public static class AdvertisementHelper
+    public static class CommercialHelper
     {
-        public static AdvertisementModel ToAdvertisementModel(this Advertisement entity)
+        public static CommercialModel ToCommercialModel(this Commercial entity)
         {
-            if (entity == null) return new AdvertisementModel();
+            if (entity == null) return new CommercialModel();
 
-            return new AdvertisementModel()
+            return new CommercialModel()
             {
                 Id = entity.Id.ToString(),
                 PredictedLabel = entity.PredictedLabel,

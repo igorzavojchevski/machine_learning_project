@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace ML.Web.Models
 {
-    public class AdvertisementTimeFrameModel
+    public class CommercialTimeFrameModel
     {
         public string Id { get; set; }
         public string ClassName { get; set; }

@@ -27,8 +27,8 @@ namespace ML.Web.Controllers
         #region Props
         private readonly ILogger<ImageClassificationController> _logger;
         private readonly ILabelScoringService _labelScoringService;
-        private readonly IAdvertisementService _advertisementService;
-        private readonly IAdvertisementScoringService _advertisementScoringService;
+        private readonly ICommercialService _commercialService;
+        private readonly ICommercialScoringService _commercialScoringService;
         private readonly ILabelClassService _labelClassService;
         private readonly ISystemSettingService _systemSettingService;
         #endregion
@@ -37,15 +37,15 @@ namespace ML.Web.Controllers
         public ImageClassificationController(
             ILogger<ImageClassificationController> logger,
             ILabelScoringService labelScoringService,
-            IAdvertisementService advertisementService,
-            IAdvertisementScoringService advertisementScoringService,
+            ICommercialService commercialService,
+            ICommercialScoringService commercialScoringService,
             ILabelClassService labelClassService,
             ISystemSettingService systemSettingService)
         {
             _logger = logger;
             _labelScoringService = labelScoringService;
-            _advertisementService = advertisementService;
-            _advertisementScoringService = advertisementScoringService;
+            _commercialService = commercialService;
+            _commercialScoringService = commercialScoringService;
             _labelClassService = labelClassService;
             _systemSettingService = systemSettingService;
         }
@@ -67,7 +67,7 @@ namespace ML.Web.Controllers
                 .Select(t => new LabelClass { Id = t.Id, ClassName = t.ClassName, FirstVersionId = t.FirstVersionId })
                 .ToList();
 
-            AdvertisementGroupModel groupList = new AdvertisementGroupModel();
+            CommercialGroupModel groupList = new CommercialGroupModel();
             groupList.Count = labelClasses.Count;
 
             List<LabelClass> labelClassesFinal = labelClasses.OrderBy(t => t.ClassName).Skip(size * (page - 1)).Take(size).ToList();
@@ -76,8 +76,8 @@ namespace ML.Web.Controllers
             {
                 string id = item.Id.ToString();
                 List<string> classNamesFromAllVersions = _labelClassService.GetAll().Where(t => t.FirstVersionId == item.FirstVersionId).Select(t => t.ClassName).ToList();
-                List<Advertisement> list = _advertisementService.GetAll().Where(t => classNamesFromAllVersions.Contains(t.PredictedLabel)).OrderByDescending(t => t.ModifiedOn).ToList();
-                groupList.Group.Add(new AdvertisementImagesGroupModel() { ID = id, PredictedLabel = item.ClassName, Advertisements = list.Select(t => t.ToAdvertisementModel()).ToList() });
+                List<Commercial> list = _commercialService.GetAll().Where(t => classNamesFromAllVersions.Contains(t.PredictedLabel)).OrderByDescending(t => t.ModifiedOn).ToList();
+                groupList.Group.Add(new CommercialImagesGroupModel() { ID = id, PredictedLabel = item.ClassName, Commercials = list.Select(t => t.ToCommercialModel()).ToList() });
             }
 
             return Ok(groupList);
@@ -118,17 +118,17 @@ namespace ML.Web.Controllers
                 .Select(t => new LabelClass { Id = t.Id, ClassName = t.ClassName, FirstVersionId = t.FirstVersionId })
                 .ToList();
 
-            List<AdvertisementTimeFrameModel> listOfAdvertisementsForTimeFrames = new List<AdvertisementTimeFrameModel>();
+            List<CommercialTimeFrameModel> listOfCommercialsForTimeFrames = new List<CommercialTimeFrameModel>();
 
             foreach (var item in labelClasses)
             {
                 List<string> classNamesFromAllVersions = _labelClassService.GetAll().Where(t => t.FirstVersionId == item.FirstVersionId).Select(t => t.ClassName).ToList();
-                List<AdvertisementTimeFrameModel> listByClassName =
-                    _advertisementService
+                List<CommercialTimeFrameModel> listByClassName =
+                    _commercialService
                     .GetAll()
                     .Where(t => classNamesFromAllVersions.Contains(t.PredictedLabel))
                     .OrderByDescending(t => t.ModifiedOn)
-                    .Select(t => new AdvertisementTimeFrameModel
+                    .Select(t => new CommercialTimeFrameModel
                     {
                         Id = t.Id.ToString(),
                         ClassName = item.ClassName,
@@ -138,12 +138,12 @@ namespace ML.Web.Controllers
                     })
                     .ToList();
 
-                listOfAdvertisementsForTimeFrames.AddRange(listByClassName);
+                listOfCommercialsForTimeFrames.AddRange(listByClassName);
             }
 
             List<LabelTimeFramesReturnModel>
                     groupList =
-                    listOfAdvertisementsForTimeFrames
+                    listOfCommercialsForTimeFrames
                     .GroupBy(t => t.ImageDateTime.Date)
                     .Select(g =>
                     new LabelTimeFramesReturnModel
@@ -276,7 +276,7 @@ namespace ML.Web.Controllers
 
             List<ObjectId> ImagesToMove = moveImagesModel.ImagesIds.Select(t => ObjectId.Parse(t)).ToList();
 
-            List<Advertisement> allAdsFromList = _advertisementService.GetAll().Where(t => ImagesToMove.Contains(t.Id)).ToList();
+            List<Commercial> allAdsFromList = _commercialService.GetAll().Where(t => ImagesToMove.Contains(t.Id)).ToList();
             if (allAdsFromList == null || allAdsFromList.Count == 0) return NotFound();
 
             string newDirPath = Path.Combine(_systemSettingService.CUSTOMLOGOMODEL_TrainedImagesFolderPath, newLabel.ClassName);
@@ -294,7 +294,7 @@ namespace ML.Web.Controllers
                 t.ModifiedBy = "MoveImages";
                 t.ModifiedOn = DateTime.UtcNow;
 
-                _advertisementService.Update(t);
+                _commercialService.Update(t);
             });
 
             return Ok("Success");
@@ -370,7 +370,7 @@ namespace ML.Web.Controllers
 
             InMemoryImageData imageInputData = new InMemoryImageData(imageData, null, imageFile.FileName, null, null, DateTime.UtcNow);
             // Predict code for provided image.
-            ImagePrediction imagePrediction = _advertisementScoringService.PredictImage(imageInputData);
+            ImagePrediction imagePrediction = _commercialScoringService.PredictImage(imageInputData);
             ImagePredictionReturnModel returnModel = new ImagePredictionReturnModel() { MaxScore = imagePrediction.Score.Max(), PredictedLabel = imagePrediction.PredictedLabel };
 
             // Stop measuring time.
@@ -416,7 +416,7 @@ namespace ML.Web.Controllers
 
             ImagePrediction prediction = new ImagePrediction() { PredictedLabel = labelClass.ClassName, Score = new float[] { 1f } }; //100% score due to custom eval.
             
-            _advertisementScoringService.SaveImageScoringInfo(imageInputData, prediction, Guid.NewGuid(), true);
+            _commercialScoringService.SaveImageScoringInfo(imageInputData, prediction, Guid.NewGuid(), true);
 
             _logger.LogInformation("ClassifyCustomImage - Finished");
 

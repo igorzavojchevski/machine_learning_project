@@ -116,7 +116,7 @@ body {
     font-size: 15px;
 }
 
-#divAdvertisements .active, #divAdvertisements .collapsible:hover {
+#divCommercials .active, #divCommercials .collapsible:hover {
     background-color: #555;
 }
 
@@ -136,18 +136,18 @@ body {
                                   supported by Chrome, Edge, Opera and Firefox */
 }
 
-#buttonCreateAdvertisement {
+#buttonCreateCommercial {
     display: inline-block;
     float: right;
     margin-top: 0.2%;
 }
 
-#advertismentsHeader {
+#commercialsHeader {
     display: inline-block;
 }
 
 /* The Modal (background) */
-.advertisement-modal {
+.commercial-modal {
     display: none; /* Hidden by default */
     position: fixed; /* Stay in place */
     z-index: 1; /* Sit on top */
@@ -162,7 +162,7 @@ body {
 }
 
 /* Modal Content */
-.advertisement-modal-content {
+.commercial-modal-content {
     background-color: #fefefe;
     margin: auto;
     padding: 20px;
@@ -170,15 +170,15 @@ body {
     width: 80%;
 }
 
-.advertisement-modal-content-form{
+.commercial-modal-content-form{
     padding: 5%;
     text-align:center;
 }
-#buttonCreateNewAdvertisement{
+#buttonCreateNewCommercial{
     margin-bottom:0.5%;
     border-radius:0px;
 }
-#newAdvertisementInput {
+#newCommercialInput {
     width: 25%;
 }
 /* The Close Button */

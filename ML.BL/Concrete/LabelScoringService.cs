@@ -20,20 +20,20 @@ namespace ML.BL.Concrete
     {
         private static string[] labels = null;
         private readonly ILogger<LabelScoringService> _logger;
-        private readonly IAdvertisementService _advertisementService;
+        private readonly ICommercialService _commercialService;
         private readonly PredictionEnginePool<ImageInputData, ImageLabelPredictions> _predictionEnginePool;
         private readonly ISystemSettingService _systemSettingService;
 
         public LabelScoringService(
             ILogger<LabelScoringService> logger,
-            IAdvertisementService advertisementService,
+            ICommercialService commercialService,
             ISystemSettingService systemSettingService,
             PredictionEnginePool<ImageInputData, ImageLabelPredictions> predictionEnginePool,
             IEvaluationGroupService evaluationGroupService)
             : base(logger, systemSettingService, evaluationGroupService)
         {
             _logger = logger;
-            _advertisementService = advertisementService;
+            _commercialService = commercialService;
             _predictionEnginePool = predictionEnginePool;
             _systemSettingService = systemSettingService;
         }
@@ -61,7 +61,7 @@ namespace ML.BL.Concrete
 
         private void SaveImageScoringInfo(ImagePredictedLabelWithProbability prediction, Guid GroupGuid)
         {
-            Advertisement ad = new Advertisement
+            Commercial commercial = new Commercial
             {
                 GroupGuid = GroupGuid,
                 PredictedLabel = prediction.PredictedLabel,
@@ -73,7 +73,7 @@ namespace ML.BL.Concrete
                 ModifiedOn = DateTime.UtcNow
             };
 
-            _advertisementService.InsertOne(ad);
+            _commercialService.InsertOne(commercial);
         }
 
         private ImagePredictedLabelWithProbability DoWork(InMemoryImageData image)

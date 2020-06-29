@@ -14,18 +14,18 @@ using System.Linq;
 
 namespace ML.BL.Concrete
 {
-    public class AdvertisementScoringService : ScoringService, IAdvertisementScoringService
+    public class CommercialScoringService : ScoringService, ICommercialScoringService
     {
         private readonly ILogger<ScoringService> _logger;
         private readonly PredictionEnginePool<InMemoryImageData, ImagePrediction> _predictionEnginePool;
-        private readonly IAdvertisementService _advertisementService;
+        private readonly ICommercialService _commercialService;
         private readonly ISystemSettingService _systemSettingService;
         private readonly ILabelClassService _labelClassService;
 
-        public AdvertisementScoringService(
+        public CommercialScoringService(
             ILogger<ScoringService> logger,
             PredictionEnginePool<InMemoryImageData, ImagePrediction> predictionEnginePool,
-            IAdvertisementService advertisementService,
+            ICommercialService commercialService,
             ISystemSettingService systemSettingService,
             IEvaluationGroupService evaluationGroupService,
             ILabelClassService labelClassService)
@@ -33,18 +33,18 @@ namespace ML.BL.Concrete
         {
             _logger = logger;
             _predictionEnginePool = predictionEnginePool;
-            _advertisementService = advertisementService;
+            _commercialService = commercialService;
             _systemSettingService = systemSettingService;
             _labelClassService = labelClassService;
         }
 
         public override void Score()
         {
-            _logger.LogInformation("AdvertisementScoringService - Score started");
+            _logger.LogInformation("CommercialScoringService - Score started");
 
             base.Score();
 
-            _logger.LogInformation("AdvertisementScoringService - Score finished");
+            _logger.LogInformation("CommercialScoringService - Score finished");
         }
 
         public override void DoLabelScoring(Guid GroupGuid, InMemoryImageData image)
@@ -61,7 +61,7 @@ namespace ML.BL.Concrete
 
         public void SaveImageScoringInfo(InMemoryImageData image, ImagePrediction prediction, Guid GroupGuid, bool isCustom = false)
         {
-            Advertisement ad = new Advertisement
+            Commercial ad = new Commercial
             {
                 GroupGuid = GroupGuid,
                 ImageId = image.ImageFileName,
@@ -73,24 +73,24 @@ namespace ML.BL.Concrete
                 PredictedLabel = prediction.PredictedLabel,
                 MaxProbability = prediction.Score.Max(),
                 IsCustom = isCustom,
-                ModifiedBy = "AdvertisementScoringService",
+                ModifiedBy = "CommercialScoringService",
                 ModifiedOn = DateTime.UtcNow
             };
 
-            _advertisementService.InsertOne(ad);
+            _commercialService.InsertOne(ad);
         }
 
         public override void GroupByLabel(Guid GroupGuid)
         {
-            List<Advertisement> advByGuid = _advertisementService.GetAll(t => t.GroupGuid == GroupGuid).ToList();
-            if (advByGuid == null || advByGuid.Count == 0) { _logger.LogInformation("AdvertisementScoringService - GroupByLabel - advByGuid contains no elements"); return; }
+            List<Commercial> cmrsByGuid = _commercialService.GetAll(t => t.GroupGuid == GroupGuid).ToList();
+            if (cmrsByGuid == null || cmrsByGuid.Count == 0) { _logger.LogInformation("CommercialScoringService - GroupByLabel - cmrsByGuid contains no elements"); return; }
 
-            List<(string KeyLabel, int CountLabel)> advGroups = advByGuid.OrderByDescending(t => t.MaxProbability).GroupBy(g => g.PredictedLabel).Select(a => (a.Key, a.Count())).ToList();
+            List<(string KeyLabel, int CountLabel)> cmrsGroups = cmrsByGuid.OrderByDescending(t => t.MaxProbability).GroupBy(g => g.PredictedLabel).Select(a => (a.Key, a.Count())).ToList();
 
             string label = string.Empty;
 
-            if (((float)advGroups.Max(t => t.CountLabel) / advByGuid.Count) >= _systemSettingService.ClassGroupThreshold)
-                label = advGroups.Select(t => t.KeyLabel).FirstOrDefault();
+            if (((float)cmrsGroups.Max(t => t.CountLabel) / cmrsByGuid.Count) >= _systemSettingService.ClassGroupThreshold)
+                label = cmrsGroups.Select(t => t.KeyLabel).FirstOrDefault();
 
             if (string.IsNullOrWhiteSpace(label) || label.ToLower() == "none") label = $"New_Item_{GroupGuid}";
 
@@ -100,7 +100,7 @@ namespace ML.BL.Concrete
             //string destOutputPath = Path.Combine(_systemSettingService.CUSTOMLOGOMODEL_TrainedImagesFolderPath, label)
             Directory.CreateDirectory(destOutputPath);
 
-            string sourcePath = advByGuid.Select(t => t.OriginalImageDirPath).FirstOrDefault();
+            string sourcePath = cmrsByGuid.Select(t => t.OriginalImageDirPath).FirstOrDefault();
             if (System.IO.Directory.Exists(sourcePath))
             {
                 string[] files = System.IO.Directory.GetFiles(sourcePath);
@@ -113,17 +113,17 @@ namespace ML.BL.Concrete
                     string destFile = System.IO.Path.Combine(destOutputPath, fileName);
                     System.IO.File.Copy(s, destFile, true);
 
-                    UpdateAdvertisement(advByGuid, destOutputPath, destFile, fileName);
+                    UpdateCommercial(cmrsByGuid, destOutputPath, destFile, fileName);
                 }
             }
         }
 
-        private void UpdateAdvertisement(List<Advertisement> advByGuid, string destOutputPath, string destFile, string fileName)
+        private void UpdateCommercial(List<Commercial> cmrsByGuid, string destOutputPath, string destFile, string fileName)
         {
-            var advertisementItem = advByGuid.First(t => t.ImageId == fileName);
-            advertisementItem.ImageFilePath = destFile;
-            advertisementItem.ImageDirPath = destOutputPath;
-            _advertisementService.Update(advertisementItem);
+            var commercialItem = cmrsByGuid.First(t => t.ImageId == fileName);
+            commercialItem.ImageFilePath = destFile;
+            commercialItem.ImageDirPath = destOutputPath;
+            _commercialService.Update(commercialItem);
         }
 
         private string CheckLabelClassOutputDirectory(string label)

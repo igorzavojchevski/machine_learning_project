@@ -8,7 +8,7 @@ var allLabels = new Array();
 var paginationInitialized = false;
 
 $(document).ready(function () {
-    $('#btnAdvertisements').trigger('click');
+    $('#btnCommercials').trigger('click');
 });
 
 function collapse(id) {
@@ -28,7 +28,7 @@ function openTab(evt, tabName) {
     console.log(evt);
     console.log(tabName);
 
-    $("#divAdvertisements").html("");
+    $("#divCommercials").html("");
     $("#timeFramesDiv").html("");
 
     if (tabName === "Labels") {
@@ -96,7 +96,6 @@ function labelSaveEdit(elementid, objectid) {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(labelItem),
         })
-        .then((resp) => resp.json())
         .then(function (response) {
             console.log(response);
         });
@@ -122,14 +121,14 @@ function labelCancelEditEsc(e) {
     }
 }
 
-function saveMoveImages(advertisementid) {
+function saveMoveImages(commercialid) {
     var arrayOfSelected = $(".image-picker").find("option:selected").toArray();
-    var arrayImagesOfAdvertisement = arrayOfSelected.filter((x) => { return x.parentElement.getAttribute("id") === "advertisementImagesDivSelect_" + advertisementid; });
-    var result = arrayImagesOfAdvertisement.map(a => a.value);
+    var arrayImagesOfCommercial = arrayOfSelected.filter((x) => { return x.parentElement.getAttribute("id") === "commercialImagesDivSelect_" + commercialid; });
+    var result = arrayImagesOfCommercial.map(a => a.value);
     console.log(result);
-    console.log(document.getElementById("advertisementImagesDiv_SELECTForMove_" + advertisementid));
+    console.log(document.getElementById("commercialImagesDiv_SELECTForMove_" + commercialid));
 
-    var selectElement = document.getElementById("advertisementImagesDiv_SELECTForMove_" + advertisementid);
+    var selectElement = document.getElementById("commercialImagesDiv_SELECTForMove_" + commercialid);
     var selectedValue = selectElement.options[selectElement.selectedIndex].value;
 
     const moveImagesModel = {
@@ -147,7 +146,7 @@ function saveMoveImages(advertisementid) {
         })
         .then(function (response) {
             console.log(response);
-            $('#btnAdvertisements').trigger('click');
+            $('#btnCommercials').trigger('click');
         });
 }
 
@@ -183,12 +182,12 @@ function GetAllLabels() {
 }
 
 function CreateLabelAndImageSection(groupList) {
-    var divAdvertisements = document.getElementById("divAdvertisements");
-    divAdvertisements.innerHTML = "";
+    var divCommercials = document.getElementById("divCommercials");
+    divCommercials.innerHTML = "";
 
     for (var i = 0; i < groupList.group.length; i++) {
         var x = document.createElement("div");
-        var id = "advertisement" + i;
+        var id = "commercial" + i;
         x.setAttribute("id", id);
 
         var lastIndex = groupList.group[i].predictedLabel.lastIndexOf('_');
@@ -223,7 +222,7 @@ function CreateLabelAndImageSection(groupList) {
         span.style.color = "inherit";
 
         var spanForCount = document.createElement("span");
-        spanForCount.textContent = "(" + groupList.group[i].advertisements.length + " items)";
+        spanForCount.textContent = "(" + groupList.group[i].commercials.length + " items)";
         spanForCount.style.classList = "noselect";
         spanForCount.style.display = "block";
         spanForCount.style.fontSize = "1rem";
@@ -273,19 +272,19 @@ function CreateLabelAndImageSection(groupList) {
         labelHeadingAndEdit.appendChild(cancelButton);
         labelHeadingAndEdit.appendChild(spanForCount);
         x.appendChild(labelHeadingAndEdit);
-        divAdvertisements.appendChild(x);
+        divCommercials.appendChild(x);
 
-        var advertisementImagesDiv = document.createElement("div");
-        advertisementImagesDiv.setAttribute("id", "advertisementImagesDiv_" + id);
-        advertisementImagesDiv.style.display = "none";
+        var commercialImagesDiv = document.createElement("div");
+        commercialImagesDiv.setAttribute("id", "commercialImagesDiv_" + id);
+        commercialImagesDiv.style.display = "none";
 
-        var advertisementImagesDiv_DIVForMove = document.createElement("div");
-        advertisementImagesDiv_DIVForMove.setAttribute("id", "advertisementImagesDiv_DIVForMove_" + id);
-        advertisementImagesDiv_DIVForMove.style.marginBottom = "1%";
-        var span_advertisementImagesDiv_SELECTForMove = document.createElement("span");
-        span_advertisementImagesDiv_SELECTForMove.textContent = "Move to: ";
-        var advertisementImagesDiv_SELECTForMove = document.createElement("select");
-        advertisementImagesDiv_SELECTForMove.setAttribute("id", "advertisementImagesDiv_SELECTForMove_" + id);
+        var commercialImagesDiv_DIVForMove = document.createElement("div");
+        commercialImagesDiv_DIVForMove.setAttribute("id", "commercialImagesDiv_DIVForMove_" + id);
+        commercialImagesDiv_DIVForMove.style.marginBottom = "1%";
+        var span_commercialImagesDiv_SELECTForMove = document.createElement("span");
+        span_commercialImagesDiv_SELECTForMove.textContent = "Move to: ";
+        var commercialImagesDiv_SELECTForMove = document.createElement("select");
+        commercialImagesDiv_SELECTForMove.setAttribute("id", "commercialImagesDiv_SELECTForMove_" + id);
         for (var li = 0; li < allLabels.length; li++) {
             if (allLabels[li].className === groupList.group[i].predictedLabel) continue;
 
@@ -293,49 +292,49 @@ function CreateLabelAndImageSection(groupList) {
             opt.value = allLabels[li].id;
             opt.textContent = allLabels[li].className;
 
-            advertisementImagesDiv_SELECTForMove.appendChild(opt);
+            commercialImagesDiv_SELECTForMove.appendChild(opt);
         }
-        advertisementImagesDiv_DIVForMove.hidden = true;
+        commercialImagesDiv_DIVForMove.hidden = true;
 
-        var advertisementImagesSaveButton = document.createElement("button");
-        advertisementImagesSaveButton.setAttribute("id", "buttonSaveForMoveImages_" + id);
-        advertisementImagesSaveButton.classList = "btn btn-success";
-        advertisementImagesSaveButton.textContent = "Save";
-        advertisementImagesSaveButton.style.fontSize = "12px";
-        advertisementImagesSaveButton.style.position = "absolute";
-        advertisementImagesSaveButton.style.marginLeft = "2%";
-        advertisementImagesSaveButton.style.marginTop = "-0.25%";
-        advertisementImagesSaveButton.setAttribute("onMouseDown", "saveMoveImages('" + id + "')");
+        var commercialImagesSaveButton = document.createElement("button");
+        commercialImagesSaveButton.setAttribute("id", "buttonSaveForMoveImages_" + id);
+        commercialImagesSaveButton.classList = "btn btn-success";
+        commercialImagesSaveButton.textContent = "Save";
+        commercialImagesSaveButton.style.fontSize = "12px";
+        commercialImagesSaveButton.style.position = "absolute";
+        commercialImagesSaveButton.style.marginLeft = "2%";
+        commercialImagesSaveButton.style.marginTop = "-0.25%";
+        commercialImagesSaveButton.setAttribute("onMouseDown", "saveMoveImages('" + id + "')");
 
-        advertisementImagesDiv_DIVForMove.appendChild(span_advertisementImagesDiv_SELECTForMove)
-        advertisementImagesDiv_DIVForMove.appendChild(advertisementImagesDiv_SELECTForMove);
-        advertisementImagesDiv_DIVForMove.appendChild(advertisementImagesSaveButton);
-        advertisementImagesDiv.appendChild(advertisementImagesDiv_DIVForMove);
+        commercialImagesDiv_DIVForMove.appendChild(span_commercialImagesDiv_SELECTForMove)
+        commercialImagesDiv_DIVForMove.appendChild(commercialImagesDiv_SELECTForMove);
+        commercialImagesDiv_DIVForMove.appendChild(commercialImagesSaveButton);
+        commercialImagesDiv.appendChild(commercialImagesDiv_DIVForMove);
 
 
-        var advertisementImagesDivSelect = document.createElement("select");
-        advertisementImagesDivSelect.setAttribute("id", "advertisementImagesDivSelect_" + id);
-        advertisementImagesDivSelect.classList = "image-picker";
-        advertisementImagesDivSelect.setAttribute("multiple", "multiple");
+        var commercialImagesDivSelect = document.createElement("select");
+        commercialImagesDivSelect.setAttribute("id", "commercialImagesDivSelect_" + id);
+        commercialImagesDivSelect.classList = "image-picker";
+        commercialImagesDivSelect.setAttribute("multiple", "multiple");
 
-        for (var j = 0; j < groupList.group[i].advertisements.length; j++) {
+        for (var j = 0; j < groupList.group[i].commercials.length; j++) {
 
-            var imageId = groupList.group[i].advertisements[j].imageId;
+            var imageId = groupList.group[i].commercials[j].imageId;
             var selectOption = document.createElement("option");
             selectOption.setAttribute("data-img-src", "images_to_train/" + groupList.group[i].predictedLabel + "/" + imageId);
-            selectOption.setAttribute("data-img-label", (groupList.group[i].advertisements[j].maxProbability * 100).toFixed(3) + "%");
-            selectOption.setAttribute("value", groupList.group[i].advertisements[j].id);
-            advertisementImagesDivSelect.append(selectOption);
+            selectOption.setAttribute("data-img-label", (groupList.group[i].commercials[j].maxProbability * 100).toFixed(3) + "%");
+            selectOption.setAttribute("value", groupList.group[i].commercials[j].id);
+            commercialImagesDivSelect.append(selectOption);
         }
-        advertisementImagesDiv.appendChild(advertisementImagesDivSelect);
-        x.appendChild(advertisementImagesDiv);
+        commercialImagesDiv.appendChild(commercialImagesDivSelect);
+        x.appendChild(commercialImagesDiv);
     }
 }
 
 function InitializePaginationPlaceholder(responseImages) {
     if (paginationInitialized) return;
 
-    var size = 3;
+    var size = 4; //make this systemsetting
     $("#labelPagination").pagination({
         items: responseImages.count,
         itemsOnPage: size,
@@ -356,9 +355,9 @@ function InitializeImagePicker() {
             //console.log(this.find("option:selected").prevObject[0].getAttribute("id"));
             var selectID = this.find("option:selected").prevObject[0].getAttribute("id");
             var lastIndex = selectID.lastIndexOf('_');
-            var advertisementID = selectID.substr(lastIndex + 1, selectID.Length);
+            var commercialID = selectID.substr(lastIndex + 1, selectID.Length);
 
-            var element = document.getElementById("advertisementImagesDiv_DIVForMove_" + advertisementID);
+            var element = document.getElementById("commercialImagesDiv_DIVForMove_" + commercialID);
             if (this.find("option:selected").length > 0) {
                 //console.log('testtt');
                 element.hidden = false;
@@ -390,7 +389,7 @@ function GetLabelTimeFrames() {
             var th2 = document.createElement('th');
             var th3 = document.createElement('th');
             var th4 = document.createElement('th');
-            th1.textContent = "Advertisement Name";
+            th1.textContent = "Commercial Name";
             th1.style.textAlign = "center";
             th2.textContent = "Start Time";
             th2.style.textAlign = "center";
@@ -495,9 +494,9 @@ function LoadImageCheck() {
     $("#buttonSaveCustomImage").attr("hidden", true);
 }
 
-function OpenCreateAdvertisementModal() {
+function OpenCreateCommercialModal() {
 
-    var modal = document.getElementById("createAdvertisementModal");
+    var modal = document.getElementById("createCommercialModal");
 
     modal.style.display = "block";
 
@@ -508,31 +507,31 @@ function OpenCreateAdvertisementModal() {
     }
 }
 
-function CloseCreateAdvertisementModal() {
-    var modal = document.getElementById("createAdvertisementModal");
+function CloseCreateCommercialModal() {
+    var modal = document.getElementById("createCommercialModal");
 
     modal.style.display = "none";
 }
 
-function CreateNewAdvertisement() {
-    var inputValue = document.getElementById("newAdvertisementInput").value;
+function CreateNewCommercial() {
+    var inputValue = document.getElementById("newCommercialInput").value;
 
-    var newAdvertisementClass = {
+    var newCommercialClass = {
         name: inputValue
     };
 
-    console.log(newAdvertisementClass);
+    console.log(newCommercialClass);
 
     fetch(serviceUrl + "/CreateLabelClassName",
         {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(newAdvertisementClass),
+            body: JSON.stringify(newCommercialClass),
         })
         .then(function (response) {
             console.log(response);
-            CloseCreateAdvertisementModal();
-            $('#btnAdvertisements').trigger('click');
+            CloseCreateCommercialModal();
+            $('#btnCommercials').trigger('click');
         });
 }
 form.addEventListener('submit', e => {

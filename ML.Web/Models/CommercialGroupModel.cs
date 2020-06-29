@@ -6,14 +6,14 @@ using System.Threading.Tasks;
 
 namespace ML.Web.Models
 {
-    public class AdvertisementGroupModel
+    public class CommercialGroupModel
     {
-        public AdvertisementGroupModel()
+        public CommercialGroupModel()
         {
-            Group = new List<AdvertisementImagesGroupModel>();
+            Group = new List<CommercialImagesGroupModel>();
         }
 
-        public List<AdvertisementImagesGroupModel> Group { get; set; }
+        public List<CommercialImagesGroupModel> Group { get; set; }
         public long Count { get; set; }
     }
 }

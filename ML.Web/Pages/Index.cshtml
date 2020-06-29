@@ -4,34 +4,34 @@
     ViewData["Title"] = "Home page";
 }
 
-<div id="headerDiv"><h2>ML Advertisement Recognition Platform</h2></div>
+<div id="headerDiv"><h2>ML Commercials Recognition Platform</h2></div>
 <br />
 
 <div id="tab">
-    <button id="btnAdvertisements" class="tablinks btn-light" onclick="openTab(event, 'Labels')">Advertisements</button>
-    <button id="btnAdvertisementTimeFrames" class="tablinks btn-light" onclick="openTab(event, 'LabelTimeFrames')">Time Frames</button>
+    <button id="btnCommercials" class="tablinks btn-light" onclick="openTab(event, 'Labels')">Commercials</button>
+    <button id="btnCommercialTimeFrames" class="tablinks btn-light" onclick="openTab(event, 'LabelTimeFrames')">Time Frames</button>
     <button id="btnImageCheck" class="tablinks btn-light" onclick="openTab(event, 'ImageCheck')">Image Check</button>
-    <button id="btnManageCustomAdvertisements" class="tablinks btn-light" onclick="openTab(event, 'ManageCustomAds')">Manage Custom Ads</button>
+    <button id="btnManageCustomCommercials" class="tablinks btn-light" onclick="openTab(event, 'ManageCustomCms')">Manage Custom Commercials</button>
 </div>
 
 <div id="Labels" class="tabcontent">
-    <div id="divAdvertisementsHeader">
-        <h3 id="advertismentsHeader">Advertisements (Labels)</h3>
-        <button id="buttonCreateAdvertisement" onclick="OpenCreateAdvertisementModal()">Create Label</button>
+    <div id="divCommercialsHeader">
+        <h3 id="commercialsHeader">Commercials (Labels)</h3>
+        <button id="buttonCreateCommercial" onclick="OpenCreateCommercialModal()">Create Label</button>
     </div>
     <br />
-    <div id="divAdvertisements" class="col-md-12"></div>
-    <div id="divAdvertisementsPagination" class="col-md-12" style="margin-bottom:3%">
+    <div id="divCommercials" class="col-md-12"></div>
+    <div id="divCommercialsPagination" class="col-md-12" style="margin-bottom:3%">
         <div id="labelPagination" class="float-right"></div>
     </div>
 
-    <div id="createAdvertisementModal" class="advertisement-modal">
-        <div class="advertisement-modal-content">
-            <span id="createAdvertisementModalXSpan" class="closeX" onclick="CloseCreateAdvertisementModal()">&times;</span>
-            <div class="advertisement-modal-content-form">
-                <span>New Advertisement Name:</span>
-                <input id="newAdvertisementInput" type="text" name="newAdvertisementInput" />
-                <button id="buttonCreateNewAdvertisement" onclick="CreateNewAdvertisement()" class="btn btn-success">Create</button>
+    <div id="createCommercialModal" class="commercial-modal">
+        <div class="commercial-modal-content">
+            <span id="createCommercialModalXSpan" class="closeX" onclick="CloseCreateCommercialModal()">&times;</span>
+            <div class="commercial-modal-content-form">
+                <span>New Commercial Name:</span>
+                <input id="newCommercialInput" type="text" name="newCommercialInput" />
+                <button id="buttonCreateNewCommercial" onclick="CreateNewCommercial()" class="btn btn-success">Create</button>
             </div>
         </div>
 
@@ -76,10 +76,10 @@
 
 </div>
 
-<div id="ManageCustomAds" class="tabcontent">
-    <h3>Manage Custom Ads</h3>
+<div id="ManageCustomCms" class="tabcontent">
+    <h3>Manage Custom Commercials</h3>
     <br />
-    <div id="manageCustomAdsDiv" class="col-md-12"></div>
+    <div id="manageCustomCmsDiv" class="col-md-12"></div>
 </div>
 
 <br />
