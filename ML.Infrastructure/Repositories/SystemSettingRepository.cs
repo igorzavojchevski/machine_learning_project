@@ -18,12 +18,18 @@ namespace ML.Infrastructure.Repositories
 
         public void FirstInsert()
         {
-            if (!GetAll().Any(t => t.SettingKey == "HLSStream_URL"))
-                InsertOne(new SystemSetting { SettingKey = "HLSStream_URL", SettingValue = @"https://5b44cf20b0388.streamlock.net:8443/live/ngrp:live_all/playlist.m3u8", ModifiedBy = "SystemSettingRepository", ModifiedOn = DateTime.UtcNow });
-
             if (!GetAll().Any(t => t.SettingKey == "FFMPEG_ExecutablePath"))
                 InsertOne(new SystemSetting { SettingKey = "FFMPEG_ExecutablePath", SettingValue = @"C:\ffmpeg\bin\ffmpeg.exe", ModifiedBy = "SystemSettingRepository", ModifiedOn = DateTime.UtcNow });
 
+            if (!GetAll().Any(t => t.SettingKey == "Archive_Path_For_Trained_Images"))
+                InsertOne(new SystemSetting { SettingKey = "Archive_Path_For_Trained_Images", SettingValue = @"E:\ML_Archive", ModifiedBy = "SystemSettingRepository", ModifiedOn = DateTime.UtcNow });
+
+            if (!GetAll().Any(t => t.SettingKey == "Archive_LastStartDate"))
+                InsertOne(new SystemSetting { SettingKey = "Archive_LastStartDate", SettingValue = @"2020-06-20 00:00:00", ModifiedBy = "SystemSettingRepository", ModifiedOn = DateTime.UtcNow });
+
+            if (!GetAll().Any(t => t.SettingKey == "Archive_NextStartPeriod_Minutes"))
+                InsertOne(new SystemSetting { SettingKey = "Archive_NextStartPeriod_Minutes", SettingValue = @"4320", ModifiedBy = "SystemSettingRepository", ModifiedOn = DateTime.UtcNow });
+                
 
             if (!GetAll().Any(t => t.SettingKey == "TF_LabelsFilePath"))
                 InsertOne(new SystemSetting { SettingKey = "TF_LabelsFilePath", SettingValue = "C:\\Users\\igor.zavojchevski\\Desktop\\Master\\ML\\assets\\MLModels\\TensorFlowModel\\imagenet_comp_graph_label_strings.txt", ModifiedBy = "SystemSettingRepository", ModifiedOn = DateTime.UtcNow });

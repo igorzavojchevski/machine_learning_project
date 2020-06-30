@@ -11,8 +11,10 @@ namespace ML.BL.Mongo.Interfaces
         int MaxChunksToProcessAtOnce { get; }
         bool IsTrainingServiceStarted { get; }
         float ClassGroupThreshold { get; }
-        string HLSStream_URL { get; }
         string FFMPEG_ExecutablePath { get; }
+        string Archive_Path_For_Trained_Images { get; }
+        string Archive_LastStartDate { get; }
+        int Archive_NextStartPeriod_Minutes { get; }
 
 
         float TF_LabelScoring_MaxProbabilityThreshold { get; }

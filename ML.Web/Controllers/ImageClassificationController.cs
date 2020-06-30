@@ -31,6 +31,7 @@ namespace ML.Web.Controllers
         private readonly ICommercialScoringService _commercialScoringService;
         private readonly ILabelClassService _labelClassService;
         private readonly ISystemSettingService _systemSettingService;
+        private readonly IEvaluationStreamService _evaluationStreamService;
         #endregion
 
         #region ctor
@@ -40,7 +41,8 @@ namespace ML.Web.Controllers
             ICommercialService commercialService,
             ICommercialScoringService commercialScoringService,
             ILabelClassService labelClassService,
-            ISystemSettingService systemSettingService)
+            ISystemSettingService systemSettingService,
+            IEvaluationStreamService evaluationStreamService)
         {
             _logger = logger;
             _labelScoringService = labelScoringService;
@@ -48,6 +50,7 @@ namespace ML.Web.Controllers
             _commercialScoringService = commercialScoringService;
             _labelClassService = labelClassService;
             _systemSettingService = systemSettingService;
+            _evaluationStreamService = evaluationStreamService;
         }
         #endregion
 
@@ -165,6 +168,43 @@ namespace ML.Web.Controllers
 
             return Ok(groupList);
         }
+
+        [Route("GetEvaluationStreams")]
+        public IActionResult GetEvaluationStreams()
+        {
+            List<EvaluationStreamModel> evaluationStreams = _evaluationStreamService.GetAll().ToList().Select(t=>t.ToEvaluationStreamModel()).ToList();
+            return Ok(evaluationStreams);
+        }
+
+        [HttpPost]
+        [Route("CreateEvaluationStream")]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(404)]
+        public IActionResult CreateEvaluationStream(EvaluationStreamItem evaluationStreamItem)
+        {
+            if (evaluationStreamItem == null) return BadRequest();
+
+            if (string.IsNullOrWhiteSpace(evaluationStreamItem.Name) || string.IsNullOrWhiteSpace(evaluationStreamItem.Stream) || string.IsNullOrWhiteSpace(evaluationStreamItem.Code)) return BadRequest();
+
+            bool exists = _evaluationStreamService.GetAll().Any(t => t.Name == evaluationStreamItem.Name || t.Stream == evaluationStreamItem.Stream || t.Code == evaluationStreamItem.Code);
+            if (exists) return BadRequest();
+
+            EvaluationStream evaluationStream = new EvaluationStream()
+            {
+                Name = evaluationStreamItem.Name,
+                Stream = evaluationStreamItem.Stream,
+                Code = evaluationStreamItem.Code,
+                IsActive = true,
+                ModifiedBy = "CreateLabelClassName",
+                ModifiedOn = DateTime.UtcNow
+            };
+
+            _evaluationStreamService.InsertOne(evaluationStream);
+
+            return Ok();
+        }
+
 
         [HttpPost]
         [Route("CreateLabelClassName")]

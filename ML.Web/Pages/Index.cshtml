@@ -12,11 +12,12 @@
     <button id="btnCommercialTimeFrames" class="tablinks btn-light" onclick="openTab(event, 'LabelTimeFrames')">Time Frames</button>
     <button id="btnImageCheck" class="tablinks btn-light" onclick="openTab(event, 'ImageCheck')">Image Check</button>
     <button id="btnManageCustomCommercials" class="tablinks btn-light" onclick="openTab(event, 'ManageCustomCms')">Manage Custom Commercials</button>
+    <button id="btnEvaluationStreams" class="tablinks btn-light" onclick="openTab(event, 'EvaluationStreams')">Evaluation Streams</button>
 </div>
 
 <div id="Labels" class="tabcontent">
     <div id="divCommercialsHeader">
-        <h3 id="commercialsHeader">Commercials (Labels)</h3>
+        <h3 class="tab-custom-header">Commercials (Labels)</h3>
         <button id="buttonCreateCommercial" onclick="OpenCreateCommercialModal()">Create Label</button>
     </div>
     <br />
@@ -34,7 +35,6 @@
                 <button id="buttonCreateNewCommercial" onclick="CreateNewCommercial()" class="btn btn-success">Create</button>
             </div>
         </div>
-
     </div>
 </div>
 
@@ -80,6 +80,34 @@
     <h3>Manage Custom Commercials</h3>
     <br />
     <div id="manageCustomCmsDiv" class="col-md-12"></div>
+</div>
+
+<div id="EvaluationStreams" class="tabcontent">
+
+    <div id="divCommercialsHeader">
+        <h3 class="tab-custom-header">Evaluation Streams</h3>
+        <button id="buttonCreateEvaluationStream" onclick="OpenCreateEvaluationStreamModal()">Create Evaluation Stream</button>
+    </div>
+    <br />
+    <div id="evaluationStreamsDiv" class="col-md-12"></div>
+
+    <div id="createEvaluationStreamModal" class="commercial-modal">
+        <div class="evaluation-stream-modal-content">
+            <span id="createCommercialModalXSpan" class="closeX" onclick="CloseCreateEvaluationStreamModal()">&times;</span>
+            <div class="evaluation-stream-modal-content-form">
+                <label for="nameEvaluationStreamInput">Name</label>
+                <input id="nameEvaluationStreamInput" class="evaluation-stream-input" type="text" name="nameEvaluationStreamInput" />
+                <br />
+                <label for="streamEvaluationStreamInput">Stream:</label>
+                <input id="streamEvaluationStreamInput" class="evaluation-stream-input" type="text" name="streamEvaluationStreamInput" />
+                <br />
+                <label for="codeEvaluationStreamInput">Code:</label>
+                <input id="codeEvaluationStreamInput" class="evaluation-stream-input" type="text" name="codeEvaluationStreamInput" />
+                <br />
+                <button id="buttonCreateNewEvaluationStream" onclick="CreateEvaluationStream()" class="btn btn-success">Create</button>
+            </div>
+        </div>
+    </div>
 </div>
 
 <br />

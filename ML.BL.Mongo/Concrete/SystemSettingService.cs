@@ -69,14 +69,6 @@ namespace ML.BL.Mongo.Concrete
             }
         }
 
-        public string HLSStream_URL
-        {
-            get
-            {
-                return GetSettingValueByKey("HLSStream_URL");
-            }
-        }
-
         public string FFMPEG_ExecutablePath
         {
             get
@@ -85,6 +77,33 @@ namespace ML.BL.Mongo.Concrete
                 //@"C:\ffmpeg\bin\ffmpeg.exe"
             }
         }
+
+        public string Archive_Path_For_Trained_Images
+        {
+            get
+            {
+                return GetSettingValueByKey("Archive_Path_For_Trained_Images");
+            }
+        }
+
+        public string Archive_LastStartDate
+        {
+            get
+            {
+                return GetSettingValueByKey("Archive_LastStartDate");
+            }
+        }
+
+        public int Archive_NextStartPeriod_Minutes
+        {
+            get
+            {
+                int minutes = int.TryParse(GetSettingValueByKey("Archive_NextStartPeriod_Minutes"), out minutes) ? minutes : 4320;
+                return minutes;
+            }
+        }
+
+
 
 
         public float TF_LabelScoring_MaxProbabilityThreshold

@@ -30,6 +30,7 @@ function openTab(evt, tabName) {
 
     $("#divCommercials").html("");
     $("#timeFramesDiv").html("");
+    $("#evaluationStreamsDiv").html("");
 
     if (tabName === "Labels") {
         paginationInitialized = false;
@@ -40,6 +41,9 @@ function openTab(evt, tabName) {
     }
     else if (tabName === "ImageCheck") {
         LoadImageCheck();
+    }
+    else if (tabName === "EvaluationStreams") {
+        GetEvaluationStreams();
     }
 
     var i, tabcontent, tablinks;
@@ -534,6 +538,107 @@ function CreateNewCommercial() {
             $('#btnCommercials').trigger('click');
         });
 }
+
+function GetEvaluationStreams() {
+
+    fetch(serviceUrl + "/GetEvaluationStreams",
+        {
+            method: 'GET',
+            headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
+        })
+        .then((resp) => resp.json())
+        .then(function (response) {
+            console.log(response);
+            var evaluationStreamsDiv = document.getElementById("evaluationStreamsDiv");
+            var table = document.createElement("table");
+            table.style.width = '100%';
+            table.setAttribute('border', '1');
+            var tbody = document.createElement('tbody');
+            var th1 = document.createElement('th');
+            var th2 = document.createElement('th');
+            var th3 = document.createElement('th');
+            var th4 = document.createElement('th');
+            th1.textContent = "Name";
+            th1.style.textAlign = "center";
+            th2.textContent = "Stream";
+            th2.style.textAlign = "center";
+            th3.textContent = "Code";
+            th3.style.textAlign = "center";
+            th4.textContent = "Active";
+            th4.style.textAlign = "center";
+            tbody.appendChild(th1);
+            tbody.appendChild(th2);
+            tbody.appendChild(th3);
+            tbody.appendChild(th4);
+
+            for (var i = 0; i < response.length; i++) {
+                var tr = document.createElement('tr');
+                tbody.appendChild(tr);
+
+                var td1 = document.createElement('td');
+                td1.textContent = response[i].name;
+                var td2 = document.createElement('td');
+                td2.textContent = response[i].stream;
+                var td3 = document.createElement('td');
+                td3.textContent = response[i].code;
+                var td4 = document.createElement('td');
+                td4.textContent = response[i].isActive;
+                tr.appendChild(td1);
+                tr.appendChild(td2);
+                tr.appendChild(td3);
+                tr.appendChild(td4);
+                tbody.appendChild(tr);
+            }
+            table.appendChild(tbody);
+            evaluationStreamsDiv.appendChild(table);
+        });
+}
+
+
+function OpenCreateEvaluationStreamModal() {
+
+    var modal = document.getElementById("createEvaluationStreamModal");
+
+    modal.style.display = "block";
+
+    window.onclick = function (event) {
+        if (event.target == modal) {
+            modal.style.display = "none";
+        }
+    }
+}
+function CreateEvaluationStream() {
+    var nameInputValue = document.getElementById("nameEvaluationStreamInput").value;
+    var streamInputValue = document.getElementById("streamEvaluationStreamInput").value;
+    var codeInputValue = document.getElementById("codeEvaluationStreamInput").value;
+
+    var newEvaluationStream = {
+        name: nameInputValue,
+        stream: streamInputValue,
+        code: codeInputValue,
+    };
+
+    console.log(newEvaluationStream);
+
+    fetch(serviceUrl + "/CreateEvaluationStream",
+        {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(newEvaluationStream),
+        })
+        .then(function (response) {
+            console.log(response);
+            CloseCreateEvaluationStreamModal();
+            $('#btnEvaluationStreams').trigger('click');
+        });
+}
+
+function CloseCreateEvaluationStreamModal() {
+    var modal = document.getElementById("createEvaluationStreamModal");
+
+    modal.style.display = "none";
+}
+
 form.addEventListener('submit', e => {
     e.preventDefault();
 

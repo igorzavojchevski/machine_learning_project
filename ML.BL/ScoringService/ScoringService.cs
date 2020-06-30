@@ -32,12 +32,12 @@ namespace ML.BL
             EvaluationGroup evaluationGroup = _evaluationGroupService.GetAll().Where(t => t.Status == TrainingStatus.New).OrderBy(t => t.ModifiedOn).FirstOrDefault();
             if (evaluationGroup == null) { _logger.LogInformation("ScoringService - Score - No trainingGroup with NEW status"); return; }
 
-            if(string.IsNullOrWhiteSpace(evaluationGroup.EvaluationGroupDirPath)) { _logger.LogInformation("ScoringService - Score - Invalid EvaluationGroupDirPath"); return; }
+            if(string.IsNullOrWhiteSpace(evaluationGroup.DirPath)) { _logger.LogInformation("ScoringService - Score - Invalid EvaluationGroupDirPath"); return; }
 
             evaluationGroup.Status = TrainingStatus.Processing;
             _evaluationGroupService.Update(evaluationGroup);
 
-            IEnumerable<InMemoryImageData> Images = BaseExtensions.LoadInMemoryImagesFromDirectory(evaluationGroup.EvaluationGroupDirPath, false);
+            IEnumerable<InMemoryImageData> Images = BaseExtensions.LoadInMemoryImagesFromDirectory(evaluationGroup.DirPath, false);
 
             if (Images == null || Images.Count() == 0) { _logger.LogInformation("ScoringService - Score - No Images provided"); return; }
 

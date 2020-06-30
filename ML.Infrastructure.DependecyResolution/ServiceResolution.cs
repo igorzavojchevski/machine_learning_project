@@ -48,6 +48,8 @@ namespace ML.Infrastructure.DependecyResolution
             services.AddTransient<ICommercialRepository, CommercialRepository>();
             services.AddTransient<ILabelClassRepository, LabelClassRepository>();
             services.AddTransient<IEvaluationGroupRepository, EvaluationGroupRepository>();
+            services.AddTransient<IEvaluationStreamRepository, EvaluationStreamRepository>();
+
             return services;
         }
 
@@ -58,6 +60,8 @@ namespace ML.Infrastructure.DependecyResolution
             services.AddTransient<ICommercialService, CommercialService>();
             services.AddTransient<ILabelClassService, LabelClassService>();
             services.AddTransient<IEvaluationGroupService, EvaluationGroupService>();
+            services.AddTransient<IEvaluationStreamService, EvaluationStreamService>();
+            services.AddTransient<IArchivingService, ArchivingService>();
 
             services.AddTransient<IFrameExporterService, FrameExporterService>();
 

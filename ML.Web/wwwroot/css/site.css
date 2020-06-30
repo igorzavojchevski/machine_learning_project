@@ -142,7 +142,13 @@ body {
     margin-top: 0.2%;
 }
 
-#commercialsHeader {
+#buttonCreateEvaluationStream {
+    display: inline-block;
+    float: right;
+    margin-top: 0.2%;
+}
+
+.tab-custom-header {
     display: inline-block;
 }
 
@@ -170,10 +176,30 @@ body {
     width: 80%;
 }
 
-.commercial-modal-content-form{
+.commercial-modal-content-form {
     padding: 5%;
-    text-align:center;
+    text-align: center;
 }
+
+
+.evaluation-stream-modal-content {
+    background-color: #fefefe;
+    margin: auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 30%;
+}
+
+.evaluation-stream-input{
+    display:block;
+    width:100%;
+}
+
+.evaluation-stream-modal-content-form {
+    padding: 5%;
+}
+
+
 #buttonCreateNewCommercial{
     margin-bottom:0.5%;
     border-radius:0px;

@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using ML.BL.Interfaces;
 using ML.ImageClassification.Train.Interfaces;
 
 namespace ML.TrainingService
@@ -13,11 +14,13 @@ namespace ML.TrainingService
     {
         private readonly ILogger<Worker> _logger;
         private readonly ITrainingService _trainingService;
+        private readonly IArchivingService _archivingService;
 
-        public Worker(ILogger<Worker> logger, ITrainingService trainingService)
+        public Worker(ILogger<Worker> logger, ITrainingService trainingService, IArchivingService archivingService)
         {
             _logger = logger;
             _trainingService = trainingService;
+            _archivingService = archivingService;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -37,24 +40,40 @@ namespace ML.TrainingService
             Thread training = new Thread(Training);
             training.Start();
 
+            Thread archiving = new Thread(Archiving);
+            archiving.Start();
+
             return base.StartAsync(cancellationToken);
+        }
+
+        public void Archiving()
+        {
+            while (true)
+            {
+                _archivingService.ArchiveImages();
+                Thread.Sleep(TimeSpan.FromMinutes(60));
+            }
         }
 
         public void Training()
         {
             while (true)
             {
-                //Do before training start activities - (set flag for start etc.)
-                _trainingService.DoBeforeTrainingStart();
-
-                //Training for Logo Custom
-                _trainingService.Train();
-
-                //Do after training finished activities- (set flag for start etc.)
-                _trainingService.DoAfterTrainingFinished();
-
-                Thread.Sleep(TimeSpan.FromMinutes(10)); //make scheduled execution
+                TrainingProcess();
+                Thread.Sleep(TimeSpan.FromMinutes(30)); //make scheduled execution
             }
+        }
+
+        public void TrainingProcess()
+        {
+            //Do before training start activities - (set flag for start etc.)
+            _trainingService.DoBeforeTrainingStart();
+
+            //Training for Logo Custom
+            _trainingService.Train();
+
+            //Do after training finished activities- (set flag for start etc.)
+            _trainingService.DoAfterTrainingFinished();
         }
     }
 }

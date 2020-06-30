@@ -279,9 +279,9 @@ namespace ML.ImageClassification.Train.Concrete
 
                 EvaluationGroup evaluationGroup = _evaluationGroupService.GetAll().Where(t => t.Status == TrainingStatus.New).OrderBy(t => t.ModifiedOn).FirstOrDefault();
                 if (evaluationGroup == null) { _logger.LogInformation("TrainingService - TrySinglePrediction - No trainingGroup with NEW status"); return; }
-                if (string.IsNullOrWhiteSpace(evaluationGroup.EvaluationGroupDirPath)) { _logger.LogInformation("TrainingService - TrySinglePrediction - Invalid EvaluationGroupDirPath"); return; }
+                if (string.IsNullOrWhiteSpace(evaluationGroup.DirPath)) { _logger.LogInformation("TrainingService - TrySinglePrediction - Invalid EvaluationGroupDirPath"); return; }
 
-                IEnumerable<InMemoryImageData> testImages = BaseExtensions.LoadInMemoryImagesFromDirectory(evaluationGroup.EvaluationGroupDirPath, false);
+                IEnumerable<InMemoryImageData> testImages = BaseExtensions.LoadInMemoryImagesFromDirectory(evaluationGroup.DirPath, false);
 
                 InMemoryImageData imageToPredict = testImages.FirstOrDefault();
                 if (imageToPredict == null)

@@ -9,6 +9,8 @@ namespace ML.Domain.Entities.Enums
         New,
         Processing,
         Processed,
-        CreatedWithError
+        CreatedWithError,
+        Archiving,
+        Archived
     }
 }

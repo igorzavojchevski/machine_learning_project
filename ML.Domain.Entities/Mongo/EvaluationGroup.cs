@@ -8,7 +8,8 @@ namespace ML.Domain.Entities.Mongo
 {
     public class EvaluationGroup : MongoBaseEntity
     {
-        public string EvaluationGroupDirPath { get; set; }
+        public string DirPath { get; set; }
+        public string ZipDirPath { get; set; }
         public Guid EvaluationGroupGuid { get; set; }
         public Guid ParentGroupGuid { get; set; }
         public TrainingStatus Status { get; set; }
