@@ -47,7 +47,7 @@ namespace ML.BL.Mongo.Concrete
         {
             get
             {
-                int chunks = int.TryParse(GetSettingValueByKey("MaxChunksToProcessAtOnce"), out chunks) ? chunks : 5;
+                int chunks = int.TryParse(GetSettingValueByKey("MaxChunksToProcessAtOnce"), out chunks) ? chunks : 3;
                 return chunks;
             }
         }

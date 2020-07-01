@@ -4,6 +4,7 @@ using ML.Domain.DataModels;
 using ML.Domain.Entities.Enums;
 using ML.Domain.Entities.Mongo;
 using ML.Utils.Extensions.Base;
+using MongoDB.Bson;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -51,7 +52,7 @@ namespace ML.BL
                 var task = Task.Factory.StartNew(() =>
                 Parallel.ForEach<InMemoryImageData>(chunk, image =>
                 {
-                    DoLabelScoring(GroupGuid, image);
+                    DoLabelScoring(GroupGuid, image, evaluationGroup.EvaluationStreamId);
                 }));
                 listOfTasks.Add(task);
             }
@@ -64,7 +65,7 @@ namespace ML.BL
             _evaluationGroupService.Update(evaluationGroup);
         }
 
-        public virtual void DoLabelScoring(Guid GroupGuid, InMemoryImageData image)
+        public virtual void DoLabelScoring(Guid GroupGuid, InMemoryImageData image, ObjectId evaluationStreamID)
         {
             throw new NotImplementedException();
         }

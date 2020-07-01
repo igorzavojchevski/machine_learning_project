@@ -58,23 +58,31 @@ namespace ML.ClassificationService
         {
             while (true)
             {
-                if (ServiceHelper.SystemSettingService.IsTrainingServiceStarted)
+                try
                 {
-                    Thread.Sleep(TimeSpan.FromMinutes(5));
-                    continue;
+
+                    if (ServiceHelper.SystemSettingService.IsTrainingServiceStarted)
+                    {
+                        Thread.Sleep(TimeSpan.FromMinutes(5));
+                        continue;
+                    }
+
+                    //Used for testing only
+                    //LabelScoring on TensorFlowInception
+                    //string imagesPath = @"C:\Users\igor.zavojchevski\Desktop\Master\TestMaterial\Frames\Panda"; //this should be output of frameexporterservice
+                    //_labelScoringService.Score(imagesPath);
+
+                    //Evaluation over Custom Logo
+                    IScoringService sync = _ScoringServiceFactory.Create(ScoringServiceType.LogoScoring);
+                    sync.Score();
+                    //ServiceHelper.SystemSettingService.CUSTOMLOGOMODEL_ExportedFromService_ImagesToEvaluateFolderPath
+
+                    Thread.Sleep(TimeSpan.FromMinutes(1));
                 }
-
-                //Used for testing only
-                //LabelScoring on TensorFlowInception
-                //string imagesPath = @"C:\Users\igor.zavojchevski\Desktop\Master\TestMaterial\Frames\Panda"; //this should be output of frameexporterservice
-                //_labelScoringService.Score(imagesPath);
-
-                //Evaluation over Custom Logo
-                IScoringService sync = _ScoringServiceFactory.Create(ScoringServiceType.LogoScoring);
-                sync.Score();
-                //ServiceHelper.SystemSettingService.CUSTOMLOGOMODEL_ExportedFromService_ImagesToEvaluateFolderPath
-
-                Thread.Sleep(TimeSpan.FromMinutes(1));
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "ClassificationService - Score exception");
+                }
             }
         }
     }

@@ -5,7 +5,9 @@ using ML.BL.Mongo.Interfaces;
 using ML.Domain.DataModels;
 using ML.Domain.DataModels.CustomLogoTrainingModel;
 using ML.Domain.DataModels.Models;
+using ML.Domain.Entities.Enums;
 using ML.Domain.Entities.Mongo;
+using MongoDB.Bson;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -47,10 +49,10 @@ namespace ML.BL.Concrete
             _logger.LogInformation("CommercialScoringService - Score finished");
         }
 
-        public override void DoLabelScoring(Guid GroupGuid, InMemoryImageData image)
+        public override void DoLabelScoring(Guid GroupGuid, InMemoryImageData image, ObjectId evaluationStreamID)
         {
             ImagePrediction prediction = PredictImage(image);
-            SaveImageScoringInfo(image, prediction, GroupGuid);
+            SaveImageScoringInfo(image, prediction, GroupGuid, ClassifiedBy.ClassificationService, evaluationStreamID);
         }
 
         public ImagePrediction PredictImage(InMemoryImageData image)
@@ -59,7 +61,7 @@ namespace ML.BL.Concrete
             return prediction;
         }
 
-        public void SaveImageScoringInfo(InMemoryImageData image, ImagePrediction prediction, Guid GroupGuid, bool isCustom = false)
+        public void SaveImageScoringInfo(InMemoryImageData image, ImagePrediction prediction, Guid GroupGuid, ClassifiedBy classifiedBy, ObjectId? evaluationStreamID = null)
         {
             Commercial ad = new Commercial
             {
@@ -72,7 +74,8 @@ namespace ML.BL.Concrete
                 ImageDateTime = image.ImageDateTime,
                 PredictedLabel = prediction.PredictedLabel,
                 MaxProbability = prediction.Score.Max(),
-                IsCustom = isCustom,
+                EvaluationStreamId = evaluationStreamID,
+                ClassifiedBy = classifiedBy,
                 ModifiedBy = "CommercialScoringService",
                 ModifiedOn = DateTime.UtcNow
             };

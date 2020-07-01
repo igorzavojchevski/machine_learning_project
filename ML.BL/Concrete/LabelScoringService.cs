@@ -13,6 +13,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using MongoDB.Bson;
 
 namespace ML.BL.Concrete
 {
@@ -53,7 +54,7 @@ namespace ML.BL.Concrete
             _logger.LogInformation("LabelScoringService - Score finished");
         }
 
-        public override void DoLabelScoring(Guid GroupGuid, InMemoryImageData image)
+        public override void DoLabelScoring(Guid GroupGuid, InMemoryImageData image, ObjectId evaluationStreamId)
         {
             ImagePredictedLabelWithProbability prediction = DoWork(image);
             SaveImageScoringInfo(prediction, GroupGuid);

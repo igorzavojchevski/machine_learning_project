@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Worker">
+﻿<Project Sdk="Microsoft.NET.Sdk.Worker">
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
@@ -8,11 +8,16 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="3.1.5" />
     <PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" Version="3.1.5" />
+    <PackageReference Include="NLog" Version="4.7.2" />
     <PackageReference Include="NLog.Web.AspNetCore" Version="4.9.2" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\ML.BL\ML.BL.csproj" />
     <ProjectReference Include="..\ML.Infrastructure.DependecyResolution\ML.Infrastructure.DependecyResolution.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Update="NLog.config" CopyToOutputDirectory="Always" />
   </ItemGroup>
 </Project>

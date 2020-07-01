@@ -17,6 +17,7 @@ using MongoDB.Bson;
 using System;
 using ML.Web.Models;
 using System.Drawing;
+using ML.Domain.Entities.Enums;
 
 namespace ML.Web.Controllers
 {
@@ -79,8 +80,8 @@ namespace ML.Web.Controllers
             {
                 string id = item.Id.ToString();
                 List<string> classNamesFromAllVersions = _labelClassService.GetAll().Where(t => t.FirstVersionId == item.FirstVersionId).Select(t => t.ClassName).ToList();
-                List<Commercial> list = _commercialService.GetAll().Where(t => classNamesFromAllVersions.Contains(t.PredictedLabel)).OrderByDescending(t => t.ModifiedOn).ToList();
-                groupList.Group.Add(new CommercialImagesGroupModel() { ID = id, PredictedLabel = item.ClassName, Commercials = list.Select(t => t.ToCommercialModel()).ToList() });
+                List<Commercial> list = _commercialService.GetAll().Where(t => t.ClassifiedBy == ClassifiedBy.ClassificationService && classNamesFromAllVersions.Contains(t.PredictedLabel)).ToList();
+                groupList.Group.Add(new CommercialImagesGroupModel() { ID = id, PredictedLabel = item.ClassName, Commercials = list.OrderByDescending(t => t.ImageDateTime).Select(t => t.ToCommercialModel()).ToList() });
             }
 
             return Ok(groupList);
@@ -137,9 +138,15 @@ namespace ML.Web.Controllers
                         ClassName = item.ClassName,
                         GroupGuid = t.GroupGuid,
                         ImageDateTime = t.ImageDateTime,
-                        IsCustom = t.IsCustom
+                        ClassifiedBy = t.ClassifiedBy,
+                        EvaluationStreamId = t.EvaluationStreamId
                     })
                     .ToList();
+
+                listByClassName
+                    .ForEach(t => 
+                    t.EvaluationStreamName = _evaluationStreamService.GetAll().Where(es => es.Id == t.EvaluationStreamId).FirstOrDefault()?.Name
+                    );
 
                 listOfCommercialsForTimeFrames.AddRange(listByClassName);
             }
@@ -153,7 +160,7 @@ namespace ML.Web.Controllers
                     {
                         DateTimeKey = g.Key,
                         LabelTimeFrameGroups =
-                            g.OrderBy(t=>t.ImageDateTime).GroupBy(t => new { t.ClassName, t.GroupGuid })
+                            g.OrderBy(t => t.ImageDateTime).GroupBy(t => new { t.ClassName, t.GroupGuid })
                             .Select(gsg =>
                             new LabelTimeFrameGroup
                             {
@@ -161,7 +168,7 @@ namespace ML.Web.Controllers
                                 GroupGuid = gsg.Key.GroupGuid,
                                 StartDate = gsg.Min(t => t.ImageDateTime),
                                 EndDate = gsg.Max(t => t.ImageDateTime),
-                                IsCustom = gsg.Select(t => t.IsCustom).First()
+                                ClassifiedBy = gsg.Select(t => t.ClassifiedBy).First()
                             }).ToList()
                     })
                     .ToList();
@@ -172,7 +179,7 @@ namespace ML.Web.Controllers
         [Route("GetEvaluationStreams")]
         public IActionResult GetEvaluationStreams()
         {
-            List<EvaluationStreamModel> evaluationStreams = _evaluationStreamService.GetAll().ToList().Select(t=>t.ToEvaluationStreamModel()).ToList();
+            List<EvaluationStreamModel> evaluationStreams = _evaluationStreamService.GetAll().ToList().Select(t => t.ToEvaluationStreamModel()).ToList();
             return Ok(evaluationStreams);
         }
 
@@ -205,6 +212,33 @@ namespace ML.Web.Controllers
             return Ok();
         }
 
+        [HttpPost]
+        [Route("EditEvaluationStream")]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(404)]
+        public IActionResult EditEvaluationStream(EvaluationStreamItem evaluationStreamItem)
+        {
+            if (evaluationStreamItem == null) return BadRequest();
+
+            if (string.IsNullOrWhiteSpace(evaluationStreamItem.Name) || string.IsNullOrWhiteSpace(evaluationStreamItem.Stream) || string.IsNullOrWhiteSpace(evaluationStreamItem.Code)) return BadRequest();
+
+            ObjectId.TryParse(evaluationStreamItem.Id, out ObjectId evaluationStreamID);
+            EvaluationStream evaluationStream = _evaluationStreamService.GetAll().Where(t => t.Id == evaluationStreamID).FirstOrDefault();
+            if (evaluationStream == null) return BadRequest();
+
+            evaluationStream.Name = evaluationStreamItem.Name;
+            evaluationStream.Stream = evaluationStreamItem.Stream;
+            evaluationStream.Code = evaluationStreamItem.Code;
+            evaluationStream.IsActive = evaluationStreamItem.IsActive;
+            evaluationStream.ModifiedBy = "CreateLabelClassName";
+            evaluationStream.ModifiedOn = DateTime.UtcNow;
+
+            _evaluationStreamService.Update(evaluationStream);
+
+            return Ok();
+        }
+
 
         [HttpPost]
         [Route("CreateLabelClassName")]
@@ -224,7 +258,7 @@ namespace ML.Web.Controllers
                 ClassName = string.Format("{0}_{1}", labelItem.Name, newGuid),
                 CategoryType = "Default", //make this enum in future
                 ImagesGroupGuid = newGuid,
-                DirectoryPath = Path.Combine(_systemSettingService.CUSTOMLOGOMODEL_TrainedImagesFolderPath, labelItem.Name, newGuid.ToString()),
+                DirectoryPath = Path.Combine(_systemSettingService.CUSTOMLOGOMODEL_TrainedImagesFolderPath, labelItem.Name + "_" + newGuid.ToString()),
                 TrainingVersion = _labelClassService.GetAll().Any() ? _labelClassService.GetAll().Max(t => t.TrainingVersion) : 0,
                 Version = 1,
                 IsChanged = false,
@@ -244,7 +278,7 @@ namespace ML.Web.Controllers
             return Ok();
         }
 
-        
+
 
         [HttpPost]
         [Route("EditLabelClassName")]
@@ -451,12 +485,12 @@ namespace ML.Web.Controllers
             string imageFilePath = Path.Combine(destOutputPath, imageDetails.ImageFile.FileName);
             i.Save(imageFilePath);
 
-            InMemoryImageData imageInputData = 
+            InMemoryImageData imageInputData =
                 new InMemoryImageData(imageData, labelClass.ClassName, imageDetails.ImageFile.FileName, imageFilePath, destOutputPath, DateTime.UtcNow);
 
             ImagePrediction prediction = new ImagePrediction() { PredictedLabel = labelClass.ClassName, Score = new float[] { 1f } }; //100% score due to custom eval.
-            
-            _commercialScoringService.SaveImageScoringInfo(imageInputData, prediction, Guid.NewGuid(), true);
+
+            _commercialScoringService.SaveImageScoringInfo(imageInputData, prediction, Guid.NewGuid(), ClassifiedBy.Custom);
 
             _logger.LogInformation("ClassifyCustomImage - Finished");
 

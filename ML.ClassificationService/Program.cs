@@ -4,6 +4,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.EventLog;
 using ML.Infrastructure.DependecyResolution;
+using NLog.Web;
 
 namespace ML.ClassificationService
 {
@@ -17,8 +18,12 @@ namespace ML.ClassificationService
         public static IHostBuilder CreateHostBuilder(string[] args)
         {
             return Host.CreateDefaultBuilder(args)
-            .ConfigureLogging(
-            options => options.AddFilter<EventLogLoggerProvider>(level => level >= LogLevel.Information))
+            .ConfigureLogging(loggingBuilder =>
+            {
+                //options.AddFilter<EventLogLoggerProvider>(level => level >= LogLevel.Information);
+                loggingBuilder.ClearProviders();
+                loggingBuilder.SetMinimumLevel(LogLevel.Trace);
+            })
             .ConfigureServices((hostContext, services) =>
             {
                 IConfiguration Configuration = hostContext.Configuration;
@@ -32,7 +37,9 @@ namespace ML.ClassificationService
 
                 services.RegisterServices(Configuration);
 
-            }).UseWindowsService();
+            })
+            .UseNLog()
+            .UseWindowsService();
         }
 
         

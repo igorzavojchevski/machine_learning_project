@@ -66,38 +66,49 @@ namespace ML.BL.Concrete
                 string newDir = Path.Combine(dirName, DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString() + evaluationStream.Code);
                 Task.Factory.StartNew(() =>
                 {
-                    ProcessExport(process, evaluationStream.Stream, newDir);
+                    ProcessExport(process, evaluationStream, newDir);
                 });
                 Thread.Sleep(TimeSpan.FromMinutes(1));
                 process.Kill();
             }
         }
 
-        public void ProcessExport(Process process, string hlsstream, string newDir)
+        public void ProcessExport(Process process, EvaluationStream evaluationStream, string newDir)
         {
-            _logger.LogInformation("FrameExporterService - Export - DoWork started - {0}", hlsstream);
+            _logger.LogInformation("FrameExporterService - DoWork - ProcessExport started - {0}", evaluationStream.Name);
 
             Guid newGuid = Guid.NewGuid();
             TrainingStatus status = TrainingStatus.New;
             try
             {
                 Directory.CreateDirectory(newDir);
-                process.StartInfo.Arguments = $"-skip_frame nokey -i {hlsstream} -vsync 0 -r 30 -f image2 -strftime 1 {newDir}\\{newGuid}_%Y%m%d%H%M%S.jpeg";
+                process.StartInfo.Arguments = $"-i {evaluationStream.Stream} -vf \"select=eq(pict_type\\,I)\" -vsync vfr -qscale:v 2 -strftime 1 {newDir}\\{newGuid}_%Y%m%d%H%M%S.jpeg";
+                    //$"-skip_frame nokey -i {evaluationStream.Stream} -vsync 0 -r 30 -f image2 -strftime 1 {newDir}\\{newGuid}_%Y%m%d%H%M%S.jpeg";
                 process.Start();
 
             }
             catch (Exception ex)
             {
                 status = TrainingStatus.CreatedWithError;
-                _logger.LogError("FrameExporterService - Export - DoWork - {0}", hlsstream);
-                _logger.LogError(ex, "FrameExporterService - Export - DoWork - {0}", hlsstream);
+                _logger.LogError("FrameExporterService - DoWork - ProcessExport - {0}", evaluationStream.Name);
+                _logger.LogError(ex, "FrameExporterService - DoWork - ProcessExport - {0}", evaluationStream.Name);
             }
             finally
             {
-                _evaluationGroupService.InsertOne(new EvaluationGroup() { DirPath = newDir, EvaluationGroupGuid = newGuid, ParentGroupGuid = newGuid, Status = status, ModifiedBy = "ExportService", ModifiedOn = DateTime.UtcNow });
+                _evaluationGroupService.InsertOne(new EvaluationGroup() 
+                { 
+                    DirPath = newDir,
+                    EvaluationGroupGuid = newGuid, 
+                    ParentGroupGuid = newGuid, 
+                    Status = status, 
+                    EvaluationStreamId = evaluationStream.Id,
+                    EvaluationStreamName = evaluationStream.Name,
+                    ModifiedBy = "ExportService", 
+                    ModifiedOn = DateTime.UtcNow 
+                });
             }
 
-            _logger.LogInformation("FrameExporterService - Export - DoWork finished {0}", hlsstream);
+            _logger.LogInformation("FrameExporterService - DoWork - ProcessExport finished {0}", evaluationStream.Name);
         }
     }
 }

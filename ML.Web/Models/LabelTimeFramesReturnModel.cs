@@ -1,4 +1,5 @@
-﻿using ML.Domain.ReturnModels;
+﻿using ML.Domain.Entities.Enums;
+using ML.Domain.ReturnModels;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,6 +20,6 @@ namespace ML.Web.Models
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
                                 
-        public bool IsCustom { get; set; }
+        public ClassifiedBy ClassifiedBy { get; set; }
     }
 }

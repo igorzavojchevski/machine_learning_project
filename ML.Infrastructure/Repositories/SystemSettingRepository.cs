@@ -29,7 +29,13 @@ namespace ML.Infrastructure.Repositories
 
             if (!GetAll().Any(t => t.SettingKey == "Archive_NextStartPeriod_Minutes"))
                 InsertOne(new SystemSetting { SettingKey = "Archive_NextStartPeriod_Minutes", SettingValue = @"4320", ModifiedBy = "SystemSettingRepository", ModifiedOn = DateTime.UtcNow });
-                
+
+            if (!GetAll().Any(t => t.SettingKey == "ClassGroupThreshold"))
+                InsertOne(new SystemSetting { SettingKey = "ClassGroupThreshold", SettingValue = @"0.9", ModifiedBy = "SystemSettingRepository", ModifiedOn = DateTime.UtcNow });
+
+            if (!GetAll().Any(t => t.SettingKey == "MaxChunksToProcessAtOnce"))
+                InsertOne(new SystemSetting { SettingKey = "MaxChunksToProcessAtOnce", SettingValue = @"3", ModifiedBy = "SystemSettingRepository", ModifiedOn = DateTime.UtcNow });
+
 
             if (!GetAll().Any(t => t.SettingKey == "TF_LabelsFilePath"))
                 InsertOne(new SystemSetting { SettingKey = "TF_LabelsFilePath", SettingValue = "C:\\Users\\igor.zavojchevski\\Desktop\\Master\\ML\\assets\\MLModels\\TensorFlowModel\\imagenet_comp_graph_label_strings.txt", ModifiedBy = "SystemSettingRepository", ModifiedOn = DateTime.UtcNow });

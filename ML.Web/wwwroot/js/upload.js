@@ -321,17 +321,31 @@ function CreateLabelAndImageSection(groupList) {
         commercialImagesDivSelect.classList = "image-picker";
         commercialImagesDivSelect.setAttribute("multiple", "multiple");
 
+        var initializedImagePicker = false;
+
         for (var j = 0; j < groupList.group[i].commercials.length; j++) {
 
             var imageId = groupList.group[i].commercials[j].imageId;
+
+            var commGroupGuid = "commGroup_" + groupList.group[i].commercials[j].groupGuid;
+            var optGroup = document.getElementById(commGroupGuid);
+            console.log(!optGroup);
+            if (!optGroup) {
+                optGroup = document.createElement("optgroup");
+                optGroup.setAttribute("id", commGroupGuid);
+                optGroup.setAttribute("label", groupList.group[i].commercials[j].groupGuid);
+            }
+
             var selectOption = document.createElement("option");
             selectOption.setAttribute("data-img-src", "images_to_train/" + groupList.group[i].predictedLabel + "/" + imageId);
             selectOption.setAttribute("data-img-label", (groupList.group[i].commercials[j].maxProbability * 100).toFixed(3) + "%");
             selectOption.setAttribute("value", groupList.group[i].commercials[j].id);
-            commercialImagesDivSelect.append(selectOption);
+            optGroup.appendChild(selectOption);
+            commercialImagesDivSelect.append(optGroup);
+
+            if (!initializedImagePicker) { commercialImagesDiv.appendChild(commercialImagesDivSelect); x.appendChild(commercialImagesDiv); InitializeImagePicker(); initializedImagePicker = true; }
+            else $(".image-picker").data("picker").sync_picker_with_select();
         }
-        commercialImagesDiv.appendChild(commercialImagesDivSelect);
-        x.appendChild(commercialImagesDiv);
     }
 }
 
@@ -393,24 +407,28 @@ function GetLabelTimeFrames() {
             var th2 = document.createElement('th');
             var th3 = document.createElement('th');
             var th4 = document.createElement('th');
+            var th5 = document.createElement('th');
             th1.textContent = "Commercial Name";
             th1.style.textAlign = "center";
             th2.textContent = "Start Time";
             th2.style.textAlign = "center";
             th3.textContent = "End Time";
             th3.style.textAlign = "center";
-            th4.textContent = "Custom Evaluation";
+            th4.textContent = "Stream Name";
             th4.style.textAlign = "center";
+            th5.textContent = "Custom Evaluation";
+            th5.style.textAlign = "center";
             tbody.appendChild(th1);
             tbody.appendChild(th2);
             tbody.appendChild(th3);
             tbody.appendChild(th4);
+            tbody.appendChild(th5);
 
             for (var i = 0; i < response.length; i++) {
 
                 var tr = document.createElement('tr');
                 var td = document.createElement('td');
-                td.setAttribute("colspan", "4");
+                td.setAttribute("colspan", "5");
                 var date = new Date(response[i].dateTimeKey);
                 td.textContent = FormatDate(date);
                 td.style.textAlign = "center";
@@ -427,11 +445,14 @@ function GetLabelTimeFrames() {
                     var td3 = document.createElement('td');
                     td3.textContent = FormatDateAndTime(response[i].labelTimeFrameGroups[j].endDate);
                     var td4 = document.createElement('td');
-                    td4.textContent = response[i].labelTimeFrameGroups[j].isCustom ? "true" : "";
+                    td4.textContent = response[i].labelTimeFrameGroups[j].evaluationStreamName;
+                    var td5 = document.createElement('td');
+                    td5.textContent = response[i].labelTimeFrameGroups[j].classifiedBy;
                     tr1.appendChild(td1);
                     tr1.appendChild(td2);
                     tr1.appendChild(td3);
                     tr1.appendChild(td4);
+                    tr1.appendChild(td5);
                     tbody.appendChild(tr1);
                 }
             }
@@ -583,10 +604,20 @@ function GetEvaluationStreams() {
                 td3.textContent = response[i].code;
                 var td4 = document.createElement('td');
                 td4.textContent = response[i].isActive;
+                var td5 = document.createElement('td');
+                td5.style.textAlign = "center";
+                var td5buttonEdit = document.createElement("button");
+                td5buttonEdit.textContent = "Edit";
+                td5buttonEdit.classList = "btn";
+                td5buttonEdit.style.fontSize = "12px";
+                td5buttonEdit.setAttribute("onClick", "editEvaluationStream('" + response[i].id + "', '" + response[i].name + "', '" + response[i].stream + "', '" + response[i].code + "', '" + response[i].isActive + "')");
+
+                td5.appendChild(td5buttonEdit);
                 tr.appendChild(td1);
                 tr.appendChild(td2);
                 tr.appendChild(td3);
                 tr.appendChild(td4);
+                tr.appendChild(td5);
                 tbody.appendChild(tr);
             }
             table.appendChild(tbody);
@@ -594,6 +625,17 @@ function GetEvaluationStreams() {
         });
 }
 
+function editEvaluationStream(id, name, stream, code, isActive) {
+    console.log(id, name, stream, code, isActive);
+    var nameInputValueById = document.getElementById("nameEvaluationStreamInput");
+    nameInputValueById.value = name;
+    var streamInputValueById = document.getElementById("streamEvaluationStreamInput");
+    streamInputValueById.value = stream;
+    var codeInputValueById = document.getElementById("codeEvaluationStreamInput");
+    codeInputValueById.value = code;
+
+    OpenCreateEvaluationStreamModal();
+}
 
 function OpenCreateEvaluationStreamModal() {
 
@@ -637,6 +679,13 @@ function CloseCreateEvaluationStreamModal() {
     var modal = document.getElementById("createEvaluationStreamModal");
 
     modal.style.display = "none";
+
+    var nameInputValue = document.getElementById("nameEvaluationStreamInput");
+    nameInputValue.value = "";
+    var streamInputValue = document.getElementById("streamEvaluationStreamInput");
+    streamInputValue.value = "";
+    var codeInputValue = document.getElementById("codeEvaluationStreamInput");
+    codeInputValue.value = "";
 }
 
 form.addEventListener('submit', e => {

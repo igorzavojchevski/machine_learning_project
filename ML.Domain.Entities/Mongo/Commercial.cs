@@ -1,4 +1,5 @@
-﻿using ML.Domain.Entities.Mongo.Base;
+﻿using ML.Domain.Entities.Enums;
+using ML.Domain.Entities.Mongo.Base;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 using System;
@@ -24,7 +25,9 @@ namespace ML.Domain.Entities.Mongo
         public Guid GroupGuid { get; set; }
         public DateTime ImageDateTime { get; set; }
 
-        public bool IsCustom { get; set; }
+        public ObjectId? EvaluationStreamId { get; set; }
+
+        public ClassifiedBy ClassifiedBy { get; set; }
 
         // not needed at this moment
         public bool IsMerged { get; set; }

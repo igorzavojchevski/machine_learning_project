@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using NLog.Web;
 
 namespace ML.Web
 {
@@ -18,9 +19,15 @@ namespace ML.Web
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>
             Host.CreateDefaultBuilder(args)
+                .ConfigureLogging(loggingBuilder =>
+                {
+                    loggingBuilder.ClearProviders();
+                    loggingBuilder.SetMinimumLevel(LogLevel.Trace);
+                })
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
                     webBuilder.UseStartup<Startup>();
-                });
+                })
+                .UseNLog();
     }
 }
