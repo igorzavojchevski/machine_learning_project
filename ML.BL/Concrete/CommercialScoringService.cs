@@ -99,7 +99,7 @@ namespace ML.BL.Concrete
 
             label = label.Contains("_") ? label : $"{label}_{GroupGuid}";
 
-            string destOutputPath = CheckLabelClassOutputDirectory(label);
+            string destOutputPath = CheckLabelClassOutputDirectory(label, GroupGuid);
             //string destOutputPath = Path.Combine(_systemSettingService.CUSTOMLOGOMODEL_TrainedImagesFolderPath, label)
             Directory.CreateDirectory(destOutputPath);
 
@@ -116,20 +116,21 @@ namespace ML.BL.Concrete
                     string destFile = System.IO.Path.Combine(destOutputPath, fileName);
                     System.IO.File.Copy(s, destFile, true);
 
-                    UpdateCommercial(cmrsByGuid, destOutputPath, destFile, fileName);
+                    UpdateCommercial(cmrsByGuid, destOutputPath, destFile, fileName, label);
                 }
             }
         }
 
-        private void UpdateCommercial(List<Commercial> cmrsByGuid, string destOutputPath, string destFile, string fileName)
+        private void UpdateCommercial(List<Commercial> cmrsByGuid, string destOutputPath, string destFile, string fileName, string label)
         {
             var commercialItem = cmrsByGuid.First(t => t.ImageId == fileName);
             commercialItem.ImageFilePath = destFile;
             commercialItem.ImageDirPath = destOutputPath;
+            commercialItem.PredictedLabel = label;
             _commercialService.Update(commercialItem);
         }
 
-        private string CheckLabelClassOutputDirectory(string label)
+        private string CheckLabelClassOutputDirectory(string label, Guid GroupGuid)
         {
             LabelClass lastOldLabelClass = 
                 _labelClassService
@@ -139,7 +140,33 @@ namespace ML.BL.Concrete
                 .OrderByDescending(t => t.Version)
                 .FirstOrDefault();
 
-            if (lastOldLabelClass == null) return Path.Combine(_systemSettingService.CUSTOMLOGOMODEL_TrainedImagesFolderPath, label);
+            if (lastOldLabelClass == null) 
+            {
+                string newPath = Path.Combine(_systemSettingService.CUSTOMLOGOMODEL_TrainedImagesFolderPath, label);
+                int lastTrainingVersion = _labelClassService.GetAll().Any() ? _labelClassService.GetAll().Max(t => t.TrainingVersion) : 0;
+
+                LabelClass newLabelClass = new LabelClass()
+                {
+                    ClassName = label,
+                    CategoryType = "Default", //make this enum in future
+                    ImagesGroupGuid = GroupGuid,
+                    DirectoryPath = newPath,
+                    TrainingVersion = lastTrainingVersion,
+                    Version = 1,
+                    IsChanged = false,
+                    ModifiedBy = "CommercialScoringService - evaluation/classification process",
+                    ModifiedOn = DateTime.UtcNow
+                };
+
+                _labelClassService.InsertOne(newLabelClass);
+
+                newLabelClass.FirstVersionId = newLabelClass.Id;
+                newLabelClass.ModifiedOn = DateTime.UtcNow;
+
+                _labelClassService.Update(newLabelClass);
+
+                return newPath; 
+            }
             
             if (!lastOldLabelClass.IsChanged) return lastOldLabelClass.DirectoryPath;
 

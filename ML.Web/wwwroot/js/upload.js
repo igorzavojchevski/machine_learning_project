@@ -125,12 +125,12 @@ function labelCancelEditEsc(e) {
     }
 }
 
-function saveMoveImages(commercialid) {
-    var arrayOfSelected = $(".image-picker").find("option:selected").toArray();
-    var arrayImagesOfCommercial = arrayOfSelected.filter((x) => { return x.parentElement.getAttribute("id") === "commercialImagesDivSelect_" + commercialid; });
-    var result = arrayImagesOfCommercial.map(a => a.value);
+function saveMoveImages(commercialid, parentDIV) {
+    var arrayOfSelected = $("#" + parentDIV + " > ul.thumbnails").find(".selected").toArray();
+    //console.log(arrayOfSelected);
+    //var arrayImagesOfCommercial = arrayOfSelected.filter((x) => { return x.parentElement.getAttribute("id") === "commercialImagesDivSelect_" + commercialid; });
+    var result = arrayOfSelected.map(a => a.getAttribute("value"));
     console.log(result);
-    console.log(document.getElementById("commercialImagesDiv_SELECTForMove_" + commercialid));
 
     var selectElement = document.getElementById("commercialImagesDiv_SELECTForMove_" + commercialid);
     var selectedValue = selectElement.options[selectElement.selectedIndex].value;
@@ -308,7 +308,7 @@ function CreateLabelAndImageSection(groupList) {
         commercialImagesSaveButton.style.position = "absolute";
         commercialImagesSaveButton.style.marginLeft = "2%";
         commercialImagesSaveButton.style.marginTop = "-0.25%";
-        commercialImagesSaveButton.setAttribute("onMouseDown", "saveMoveImages('" + id + "')");
+        commercialImagesSaveButton.setAttribute("onMouseDown", "saveMoveImages('" + id + "','" + commercialImagesDiv.id + "')");
 
         commercialImagesDiv_DIVForMove.appendChild(span_commercialImagesDiv_SELECTForMove)
         commercialImagesDiv_DIVForMove.appendChild(commercialImagesDiv_SELECTForMove);
@@ -339,6 +339,7 @@ function CreateLabelAndImageSection(groupList) {
             var selectOption = document.createElement("option");
             selectOption.setAttribute("data-img-src", "images_to_train/" + groupList.group[i].predictedLabel + "/" + imageId);
             selectOption.setAttribute("data-img-label", (groupList.group[i].commercials[j].maxProbability * 100).toFixed(3) + "%");
+            selectOption.setAttribute("data-img-label2","(" + FormatDateAndTime(groupList.group[i].commercials[j].imageDateTime) + ")");
             selectOption.setAttribute("value", groupList.group[i].commercials[j].id);
             optGroup.appendChild(selectOption);
             commercialImagesDivSelect.append(optGroup);

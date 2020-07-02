@@ -144,7 +144,7 @@ namespace ML.Web.Controllers
                     .ToList();
 
                 listByClassName
-                    .ForEach(t => 
+                    .ForEach(t =>
                     t.EvaluationStreamName = _evaluationStreamService.GetAll().Where(es => es.Id == t.EvaluationStreamId).FirstOrDefault()?.Name
                     );
 
@@ -341,7 +341,7 @@ namespace ML.Web.Controllers
 
             if (string.IsNullOrWhiteSpace(moveImagesModel.NewClassNameId)) return BadRequest();
 
-            if (moveImagesModel.ImagesIds == null || moveImagesModel.ImagesIds.Count == 0) return BadRequest();
+            if (moveImagesModel.ImagesIds == null || moveImagesModel.ImagesIds.Count == 0 || moveImagesModel.ImagesIds.Any(t => t == null)) return BadRequest();
 
             ObjectId.TryParse(moveImagesModel.NewClassNameId, out ObjectId labelClassID);
 

@@ -36,6 +36,7 @@ namespace ML.BL
             if(string.IsNullOrWhiteSpace(evaluationGroup.DirPath)) { _logger.LogInformation("ScoringService - Score - Invalid EvaluationGroupDirPath"); return; }
 
             evaluationGroup.Status = TrainingStatus.Processing;
+            evaluationGroup.ModifiedOn = DateTime.UtcNow;
             _evaluationGroupService.Update(evaluationGroup);
 
             IEnumerable<InMemoryImageData> Images = BaseExtensions.LoadInMemoryImagesFromDirectory(evaluationGroup.DirPath, false);
@@ -62,6 +63,7 @@ namespace ML.BL
             GroupByLabel(GroupGuid);
 
             evaluationGroup.Status = TrainingStatus.Processed;
+            evaluationGroup.ModifiedOn = DateTime.UtcNow;
             _evaluationGroupService.Update(evaluationGroup);
         }
 
