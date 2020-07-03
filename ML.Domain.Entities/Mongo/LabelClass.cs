@@ -15,5 +15,6 @@ namespace ML.Domain.Entities.Mongo
         public ObjectId FirstVersionId { get; set; }
         public bool IsChanged { get; set; }
         public bool IsCustom { get; set; }
+        public bool IsCleanedUp { get; set; }
     }
 }

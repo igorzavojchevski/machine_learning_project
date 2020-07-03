@@ -8,7 +8,7 @@ namespace ML.ImageClassification.Train.Interfaces
     {
         void DoBeforeTrainingStart();
         void DoAfterTrainingFinished();
-
         void Train();
+        void DoCleanup();
     }
 }

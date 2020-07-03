@@ -24,18 +24,21 @@ namespace ML.ImageClassification.Train.Concrete
         private readonly ISystemSettingService _systemSettingService;
         private readonly IEvaluationGroupService _evaluationGroupService;
         private readonly ILabelClassService _labelClassService;
+        private readonly ICommercialService _commercialService;
 
         public TrainingService(
             ILogger<TrainingService> logger,
             ISystemSettingService systemSettingService,
             IEvaluationGroupService evaluationGroupService,
-            ILabelClassService labelClassService)
+            ILabelClassService labelClassService,
+            ICommercialService commercialService)
         {
             _logger = logger;
             _mlContext = new MLContext(seed: 1);
             _systemSettingService = systemSettingService;
             _evaluationGroupService = evaluationGroupService;
             _labelClassService = labelClassService;
+            _commercialService = commercialService;
         }
 
         public void DoBeforeTrainingStart()
@@ -180,6 +183,9 @@ namespace ML.ImageClassification.Train.Concrete
                 // 9. Try a single prediction simulating an end-user app
                 TrySinglePrediction(_mlContext, trainedModel);
 
+                //10. Update all that are trained
+                UpdateAllTrainedImages(images);
+
                 _logger.LogInformation("Finished Training");
             }
             catch (Exception ex)
@@ -187,6 +193,52 @@ namespace ML.ImageClassification.Train.Concrete
                 _logger.LogError("TrainingService - exception", ex);
                 _logger.LogError(ex, "TrainingService - exception");
             }
+        }
+
+        private void UpdateAllTrainedImages(IEnumerable<ImageData> images)
+        {
+            foreach (ImageData image in images)
+            {
+                Commercial commercial = _commercialService.GetAll().Where(t => t.ImageFilePath == image.ImagePath).FirstOrDefault();
+                if (commercial == null) continue;
+
+                commercial.ModifiedOn = DateTime.UtcNow;
+                commercial.ModifiedBy = "UpdateAllTrainedImages - TrainingService";
+                commercial.IsTrained = true;
+                _commercialService.Update(commercial);
+            }
+        }
+
+        public void DoCleanup()
+        {
+            List<LabelClass> listOfDirPath_LabelClasses = _labelClassService.GetAll().Where(t => !t.IsCleanedUp).ToList();
+            foreach (var labelData in listOfDirPath_LabelClasses)
+            {
+                if (!Directory.Exists(labelData.DirectoryPath))
+                {
+                    labelData.ModifiedOn = DateTime.UtcNow;
+                    labelData.ModifiedBy = "Cleanup - TrainingService";
+                    labelData.IsCleanedUp = true;
+                    _labelClassService.Update(labelData);
+
+                    continue;
+                }
+
+                if (!IsDirectoryEmpty(labelData.DirectoryPath)) continue;
+
+                Directory.Delete(labelData.DirectoryPath, true);
+
+                labelData.ModifiedOn = DateTime.UtcNow;
+                labelData.ModifiedBy = "Cleanup - TrainingService";
+                labelData.IsCleanedUp = true;
+                _labelClassService.Update(labelData);
+            }
+        }
+
+        private bool IsDirectoryEmpty(string path)
+        {
+            bool isDirectoryEmpty = !Directory.EnumerateFileSystemEntries(path).Any();
+            return isDirectoryEmpty;
         }
 
         private void InsertLabelsAsCommercialClasses(string imagesToReTrainFolderPath)
@@ -212,6 +264,18 @@ namespace ML.ImageClassification.Train.Concrete
                 .OrderByDescending(t => t.TrainingVersion)
                 .ThenByDescending(t => t.Version)
                 .FirstOrDefault();
+
+            if (labelClass != null)
+            {
+                labelClass.TrainingVersion = newTrainingVersion;
+                labelClass.Version = labelClass.Version + 1;
+                labelClass.ModifiedOn = DateTime.UtcNow;
+                labelClass.ModifiedBy = "PrepareAndInsertLabelClass - TrainingService";
+
+                _labelClassService.Update(labelClass);
+
+                return;
+            }
 
             LabelClass newLabelClass = new LabelClass()
             {

@@ -102,6 +102,7 @@ function labelSaveEdit(elementid, objectid) {
         })
         .then(function (response) {
             console.log(response);
+            $('#btnCommercials').trigger('click');
         });
 }
 
@@ -168,7 +169,7 @@ function LoadLabelsAndImages(size, page) {
 
             CreateLabelAndImageSection(response);
 
-            InitializeImagePicker();
+            //InitializeImagePicker();
             InitializePaginationPlaceholder(response);
         })
 }
@@ -317,7 +318,8 @@ function CreateLabelAndImageSection(groupList) {
 
 
         var commercialImagesDivSelect = document.createElement("select");
-        commercialImagesDivSelect.setAttribute("id", "commercialImagesDivSelect_" + id);
+        var commercialImagesDivSelectID = "commercialImagesDivSelect_" + id;
+        commercialImagesDivSelect.setAttribute("id", commercialImagesDivSelectID);
         commercialImagesDivSelect.classList = "image-picker";
         commercialImagesDivSelect.setAttribute("multiple", "multiple");
 
@@ -327,7 +329,7 @@ function CreateLabelAndImageSection(groupList) {
 
             var imageId = groupList.group[i].commercials[j].imageId;
 
-            var commGroupGuid = "commGroup_" + groupList.group[i].commercials[j].groupGuid;
+            var commGroupGuid = "commGroup_" + i + "_" + groupList.group[i].commercials[j].groupGuid;
             var optGroup = document.getElementById(commGroupGuid);
             console.log(!optGroup);
             if (!optGroup) {
@@ -339,14 +341,15 @@ function CreateLabelAndImageSection(groupList) {
             var selectOption = document.createElement("option");
             selectOption.setAttribute("data-img-src", "images_to_train/" + groupList.group[i].predictedLabel + "/" + imageId);
             selectOption.setAttribute("data-img-label", (groupList.group[i].commercials[j].maxProbability * 100).toFixed(3) + "%");
-            selectOption.setAttribute("data-img-label2","(" + FormatDateAndTime(groupList.group[i].commercials[j].imageDateTime) + ")");
+            selectOption.setAttribute("data-img-label2", "(" + FormatDateAndTime(groupList.group[i].commercials[j].imageDateTime) + ")");
             selectOption.setAttribute("value", groupList.group[i].commercials[j].id);
             optGroup.appendChild(selectOption);
             commercialImagesDivSelect.append(optGroup);
 
-            if (!initializedImagePicker) { commercialImagesDiv.appendChild(commercialImagesDivSelect); x.appendChild(commercialImagesDiv); InitializeImagePicker(); initializedImagePicker = true; }
-            else $(".image-picker").data("picker").sync_picker_with_select();
+            if (!initializedImagePicker) { commercialImagesDiv.appendChild(commercialImagesDivSelect); x.appendChild(commercialImagesDiv); InitializeImagePicker(commercialImagesDivSelectID); initializedImagePicker = true; }
+            else $("#" + commercialImagesDivSelectID).data("picker").sync_picker_with_select();
         }
+        InitializeImagePicker(commercialImagesDivSelectID);
     }
 }
 
@@ -365,8 +368,8 @@ function InitializePaginationPlaceholder(responseImages) {
     paginationInitialized = true;
 }
 
-function InitializeImagePicker() {
-    $(".image-picker").imagepicker({
+function InitializeImagePicker(id) {
+    $("#" + id).imagepicker({
         show_label: true,
         clicked: function () {
             //console.log(this.find("option:selected"));

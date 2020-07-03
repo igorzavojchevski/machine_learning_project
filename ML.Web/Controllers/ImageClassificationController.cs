@@ -62,7 +62,7 @@ namespace ML.Web.Controllers
 
             List<LabelClass> lastTrainingVersionLabels = _labelClassService
                 .GetAll()
-                .Where(t => t.TrainingVersion == lastTrainingVersion)
+                .Where(t => t.TrainingVersion == lastTrainingVersion && !t.IsCleanedUp)
                 .ToList();
 
             List<LabelClass> labelClasses = lastTrainingVersionLabels
@@ -94,7 +94,7 @@ namespace ML.Web.Controllers
 
             var lastTrainingVersionLabels = _labelClassService
                 .GetAll()
-                .Where(t => t.TrainingVersion == lastTrainingVersion)
+                .Where(t => t.TrainingVersion == lastTrainingVersion && !t.IsCleanedUp)
                 .ToList();
 
             var labelClasses = lastTrainingVersionLabels
@@ -357,11 +357,11 @@ namespace ML.Web.Controllers
 
             allAdsFromList.ForEach(t =>
             {
-                string newFilePath = Path.Combine(newDirPath, string.Format("{0}_{1}", t.PredictedLabel, t.ImageId));
+                string newFilePath = Path.Combine(newDirPath, t.ImageId);
 
                 Directory.Move(t.ImageFilePath, newFilePath);
 
-                t.ImageId = string.Format("{0}_{1}", t.PredictedLabel, t.ImageId);
+                //t.ImageId = string.Format("{0}_{1}", t.PredictedLabel, t.ImageId);
                 t.PredictedLabel = newLabel.ClassName;
                 t.ImageDirPath = newDirPath;
                 t.ImageFilePath = newFilePath;

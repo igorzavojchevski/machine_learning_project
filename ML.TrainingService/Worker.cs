@@ -50,8 +50,8 @@ namespace ML.TrainingService
         {
             while (true)
             {
-                _archivingService.ArchiveImages();
-                Thread.Sleep(TimeSpan.FromMinutes(60));
+                //_archivingService.ArchiveImages();
+                //Thread.Sleep(TimeSpan.FromMinutes(60));
             }
         }
 
@@ -68,6 +68,9 @@ namespace ML.TrainingService
         {
             //Do before training start activities - (set flag for start etc.)
             _trainingService.DoBeforeTrainingStart();
+
+            //Do cleanup for not used items
+            _trainingService.DoCleanup();
 
             //Training for Logo Custom
             _trainingService.Train();

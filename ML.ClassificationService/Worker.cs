@@ -77,7 +77,7 @@ namespace ML.ClassificationService
                     sync.Score();
                     //ServiceHelper.SystemSettingService.CUSTOMLOGOMODEL_ExportedFromService_ImagesToEvaluateFolderPath
 
-                    Thread.Sleep(TimeSpan.FromMinutes(1));
+                    Thread.Sleep(TimeSpan.FromSeconds(10));
                 }
                 catch (Exception ex)
                 {

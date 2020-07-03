@@ -29,6 +29,9 @@ namespace ML.Domain.Entities.Mongo
 
         public ClassifiedBy ClassifiedBy { get; set; }
 
+        public bool IsTrained { get; set; }
+
+
         // not needed at this moment
         public bool IsMerged { get; set; }
         public string MergeParentDirPath { get; set; }
