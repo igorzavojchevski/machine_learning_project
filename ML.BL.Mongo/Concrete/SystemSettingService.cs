@@ -103,7 +103,14 @@ namespace ML.BL.Mongo.Concrete
             }
         }
 
-
+        public int ExportService_ExportPeriod_Seconds
+        {
+            get
+            {
+                int seconds = int.TryParse(GetSettingValueByKey("ExportService_ExportPeriod_Seconds"), out seconds) ? seconds : 60;
+                return seconds;
+            }
+        }
 
 
         public float TF_LabelScoring_MaxProbabilityThreshold

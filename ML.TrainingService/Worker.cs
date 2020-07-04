@@ -50,8 +50,8 @@ namespace ML.TrainingService
         {
             while (true)
             {
-                //_archivingService.ArchiveImages();
-                //Thread.Sleep(TimeSpan.FromMinutes(60));
+                _archivingService.ArchiveImages();
+                Thread.Sleep(TimeSpan.FromMinutes(60));
             }
         }
 
@@ -66,17 +66,24 @@ namespace ML.TrainingService
 
         public void TrainingProcess()
         {
-            //Do before training start activities - (set flag for start etc.)
-            _trainingService.DoBeforeTrainingStart();
+            try
+            {
+                //Do before training start activities - (set flag for start etc.)
+                _trainingService.DoBeforeTrainingStart();
 
-            //Do cleanup for not used items
-            _trainingService.DoCleanup();
+                //Do cleanup for not used items
+                _trainingService.DoCleanup();
 
-            //Training for Logo Custom
-            _trainingService.Train();
+                //Training for Logo Custom
+                _trainingService.Train();
 
-            //Do after training finished activities- (set flag for start etc.)
-            _trainingService.DoAfterTrainingFinished();
+                //Do after training finished activities- (set flag for start etc.)
+                _trainingService.DoAfterTrainingFinished();
+            }
+            catch(Exception ex)
+            {
+                _logger.LogError(ex, "TrainingService exception");
+            }
         }
     }
 }

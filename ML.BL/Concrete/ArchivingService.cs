@@ -30,6 +30,8 @@ namespace ML.BL.Concrete
 
         public void ArchiveImages()
         {
+            _logger.LogInformation("ArchivingService - ArchiveImages - started");
+
             string archiveLastStartDateString = _systemSettingService.Archive_LastStartDate;
             bool isParsable = DateTime.TryParse(archiveLastStartDateString, out DateTime archiveLastStartDate);
             if (!isParsable) { _logger.LogInformation("ArchivingService - ArchiveImages - Archive_StartDate does not have appropriate format"); return; }
@@ -57,6 +59,8 @@ namespace ML.BL.Concrete
             }
 
             UpdateArchiveLastStartDate();
+
+            _logger.LogInformation("ArchivingService - ArchiveImages - finished");
         }
 
         private void UpdateArchiveLastStartDate()

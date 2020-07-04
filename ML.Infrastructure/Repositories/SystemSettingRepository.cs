@@ -36,6 +36,9 @@ namespace ML.Infrastructure.Repositories
             if (!GetAll().Any(t => t.SettingKey == "MaxChunksToProcessAtOnce"))
                 InsertOne(new SystemSetting { SettingKey = "MaxChunksToProcessAtOnce", SettingValue = @"3", ModifiedBy = "SystemSettingRepository", ModifiedOn = DateTime.UtcNow });
 
+            if (!GetAll().Any(t => t.SettingKey == "ExportService_ExportPeriod_Seconds"))
+                InsertOne(new SystemSetting { SettingKey = "ExportService_ExportPeriod_Seconds", SettingValue = @"60", ModifiedBy = "SystemSettingRepository", ModifiedOn = DateTime.UtcNow });
+
 
             if (!GetAll().Any(t => t.SettingKey == "TF_LabelsFilePath"))
                 InsertOne(new SystemSetting { SettingKey = "TF_LabelsFilePath", SettingValue = "C:\\Users\\igor.zavojchevski\\Desktop\\Master\\ML\\assets\\MLModels\\TensorFlowModel\\imagenet_comp_graph_label_strings.txt", ModifiedBy = "SystemSettingRepository", ModifiedOn = DateTime.UtcNow });

@@ -15,6 +15,7 @@ namespace ML.BL.Mongo.Interfaces
         string Archive_Path_For_Trained_Images { get; }
         string Archive_LastStartDate { get; }
         int Archive_NextStartPeriod_Minutes { get; }
+        int ExportService_ExportPeriod_Seconds { get; }
 
 
         float TF_LabelScoring_MaxProbabilityThreshold { get; }

@@ -68,7 +68,7 @@ namespace ML.BL.Concrete
                 {
                     ProcessExport(process, evaluationStream, newDir);
                 });
-                Thread.Sleep(TimeSpan.FromMinutes(1));
+                Thread.Sleep(TimeSpan.FromSeconds(_systemSettingService.ExportService_ExportPeriod_Seconds));
                 process.Kill();
             }
         }
