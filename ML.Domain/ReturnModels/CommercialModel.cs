@@ -18,6 +18,9 @@ namespace ML.Domain.ReturnModels
         public Guid GroupGuid { get; set; }
         public DateTime ImageDateTime { get; set; }
 
+        public bool IsTrained { get; set; }
+        public string TrainedForClassName { get; set; }
+
         public bool IsMerged { get; set; }
         public string MergeParentDirPath { get; set; }
         public Dictionary<string, float> TopProbabilities { get; set; }

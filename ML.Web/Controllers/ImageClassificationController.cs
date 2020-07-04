@@ -56,7 +56,7 @@ namespace ML.Web.Controllers
         #endregion
 
         [Route("GetAllImages")]
-        public IActionResult GetAllImages(int size, int page)
+        public IActionResult GetAllImages(int size, int page, bool? showTrained = null)
         {
             var lastTrainingVersion = _labelClassService.GetAll().Max(t => t.TrainingVersion);
 
@@ -76,11 +76,18 @@ namespace ML.Web.Controllers
 
             List<LabelClass> labelClassesFinal = labelClasses.OrderBy(t => t.ClassName).Skip(size * (page - 1)).Take(size).ToList();
 
+            //Make bool param for isTrained
             foreach (var item in labelClassesFinal)
             {
                 string id = item.Id.ToString();
                 List<string> classNamesFromAllVersions = _labelClassService.GetAll().Where(t => t.FirstVersionId == item.FirstVersionId).Select(t => t.ClassName).ToList();
-                List<Commercial> list = _commercialService.GetAll().Where(t => t.ClassifiedBy == ClassifiedBy.ClassificationService && classNamesFromAllVersions.Contains(t.PredictedLabel)).ToList();
+                List<Commercial> list = new List<Commercial>();
+
+                if (!showTrained.HasValue)
+                    list = _commercialService.GetAll().Where(t => t.ClassifiedBy == ClassifiedBy.ClassificationService && classNamesFromAllVersions.Contains(t.PredictedLabel)).ToList();
+                else
+                    list = _commercialService.GetAll().Where(t => t.ClassifiedBy == ClassifiedBy.ClassificationService && t.IsTrained == showTrained && classNamesFromAllVersions.Contains(t.PredictedLabel)).ToList();
+
                 groupList.Group.Add(new CommercialImagesGroupModel() { ID = id, PredictedLabel = item.ClassName, Commercials = list.OrderByDescending(t => t.ImageDateTime).Select(t => t.ToCommercialModel()).ToList() });
             }
 
@@ -168,7 +175,8 @@ namespace ML.Web.Controllers
                                 GroupGuid = gsg.Key.GroupGuid,
                                 StartDate = gsg.Min(t => t.ImageDateTime),
                                 EndDate = gsg.Max(t => t.ImageDateTime),
-                                ClassifiedBy = gsg.Select(t => t.ClassifiedBy).First()
+                                ClassifiedBy = gsg.Select(t => t.ClassifiedBy.ToString()).First(),
+                                EvaluationStreamName = gsg.Select(t => t.EvaluationStreamName).First()
                             }).ToList()
                     })
                     .ToList();
@@ -194,20 +202,32 @@ namespace ML.Web.Controllers
 
             if (string.IsNullOrWhiteSpace(evaluationStreamItem.Name) || string.IsNullOrWhiteSpace(evaluationStreamItem.Stream) || string.IsNullOrWhiteSpace(evaluationStreamItem.Code)) return BadRequest();
 
-            bool exists = _evaluationStreamService.GetAll().Any(t => t.Name == evaluationStreamItem.Name || t.Stream == evaluationStreamItem.Stream || t.Code == evaluationStreamItem.Code);
-            if (exists) return BadRequest();
-
-            EvaluationStream evaluationStream = new EvaluationStream()
+            bool create = true;
+            EvaluationStream evaluationStream = null;
+            if (string.IsNullOrWhiteSpace(evaluationStreamItem.Id))
             {
-                Name = evaluationStreamItem.Name,
-                Stream = evaluationStreamItem.Stream,
-                Code = evaluationStreamItem.Code,
-                IsActive = true,
-                ModifiedBy = "CreateLabelClassName",
-                ModifiedOn = DateTime.UtcNow
-            };
+                bool exists = _evaluationStreamService.GetAll().Any(t => t.Code == evaluationStreamItem.Code);
+                if (exists) return BadRequest();
+                evaluationStream = new EvaluationStream();
+            }
+            else
+            {
+                bool IsParsable = ObjectId.TryParse(evaluationStreamItem.Id, out ObjectId objectID);
+                if (!IsParsable) return BadRequest();
+                evaluationStream = _evaluationStreamService.GetAll().Where(t => t.Id == objectID).FirstOrDefault();
+                if (evaluationStream == null) return NotFound();
+                create = false;
+            }
 
-            _evaluationStreamService.InsertOne(evaluationStream);
+            evaluationStream.Name = evaluationStreamItem.Name;
+            evaluationStream.Stream = evaluationStreamItem.Stream;
+            evaluationStream.Code = evaluationStreamItem.Code;
+            evaluationStream.IsActive = true;
+            evaluationStream.ModifiedBy = "CreateLabelClassName";
+            evaluationStream.ModifiedOn = DateTime.UtcNow;
+
+            if (create) _evaluationStreamService.InsertOne(evaluationStream);
+            else _evaluationStreamService.Update(evaluationStream);
 
             return Ok();
         }

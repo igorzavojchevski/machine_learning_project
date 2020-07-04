@@ -155,8 +155,8 @@ function saveMoveImages(commercialid, parentDIV) {
         });
 }
 
-function LoadLabelsAndImages(size, page) {
-    fetch(serviceUrl + "/GetAllImages?size=" + size + "&page=" + page,
+function LoadLabelsAndImages(size, page, showTrained) {
+    fetch(serviceUrl + "/GetAllImages?size=" + size + "&page=" + page + (showTrained == null ? "" : "&showTrained=" + showTrained),
         {
             headers: { 'Accept': 'application/json', 'Content-Type': 'application/x-www-form-urlencoded' }
         }) // Call the fetch function passing the url of the API as a parameter
@@ -342,6 +342,7 @@ function CreateLabelAndImageSection(groupList) {
             selectOption.setAttribute("data-img-src", "images_to_train/" + groupList.group[i].predictedLabel + "/" + imageId);
             selectOption.setAttribute("data-img-label", (groupList.group[i].commercials[j].maxProbability * 100).toFixed(3) + "%");
             selectOption.setAttribute("data-img-label2", "(" + FormatDateAndTime(groupList.group[i].commercials[j].imageDateTime) + ")");
+            selectOption.setAttribute("data-img-label3", groupList.group[i].commercials[j].trainedForClassName === groupList.group[i].predictedLabel ? (groupList.group[i].commercials[j].isTrained ? "<span style='color:darkgreen;font-weight:600'>Trained</span>" : "<span style='color:red;font-weight:600'>Not trained</span>") : "<span style='color:red;font-weight:600'>Not trained for this label</span>");
             selectOption.setAttribute("value", groupList.group[i].commercials[j].id);
             optGroup.appendChild(selectOption);
             commercialImagesDivSelect.append(optGroup);
@@ -420,7 +421,7 @@ function GetLabelTimeFrames() {
             th3.style.textAlign = "center";
             th4.textContent = "Stream Name";
             th4.style.textAlign = "center";
-            th5.textContent = "Custom Evaluation";
+            th5.textContent = "Evaluated by";
             th5.style.textAlign = "center";
             tbody.appendChild(th1);
             tbody.appendChild(th2);
@@ -446,12 +447,16 @@ function GetLabelTimeFrames() {
                     td1.textContent = response[i].labelTimeFrameGroups[j].className;
                     var td2 = document.createElement('td');
                     td2.textContent = FormatDateAndTime(response[i].labelTimeFrameGroups[j].startDate);
+                    td2.style.textAlign = "center";
                     var td3 = document.createElement('td');
                     td3.textContent = FormatDateAndTime(response[i].labelTimeFrameGroups[j].endDate);
+                    td3.style.textAlign = "center";
                     var td4 = document.createElement('td');
                     td4.textContent = response[i].labelTimeFrameGroups[j].evaluationStreamName;
+                    td4.style.textAlign = "center";
                     var td5 = document.createElement('td');
                     td5.textContent = response[i].labelTimeFrameGroups[j].classifiedBy;
+                    td5.style.textAlign = "center";
                     tr1.appendChild(td1);
                     tr1.appendChild(td2);
                     tr1.appendChild(td3);
@@ -602,12 +607,15 @@ function GetEvaluationStreams() {
 
                 var td1 = document.createElement('td');
                 td1.textContent = response[i].name;
+                td1.style.textAlign = "center";
                 var td2 = document.createElement('td');
                 td2.textContent = response[i].stream;
                 var td3 = document.createElement('td');
                 td3.textContent = response[i].code;
+                td3.style.textAlign = "center";
                 var td4 = document.createElement('td');
                 td4.textContent = response[i].isActive;
+                td4.style.textAlign = "center";
                 var td5 = document.createElement('td');
                 td5.style.textAlign = "center";
                 var td5buttonEdit = document.createElement("button");
@@ -631,6 +639,8 @@ function GetEvaluationStreams() {
 
 function editEvaluationStream(id, name, stream, code, isActive) {
     console.log(id, name, stream, code, isActive);
+    var idInputValueById = document.getElementById("idEvaluationStreamInput");
+    idInputValueById.value = id;
     var nameInputValueById = document.getElementById("nameEvaluationStreamInput");
     nameInputValueById.value = name;
     var streamInputValueById = document.getElementById("streamEvaluationStreamInput");
@@ -654,11 +664,13 @@ function OpenCreateEvaluationStreamModal() {
     }
 }
 function CreateEvaluationStream() {
+    var idInputValue = document.getElementById("idEvaluationStreamInput").value;
     var nameInputValue = document.getElementById("nameEvaluationStreamInput").value;
     var streamInputValue = document.getElementById("streamEvaluationStreamInput").value;
     var codeInputValue = document.getElementById("codeEvaluationStreamInput").value;
 
     var newEvaluationStream = {
+        id: idInputValue,
         name: nameInputValue,
         stream: streamInputValue,
         code: codeInputValue,
@@ -684,6 +696,8 @@ function CloseCreateEvaluationStreamModal() {
 
     modal.style.display = "none";
 
+    var idInputValue = document.getElementById("idEvaluationStreamInput");
+    idInputValue.value = "";
     var nameInputValue = document.getElementById("nameEvaluationStreamInput");
     nameInputValue.value = "";
     var streamInputValue = document.getElementById("streamEvaluationStreamInput");

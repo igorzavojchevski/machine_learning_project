@@ -1,0 +1,6 @@
+.update( { $set: { ImageDirPath: "E:\\Test_Assets\\images_to_train\\BESPLATNO_REKLAMIRANJE_DIK_880180cb-61e9-4e57-ad7f-072ff3574ddb" }}  );
+
+E:\\Test_Assets\\images_to_train\\New_Item_880180cb-61e9-4e57-ad7f-072ff3574ddb
+
+
+E:\\Test_Assets\\images_to_train\\BESPLATNO_REKLAMIRANJE_DIK_880180cb-61e9-4e57-ad7f-072ff3574ddb

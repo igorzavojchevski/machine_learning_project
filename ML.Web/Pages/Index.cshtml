@@ -11,14 +11,14 @@
     <button id="btnCommercials" class="tablinks btn-light" onclick="openTab(event, 'Labels')">Commercials</button>
     <button id="btnCommercialTimeFrames" class="tablinks btn-light" onclick="openTab(event, 'LabelTimeFrames')">Time Frames</button>
     <button id="btnImageCheck" class="tablinks btn-light" onclick="openTab(event, 'ImageCheck')">Image Check</button>
-    <button id="btnManageCustomCommercials" class="tablinks btn-light" onclick="openTab(event, 'ManageCustomCms')">Manage Custom Commercials</button>
+    @*<button id="btnManageCustomCommercials" class="tablinks btn-light" onclick="openTab(event, 'ManageCustomCms')">Manage Custom Commercials</button>*@
     <button id="btnEvaluationStreams" class="tablinks btn-light" onclick="openTab(event, 'EvaluationStreams')">Evaluation Streams</button>
 </div>
 
 <div id="Labels" class="tabcontent">
     <div id="divCommercialsHeader">
         <h3 class="tab-custom-header">Commercials (Labels)</h3>
-        <button id="buttonCreateCommercial" onclick="OpenCreateCommercialModal()">Create Label</button>
+        <button id="buttonCreateCommercial" onclick="OpenCreateCommercialModal()">Create Commercial Label</button>
     </div>
     <br />
     <div id="divCommercials" class="col-md-12"></div>
@@ -76,11 +76,11 @@
 
 </div>
 
-<div id="ManageCustomCms" class="tabcontent">
+@*<div id="ManageCustomCms" class="tabcontent">
     <h3>Manage Custom Commercials</h3>
     <br />
     <div id="manageCustomCmsDiv" class="col-md-12"></div>
-</div>
+</div>*@
 
 <div id="EvaluationStreams" class="tabcontent">
 
@@ -95,6 +95,7 @@
         <div class="evaluation-stream-modal-content">
             <span id="createCommercialModalXSpan" class="closeX" onclick="CloseCreateEvaluationStreamModal()">&times;</span>
             <div class="evaluation-stream-modal-content-form">
+                <input id="idEvaluationStreamInput" class="evaluation-stream-input" type="text" name="idEvaluationStreamInput" hidden />
                 <label for="nameEvaluationStreamInput">Name</label>
                 <input id="nameEvaluationStreamInput" class="evaluation-stream-input" type="text" name="nameEvaluationStreamInput" />
                 <br />

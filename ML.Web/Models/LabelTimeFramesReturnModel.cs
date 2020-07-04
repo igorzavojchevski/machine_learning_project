@@ -20,6 +20,7 @@ namespace ML.Web.Models
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
                                 
-        public ClassifiedBy ClassifiedBy { get; set; }
+        public string ClassifiedBy { get; set; }
+        public string EvaluationStreamName { get; set; }
     }
 }

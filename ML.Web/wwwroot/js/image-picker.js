@@ -291,7 +291,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
             }
         }, {
             key: "label",
-                value: function label() {
+            value: function label() {
                 if (this.option.data("img-label")) {
                     return this.option.data("img-label");
                 } else {
@@ -303,6 +303,15 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
             value: function label2() {
                 if (this.option.data("img-label2")) {
                     return this.option.data("img-label2");
+                } else {
+                    return this.option.text();
+                }
+            }
+        }, {
+            key: "label3",
+            value: function label3() {
+                if (this.option.data("img-label3")) {
+                    return this.option.data("img-label3");
                 } else {
                     return this.option.text();
                 }
@@ -350,6 +359,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                 if (this.opts.show_label) {
                     thumbnail.append(jQuery("<p/>").html(this.label()));
                     thumbnail.append(jQuery("<p/>").html(this.label2()));
+                    thumbnail.append(jQuery("<p/>").html(this.label3()));
                 }
                 this.node.append(thumbnail);
                 return this.node;

@@ -24,6 +24,8 @@ namespace ML.BL.Helpers
                 GroupGuid = entity.GroupGuid,
                 MaxProbability = entity.MaxProbability,
                 ImageDateTime = entity.ImageDateTime,
+                IsTrained = entity.IsTrained,
+                TrainedForClassName = entity.TrainedForClassName,
 
                 IsMerged = entity.IsMerged,
                 MergeParentDirPath = entity.MergeParentDirPath,

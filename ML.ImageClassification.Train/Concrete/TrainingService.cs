@@ -205,6 +205,7 @@ namespace ML.ImageClassification.Train.Concrete
                 commercial.ModifiedOn = DateTime.UtcNow;
                 commercial.ModifiedBy = "UpdateAllTrainedImages - TrainingService";
                 commercial.IsTrained = true;
+                commercial.TrainedForClassName = commercial.PredictedLabel;
                 _commercialService.Update(commercial);
             }
         }

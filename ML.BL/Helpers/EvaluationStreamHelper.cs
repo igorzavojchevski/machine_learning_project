@@ -14,6 +14,7 @@ namespace ML.BL.Helpers
 
             return new EvaluationStreamModel()
             {
+                Id = entity.Id.ToString(),
                 Name = entity.Name,
                 Stream = entity.Stream,
                 Code = entity.Code,

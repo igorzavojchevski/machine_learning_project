@@ -30,6 +30,7 @@ namespace ML.Domain.Entities.Mongo
         public ClassifiedBy ClassifiedBy { get; set; }
 
         public bool IsTrained { get; set; }
+        public string TrainedForClassName { get; set; }
 
 
         // not needed at this moment
