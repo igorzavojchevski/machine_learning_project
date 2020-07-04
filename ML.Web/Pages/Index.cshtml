@@ -13,6 +13,7 @@
     <button id="btnImageCheck" class="tablinks btn-light" onclick="openTab(event, 'ImageCheck')">Image Check</button>
     @*<button id="btnManageCustomCommercials" class="tablinks btn-light" onclick="openTab(event, 'ManageCustomCms')">Manage Custom Commercials</button>*@
     <button id="btnEvaluationStreams" class="tablinks btn-light" onclick="openTab(event, 'EvaluationStreams')">Evaluation Streams</button>
+    <button id="btnSystemSettings" class="tablinks btn-light" onclick="openTab(event, 'SystemSettings')">System Settings</button>
 </div>
 
 <div id="Labels" class="tabcontent">
@@ -110,6 +111,35 @@
                 <br />
                 <br />
                 <button id="buttonCreateNewEvaluationStream" onclick="CreateEvaluationStream()" class="btn btn-success">Create</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<div id="SystemSettings" class="tabcontent">
+
+    <div id="divCommercialsHeader">
+        <h3 class="tab-custom-header">System Settings</h3>
+        <button id="buttonCreateSystemSetting" onclick="OpenSystemSettingModal(true)">Create System Setting</button>
+    </div>
+    <br />
+    <div id="systemSettingsDiv" class="col-md-12"></div>
+
+    <div id="systemSettingsModal" class="commercial-modal">
+        <div class="systemsetting-modal-content ">
+            <span id="createCommercialModalXSpan" class="closeX" onclick="CloseSystemSettingsModal()">&times;</span>
+            <div class="systemsetting-modal-content-form">
+                <input id="idSystemSettingsInput" class="evaluation-stream-input" type="text" name="idSystemSettingsInput" hidden />
+                <label for="settingKeyInput">Setting Key</label>
+                <input id="settingKeyInput" class="evaluation-stream-input" type="text" name="settingKeyInput" />
+                <br />
+                <label for="settingValueInput">Setting Value:</label>
+                <input id="settingValueInput" class="evaluation-stream-input" type="text" name="settingValueInput" />
+                <br />
+                <br />
+                <button id="buttonCreateNewSystemSetting" onclick="CreateSystemSetting()" class="btn btn-success">Create</button>
             </div>
         </div>
     </div>

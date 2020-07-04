@@ -1,0 +1,1 @@
+{"options":{},"indexes":[{"v":{"$numberInt":"2"},"key":{"_id":{"$numberInt":"1"}},"name":"_id_","ns":"MLClassificationDB_Test3.SystemSettings"}],"uuid":"e605a5d4b6704c428f8dbed6c99e5d90"}

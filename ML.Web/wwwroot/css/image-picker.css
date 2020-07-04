@@ -46,10 +46,15 @@
     height: 150px;
     width: 150px;
     display: inline-block;
-}
-
-.thumbnail p {
-    margin-bottom: 0;
-    margin-top: 0;
     text-align: center;
 }
+
+.thumbnail {
+    text-align: center;
+}
+
+    .thumbnail p {
+        margin-bottom: 0;
+        margin-top: 0;
+        text-align: center;
+    }

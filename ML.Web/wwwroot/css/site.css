@@ -148,6 +148,12 @@ body {
     margin-top: 0.2%;
 }
 
+#buttonCreateSystemSetting {
+    display: inline-block;
+    float: right;
+    margin-top: 0.2%;
+}
+
 .tab-custom-header {
     display: inline-block;
 }
@@ -199,6 +205,23 @@ body {
     padding: 5%;
 }
 
+#systemSettingsDiv{
+    font-size:12px;
+}
+.systemsetting-modal-content-form {
+    padding: 5%;
+}
+.systemsetting-input {
+    display: block;
+    width: 100%;
+}
+.systemsetting-modal-content {
+    background-color: #fefefe;
+    margin: auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 30%;
+}
 
 #buttonCreateNewCommercial{
     margin-bottom:0.5%;

@@ -31,6 +31,7 @@ function openTab(evt, tabName) {
     $("#divCommercials").html("");
     $("#timeFramesDiv").html("");
     $("#evaluationStreamsDiv").html("");
+    $("#systemSettingsDiv").html("");
 
     if (tabName === "Labels") {
         paginationInitialized = false;
@@ -44,6 +45,9 @@ function openTab(evt, tabName) {
     }
     else if (tabName === "EvaluationStreams") {
         GetEvaluationStreams();
+    }
+    else if (tabName === "SystemSettings") {
+        GetSystemSettings();
     }
 
     var i, tabcontent, tablinks;
@@ -637,6 +641,74 @@ function GetEvaluationStreams() {
         });
 }
 
+
+function GetSystemSettings() {
+
+    fetch(serviceUrl + "/GetSystemSettings",
+        {
+            method: 'GET',
+            headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
+        })
+        .then((resp) => resp.json())
+        .then(function (response) {
+            console.log(response);
+            var systemSettingsDiv = document.getElementById("systemSettingsDiv");
+            var table = document.createElement("table");
+            table.style.width = '100%';
+            table.setAttribute('border', '1');
+            var tbody = document.createElement('tbody');
+            var th1 = document.createElement('th');
+            var th2 = document.createElement('th');
+            var th3 = document.createElement('th');
+            var th4 = document.createElement('th');
+            th1.textContent = "Setting Key";
+            th1.style.textAlign = "center";
+            th2.textContent = "Setting Value";
+            th2.style.textAlign = "center";
+            th3.textContent = "Date Modified";
+            th3.style.textAlign = "center";
+            th4.textContent = "Modified By";
+            th4.style.textAlign = "center";
+            tbody.appendChild(th1);
+            tbody.appendChild(th2);
+            tbody.appendChild(th3);
+            tbody.appendChild(th4);
+
+            for (var i = 0; i < response.length; i++) {
+                var tr = document.createElement('tr');
+                tbody.appendChild(tr);
+
+                var td1 = document.createElement('td');
+                td1.textContent = response[i].settingKey;
+                var td2 = document.createElement('td');
+                td2.textContent = response[i].settingValue;
+                var td3 = document.createElement('td');
+                td3.textContent =  FormatDateAndTime(response[i].modifiedOn);
+                td3.style.textAlign = "center";
+                var td4 = document.createElement('td');
+                td4.textContent = response[i].modifiedBy;
+                td4.style.textAlign = "center";
+                var td5 = document.createElement('td');
+                td5.style.textAlign = "center";
+                var td5buttonEdit = document.createElement("button");
+                td5buttonEdit.textContent = "Edit";
+                td5buttonEdit.classList = "btn";
+                td5buttonEdit.style.fontSize = "12px";
+                td5buttonEdit.setAttribute("onClick", "editSystemSetting('" + response[i].id + "', '" + response[i].settingKey + "', '" + response[i].settingValue + "')");
+
+                td5.appendChild(td5buttonEdit);
+                tr.appendChild(td1);
+                tr.appendChild(td2);
+                tr.appendChild(td3);
+                tr.appendChild(td4);
+                tr.appendChild(td5);
+                tbody.appendChild(tr);
+            }
+            table.appendChild(tbody);
+            systemSettingsDiv.appendChild(table);
+        });
+}
+
 function editEvaluationStream(id, name, stream, code, isActive) {
     console.log(id, name, stream, code, isActive);
     var idInputValueById = document.getElementById("idEvaluationStreamInput");
@@ -714,6 +786,76 @@ function CloseCreateEvaluationStreamModal() {
     var isActiveInputValue = document.getElementById("isActiveEvaluationStreamInput");
     isActiveInputValue.checked = false;
 }
+
+
+
+function OpenSystemSettingModal(isCreate) {
+    var modal = document.getElementById("systemSettingsModal");
+    modal.style.display = "block";
+
+    if (!isCreate) document.getElementById("buttonCreateNewSystemSetting").textContent = "Edit";
+    else document.getElementById("buttonCreateNewSystemSetting").textContent = "Create";
+
+    window.onclick = function (event) {
+        if (event.target == modal) {
+            modal.style.display = "none";
+        }
+    }
+}
+
+function CloseSystemSettingsModal() {
+    var modal = document.getElementById("systemSettingsModal");
+
+    modal.style.display = "none";
+
+    var idInputValue = document.getElementById("idSystemSettingsInput");
+    idInputValue.value = "";
+    var settingKeyInput = document.getElementById("settingKeyInput");
+    settingKeyInput.value = "";
+    var settingValueInput = document.getElementById("settingValueInput");
+    settingValueInput.value = "";
+}
+
+
+function CreateSystemSetting() {
+    var idInputValue = document.getElementById("idSystemSettingsInput").value;
+    var settingKeyInputValue = document.getElementById("settingKeyInput").value;
+    var settingValueInputValue = document.getElementById("settingValueInput").value;
+
+    var newSettingKey = {
+        id: idInputValue,
+        settingKey: settingKeyInputValue,
+        settingValue: settingValueInputValue
+    };
+
+    console.log(newSettingKey);
+
+    fetch(serviceUrl + "/CreateSystemSetting",
+        {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(newSettingKey),
+        })
+        .then(function (response) {
+            console.log(response);
+            CloseSystemSettingsModal();
+            $('#btnSystemSettings').trigger('click');
+        });
+}
+
+function editSystemSetting(id, settingKey, settingValue) {
+    console.log(id, settingKey, settingValue);
+    var idInputValue = document.getElementById("idSystemSettingsInput");
+    idInputValue.value = id;
+    var settingKeyInput = document.getElementById("settingKeyInput");
+    settingKeyInput.value = settingKey;
+    var settingValueInput = document.getElementById("settingValueInput");
+    settingValueInput.value = settingValue;
+
+    OpenSystemSettingModal(false);
+}
+
+
 
 form.addEventListener('submit', e => {
     e.preventDefault();

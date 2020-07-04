@@ -105,6 +105,7 @@ namespace ML.Web.Controllers
                 .ToList();
 
             var labelClasses = lastTrainingVersionLabels
+                .OrderBy(t => t.ClassName.ToLower().StartsWith("new_"))
                 .GroupBy(r => r.FirstVersionId)
                 .Select(g => g.OrderByDescending(r => r.Version).First())
                 .Select(t => new LabelClassReturnModel { Id = t.Id.ToString(), ClassName = t.ClassName })
@@ -167,7 +168,7 @@ namespace ML.Web.Controllers
                     {
                         DateTimeKey = g.Key,
                         LabelTimeFrameGroups =
-                            g.OrderBy(t => t.ImageDateTime).GroupBy(t => new { t.ClassName, t.GroupGuid })
+                            g.OrderByDescending(t => t.ImageDateTime).GroupBy(t => new { t.ClassName, t.GroupGuid })
                             .Select(gsg =>
                             new LabelTimeFrameGroup
                             {
@@ -181,6 +182,7 @@ namespace ML.Web.Controllers
                     })
                     .ToList();
 
+            groupList = groupList.OrderByDescending(o => o.DateTimeKey).ToList();
             return Ok(groupList);
         }
 
@@ -191,6 +193,14 @@ namespace ML.Web.Controllers
             return Ok(evaluationStreams);
         }
 
+        [Route("GetSystemSettings")]
+        public IActionResult GetSystemSettings()
+        {
+            List<SystemSettingReturnModel> systemSettings = _systemSettingService.GetAll().ToList().Select(t => t.ToSystemSettingReturnModel()).ToList();
+            return Ok(systemSettings);
+        }
+
+        
         [HttpPost]
         [Route("CreateEvaluationStream")]
         [ProducesResponseType(200)]
@@ -259,6 +269,70 @@ namespace ML.Web.Controllers
             return Ok();
         }
 
+
+
+        [HttpPost]
+        [Route("CreateSystemSetting")]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(404)]
+        public IActionResult CreateSystemSetting(SystemSettingItem systemSettingItem)
+        {
+            if (systemSettingItem == null) return BadRequest();
+
+            if (string.IsNullOrWhiteSpace(systemSettingItem.SettingKey) || string.IsNullOrWhiteSpace(systemSettingItem.SettingKey)) return BadRequest();
+
+            bool create = true;
+            SystemSetting systemSetting = null;
+            if (string.IsNullOrWhiteSpace(systemSettingItem.Id))
+            {
+                bool exists = _systemSettingService.GetAll().Any(t => t.SettingKey == systemSettingItem.SettingKey);
+                if (exists) return BadRequest();
+                systemSetting = new SystemSetting();
+            }
+            else
+            {
+                bool IsParsable = ObjectId.TryParse(systemSettingItem.Id, out ObjectId objectID);
+                if (!IsParsable) return BadRequest();
+                systemSetting = _systemSettingService.GetAll().Where(t => t.Id == objectID).FirstOrDefault();
+                if (systemSetting == null) return NotFound();
+                create = false;
+            }
+            systemSetting.SettingKey = systemSettingItem.SettingKey;
+            systemSetting.SettingValue = systemSettingItem.SettingValue;
+            systemSetting.ModifiedBy = "CreateSystemSetting";
+            systemSetting.ModifiedOn = DateTime.UtcNow;
+
+            if (create) _systemSettingService.InsertOne(systemSetting);
+            else _systemSettingService.Update(systemSetting);
+
+            return Ok();
+        }
+
+        [HttpPost]
+        [Route("EditSystemSetting")]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(404)]
+        public IActionResult EditSystemSetting(SystemSettingItem systemSettingItem)
+        {
+            if (systemSettingItem == null) return BadRequest();
+
+            if (string.IsNullOrWhiteSpace(systemSettingItem.SettingKey) || string.IsNullOrWhiteSpace(systemSettingItem.SettingValue)) return BadRequest();
+
+            ObjectId.TryParse(systemSettingItem.Id, out ObjectId systemSettingID);
+            SystemSetting systemSetting = _systemSettingService.GetAll().Where(t => t.Id == systemSettingID).FirstOrDefault();
+            if (systemSetting == null) return BadRequest();
+
+            systemSetting.SettingKey = systemSettingItem.SettingKey;
+            systemSetting.SettingValue = systemSettingItem.SettingValue;
+            systemSetting.ModifiedBy = "CreateSystemSetting";
+            systemSetting.ModifiedOn = DateTime.UtcNow;
+
+            _systemSettingService.Update(systemSetting);
+
+            return Ok();
+        }
 
         [HttpPost]
         [Route("CreateLabelClassName")]
