@@ -622,7 +622,7 @@ function GetEvaluationStreams() {
                 td5buttonEdit.textContent = "Edit";
                 td5buttonEdit.classList = "btn";
                 td5buttonEdit.style.fontSize = "12px";
-                td5buttonEdit.setAttribute("onClick", "editEvaluationStream('" + response[i].id + "', '" + response[i].name + "', '" + response[i].stream + "', '" + response[i].code + "', '" + response[i].isActive + "')");
+                td5buttonEdit.setAttribute("onClick", "editEvaluationStream('" + response[i].id + "', '" + response[i].name + "', '" + response[i].stream + "', '" + response[i].code + "', " + response[i].isActive + ")");
 
                 td5.appendChild(td5buttonEdit);
                 tr.appendChild(td1);
@@ -647,15 +647,20 @@ function editEvaluationStream(id, name, stream, code, isActive) {
     streamInputValueById.value = stream;
     var codeInputValueById = document.getElementById("codeEvaluationStreamInput");
     codeInputValueById.value = code;
+    var isActiveInputValueById = document.getElementById("isActiveEvaluationStreamInput");
+    isActiveInputValueById.checked = isActive;
+    console.log(isActiveInputValueById);
 
-    OpenCreateEvaluationStreamModal();
+    OpenCreateEvaluationStreamModal(false);
 }
 
-function OpenCreateEvaluationStreamModal() {
+function OpenCreateEvaluationStreamModal(isCreate) {
 
     var modal = document.getElementById("createEvaluationStreamModal");
-
     modal.style.display = "block";
+
+    if (!isCreate) document.getElementById("buttonCreateNewEvaluationStream").textContent = "Edit";
+    else document.getElementById("buttonCreateNewEvaluationStream").textContent = "Create";
 
     window.onclick = function (event) {
         if (event.target == modal) {
@@ -668,12 +673,14 @@ function CreateEvaluationStream() {
     var nameInputValue = document.getElementById("nameEvaluationStreamInput").value;
     var streamInputValue = document.getElementById("streamEvaluationStreamInput").value;
     var codeInputValue = document.getElementById("codeEvaluationStreamInput").value;
+    var isActiveInputValue = document.getElementById("isActiveEvaluationStreamInput").checked;
 
     var newEvaluationStream = {
         id: idInputValue,
         name: nameInputValue,
         stream: streamInputValue,
         code: codeInputValue,
+        isActive: isActiveInputValue
     };
 
     console.log(newEvaluationStream);
@@ -704,6 +711,8 @@ function CloseCreateEvaluationStreamModal() {
     streamInputValue.value = "";
     var codeInputValue = document.getElementById("codeEvaluationStreamInput");
     codeInputValue.value = "";
+    var isActiveInputValue = document.getElementById("isActiveEvaluationStreamInput");
+    isActiveInputValue.checked = false;
 }
 
 form.addEventListener('submit', e => {

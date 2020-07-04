@@ -86,7 +86,7 @@
 
     <div id="divCommercialsHeader">
         <h3 class="tab-custom-header">Evaluation Streams</h3>
-        <button id="buttonCreateEvaluationStream" onclick="OpenCreateEvaluationStreamModal()">Create Evaluation Stream</button>
+        <button id="buttonCreateEvaluationStream" onclick="OpenCreateEvaluationStreamModal(true)">Create Evaluation Stream</button>
     </div>
     <br />
     <div id="evaluationStreamsDiv" class="col-md-12"></div>
@@ -104,6 +104,10 @@
                 <br />
                 <label for="codeEvaluationStreamInput">Code:</label>
                 <input id="codeEvaluationStreamInput" class="evaluation-stream-input" type="text" name="codeEvaluationStreamInput" />
+                <br />
+                <label for="isActiveEvaluationStreamInput">IsActive:</label>
+                <input id="isActiveEvaluationStreamInput" type="checkbox" name="isActiveEvaluationStreamInput" />
+                <br />
                 <br />
                 <button id="buttonCreateNewEvaluationStream" onclick="CreateEvaluationStream()" class="btn btn-success">Create</button>
             </div>

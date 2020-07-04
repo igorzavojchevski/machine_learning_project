@@ -222,7 +222,7 @@ namespace ML.Web.Controllers
             evaluationStream.Name = evaluationStreamItem.Name;
             evaluationStream.Stream = evaluationStreamItem.Stream;
             evaluationStream.Code = evaluationStreamItem.Code;
-            evaluationStream.IsActive = true;
+            evaluationStream.IsActive = evaluationStreamItem.IsActive;
             evaluationStream.ModifiedBy = "CreateLabelClassName";
             evaluationStream.ModifiedOn = DateTime.UtcNow;
 

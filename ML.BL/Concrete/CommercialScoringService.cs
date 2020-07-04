@@ -101,7 +101,7 @@ namespace ML.BL.Concrete
 
             string destOutputPath = CheckLabelClassOutputDirectory(label, GroupGuid);
             //string destOutputPath = Path.Combine(_systemSettingService.CUSTOMLOGOMODEL_TrainedImagesFolderPath, label)
-            Directory.CreateDirectory(destOutputPath);
+            if(!Directory.Exists(destOutputPath)) Directory.CreateDirectory(destOutputPath);
 
             string sourcePath = cmrsByGuid.Select(t => t.OriginalImageDirPath).FirstOrDefault();
             if (System.IO.Directory.Exists(sourcePath))
