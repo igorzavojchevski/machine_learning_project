@@ -8,6 +8,7 @@ namespace ML.Domain.ReturnModels
     {
         public string ID { get; set; }
         public string PredictedLabel { get; set; }
+        public DateTime ModifiedOn { get; set; }
         public List<CommercialModel> Commercials { get; set; }
     }
 }

@@ -6,10 +6,35 @@ const serviceUrl = 'api/ImageClassification';
 const form = document.querySelector('#formCheckLabel');
 var allLabels = new Array();
 var paginationInitialized = false;
+var paginationNewItemsInitialized = false;
 
 $(document).ready(function () {
     $('#btnCommercials').trigger('click');
+    $("#divCommercialsSearch").bind("keypress", {}, keypressAllCommercialSearch);
+    $("#divNewItemsSearch").bind("keypress", {}, keypressNewItemsSearch);
 });
+
+function keypressAllCommercialSearch(e) {
+    var code = (e.keyCode ? e.keyCode : e.which);
+    if (code == 13) { //Enter keycode                        
+        e.preventDefault();
+        $("#divCommercials").html("");
+        paginationInitialized = false;
+        LoadLabelsAndImages(4, 1, false, e.target.value);
+        $("#labelPagination").pagination("redraw");
+    }
+};
+
+function keypressNewItemsSearch(e) {
+    var code = (e.keyCode ? e.keyCode : e.which);
+    if (code == 13) { //Enter keycode                        
+        e.preventDefault();
+        $("#divNewItems").html("");
+        paginationNewItemsInitialized = false;
+        LoadNewItems(4, 1, false, e.target.value);
+        $("#newItemLabelPagination").pagination("redraw");
+    }
+};
 
 function collapse(id) {
 
@@ -32,6 +57,7 @@ function openTab(evt, tabName) {
     $("#timeFramesDiv").html("");
     $("#evaluationStreamsDiv").html("");
     $("#systemSettingsDiv").html("");
+    $("#divNewItems").html("");
 
     if (tabName === "Labels") {
         paginationInitialized = false;
@@ -48,6 +74,10 @@ function openTab(evt, tabName) {
     }
     else if (tabName === "SystemSettings") {
         GetSystemSettings();
+    }
+    else if (tabName === "NewItems") {
+        paginationNewItemsInitialized = false;
+        LoadNewItems(4,1);
     }
 
     var i, tabcontent, tablinks;
@@ -159,8 +189,8 @@ function saveMoveImages(commercialid, parentDIV) {
         });
 }
 
-function LoadLabelsAndImages(size, page, showTrained) {
-    fetch(serviceUrl + "/GetAllImages?size=" + size + "&page=" + page + (showTrained == null ? "" : "&showTrained=" + showTrained),
+function LoadNewItems(size, page, showTrained, search) {
+    fetch(serviceUrl + "/GetAllNewItemImages?size=" + size + "&page=" + page + (showTrained == null ? "" : "&showTrained=" + showTrained) + (search == null ? "" : "&search=" + search),
         {
             headers: { 'Accept': 'application/json', 'Content-Type': 'application/x-www-form-urlencoded' }
         }) // Call the fetch function passing the url of the API as a parameter
@@ -171,7 +201,26 @@ function LoadLabelsAndImages(size, page, showTrained) {
 
             console.log(response);
 
-            CreateLabelAndImageSection(response);
+            CreateLabelAndImageSection(response, "divNewItems");
+
+            //InitializeImagePicker();
+            InitializePaginationPlaceholderNewItems(response);
+        })
+}
+
+function LoadLabelsAndImages(size, page, showTrained, search) {
+    fetch(serviceUrl + "/GetAllImages?size=" + size + "&page=" + page + (showTrained == null ? "" : "&showTrained=" + showTrained) + (search == null ? "" : "&search=" + search),
+        {
+            headers: { 'Accept': 'application/json', 'Content-Type': 'application/x-www-form-urlencoded' }
+        }) // Call the fetch function passing the url of the API as a parameter
+        .then((resp) => resp.json())
+        .then(function (response) {
+
+            GetAllLabels();
+
+            console.log(response);
+
+            CreateLabelAndImageSection(response, "divCommercials");
 
             //InitializeImagePicker();
             InitializePaginationPlaceholder(response);
@@ -190,8 +239,8 @@ function GetAllLabels() {
     });
 }
 
-function CreateLabelAndImageSection(groupList) {
-    var divCommercials = document.getElementById("divCommercials");
+function CreateLabelAndImageSection(groupList, divID) {
+    var divCommercials = document.getElementById(divID);
     divCommercials.innerHTML = "";
 
     for (var i = 0; i < groupList.group.length; i++) {
@@ -240,6 +289,15 @@ function CreateLabelAndImageSection(groupList) {
         spanForCount.style.lineHeight = "1.2";
         spanForCount.style.color = "inherit";
 
+        var spanForDate = document.createElement("span");
+        spanForDate.textContent = "(" + FormatDateAndTime(groupList.group[i].modifiedOn) + ")";
+        spanForDate.style.classList = "noselect";
+        spanForDate.style.display = "block";
+        spanForDate.style.fontSize = "1rem";
+        spanForDate.style.fontFamily = "inherit";
+        spanForDate.style.fontWeight = "500";
+        spanForDate.style.lineHeight = "1.2";
+        spanForDate.style.color = "inherit";
 
         var editbutton = document.createElement("button");
         editbutton.setAttribute("id", "buttonEditForLabel_" + labelHeadingElementID);
@@ -279,6 +337,7 @@ function CreateLabelAndImageSection(groupList) {
         labelHeadingAndEdit.appendChild(editbutton);
         labelHeadingAndEdit.appendChild(saveButton);
         labelHeadingAndEdit.appendChild(cancelButton);
+        labelHeadingAndEdit.appendChild(spanForDate);
         labelHeadingAndEdit.appendChild(spanForCount);
         x.appendChild(labelHeadingAndEdit);
         divCommercials.appendChild(x);
@@ -361,6 +420,7 @@ function CreateLabelAndImageSection(groupList) {
 function InitializePaginationPlaceholder(responseImages) {
     if (paginationInitialized) return;
 
+    console.log(responseImages);
     var size = 4; //make this systemsetting
     $("#labelPagination").pagination({
         items: responseImages.count,
@@ -371,6 +431,21 @@ function InitializePaginationPlaceholder(responseImages) {
         }
     });
     paginationInitialized = true;
+}
+
+function InitializePaginationPlaceholderNewItems(responseImages) {
+    if (paginationNewItemsInitialized) return;
+
+    var size = 4; //make this systemsetting
+    $("#newItemLabelPagination").pagination({
+        items: responseImages.count,
+        itemsOnPage: size,
+        cssStyle: 'light-theme',
+        onPageClick: function (e) {
+            LoadNewItems(size, e);
+        }
+    });
+    paginationNewItemsInitialized = true;
 }
 
 function InitializeImagePicker(id) {

@@ -180,11 +180,11 @@ namespace ML.ImageClassification.Train.Concrete
 
                 InsertLabelsAsCommercialClasses(imagesToReTrainFolderPath);
 
-                // 9. Try a single prediction simulating an end-user app
-                TrySinglePrediction(_mlContext, trainedModel);
-
-                //10. Update all that are trained
+                //9. Update all that are trained
                 UpdateAllTrainedImages(images);
+
+                //10. Try a single prediction simulating an end-user app
+                TrySinglePrediction(_mlContext, trainedModel);
 
                 _logger.LogInformation("Finished Training");
             }
@@ -200,12 +200,21 @@ namespace ML.ImageClassification.Train.Concrete
             foreach (ImageData image in images)
             {
                 Commercial commercial = _commercialService.GetAll().Where(t => t.ImageFilePath == image.ImagePath).FirstOrDefault();
-                if (commercial == null) continue;
+                if (commercial == null) 
+                {
+                    _logger.LogInformation("Continue - " + image.ImagePath);
+                    continue; 
+                }
 
+                _logger.LogInformation("Commercial ImageID = " + commercial.ImageId);
+                _logger.LogInformation("Commercial ImageFilePath = " + commercial.ImageFilePath);
+                _logger.LogInformation("PredictedLabel = " + commercial.PredictedLabel);
                 commercial.ModifiedOn = DateTime.UtcNow;
                 commercial.ModifiedBy = "UpdateAllTrainedImages - TrainingService";
                 commercial.IsTrained = true;
                 commercial.TrainedForClassName = commercial.PredictedLabel;
+                _logger.LogInformation("TrainedForClassName = " + commercial.TrainedForClassName);
+
                 _commercialService.Update(commercial);
             }
         }

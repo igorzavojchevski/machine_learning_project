@@ -9,6 +9,7 @@
 
 <div id="tab">
     <button id="btnCommercials" class="tablinks btn-light" onclick="openTab(event, 'Labels')">Commercials</button>
+    <button id="btnNewItems" class="tablinks btn-light" onclick="openTab(event, 'NewItems')">New Items</button>
     <button id="btnCommercialTimeFrames" class="tablinks btn-light" onclick="openTab(event, 'LabelTimeFrames')">Time Frames</button>
     <button id="btnImageCheck" class="tablinks btn-light" onclick="openTab(event, 'ImageCheck')">Image Check</button>
     @*<button id="btnManageCustomCommercials" class="tablinks btn-light" onclick="openTab(event, 'ManageCustomCms')">Manage Custom Commercials</button>*@
@@ -21,6 +22,11 @@
         <h3 class="tab-custom-header">Commercials (Labels)</h3>
         <button id="buttonCreateCommercial" onclick="OpenCreateCommercialModal()">Create Commercial Label</button>
     </div>
+    <div id="divCommercialsSearch">
+        <label for="divCommercialsSearch">Search: </label>
+        <input type="text" id="divCommercialsSearch" value="" name="divCommercialsSearch" />
+    </div>
+    <br />
     <br />
     <div id="divCommercials" class="col-md-12"></div>
     <div id="divCommercialsPagination" class="col-md-12" style="margin-bottom:3%">
@@ -140,6 +146,34 @@
                 <br />
                 <br />
                 <button id="buttonCreateNewSystemSetting" onclick="CreateSystemSetting()" class="btn btn-success">Create</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="NewItems" class="tabcontent">
+    <div id="divCommercialsHeader">
+        <h3 class="tab-custom-header">New Items</h3>
+        <button id="buttonCreateCommercial" onclick="OpenCreateCommercialModal()">Create Commercial Label</button>
+    </div>
+    <div id="divCommercialsSearch">
+        <label for="divNewItemsSearch">Search: </label>
+        <input type="text" id="divNewItemsSearch" name="divNewItemsSearch" value="" />
+    </div>
+    <br />
+    <br />
+    <div id="divNewItems" class="col-md-12"></div>
+    <div id="divCommercialsPagination" class="col-md-12" style="margin-bottom:3%">
+        <div id="newItemLabelPagination" class="float-right"></div>
+    </div>
+
+    <div id="createCommercialModal" class="commercial-modal">
+        <div class="commercial-modal-content">
+            <span id="createCommercialModalXSpan" class="closeX" onclick="CloseCreateCommercialModal()">&times;</span>
+            <div class="commercial-modal-content-form">
+                <span>New Commercial Name:</span>
+                <input id="newCommercialInput" type="text" name="newCommercialInput" />
+                <button id="buttonCreateNewCommercial" onclick="CreateNewCommercial()" class="btn btn-success">Create</button>
             </div>
         </div>
     </div>

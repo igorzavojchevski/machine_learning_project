@@ -244,3 +244,8 @@ body {
         text-decoration: none;
         cursor: pointer;
     }
+
+#divCommercialsSearch{
+    margin-bottom:2%;
+    float:right;
+}

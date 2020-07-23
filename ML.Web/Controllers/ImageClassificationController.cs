@@ -56,7 +56,7 @@ namespace ML.Web.Controllers
         #endregion
 
         [Route("GetAllImages")]
-        public IActionResult GetAllImages(int size, int page, bool? showTrained = null)
+        public IActionResult GetAllImages(int size, int page, bool? showTrained = null, string? search = null)
         {
             var lastTrainingVersion = _labelClassService.GetAll().Max(t => t.TrainingVersion);
 
@@ -64,17 +64,32 @@ namespace ML.Web.Controllers
                 .GetAll()
                 .Where(t => t.TrainingVersion == lastTrainingVersion && !t.IsCleanedUp)
                 .ToList();
+            
+            List<LabelClass> labelClasses = null;
 
-            List<LabelClass> labelClasses = lastTrainingVersionLabels
+
+            if (string.IsNullOrWhiteSpace(search))
+            {
+                labelClasses = lastTrainingVersionLabels
                 .GroupBy(r => r.FirstVersionId)
                 .Select(g => g.OrderByDescending(r => r.Version).First())
-                .Select(t => new LabelClass { Id = t.Id, ClassName = t.ClassName, FirstVersionId = t.FirstVersionId })
+                .Select(t => new LabelClass { Id = t.Id, ClassName = t.ClassName, FirstVersionId = t.FirstVersionId, ModifiedOn = t.ModifiedOn })
                 .ToList();
+            }
+            else
+            {
+                labelClasses = lastTrainingVersionLabels
+                .Where(t => t.ClassName.ToLowerInvariant().Contains(search))
+                .GroupBy(r => r.FirstVersionId)
+                .Select(g => g.OrderByDescending(r => r.Version).First())
+                .Select(t => new LabelClass { Id = t.Id, ClassName = t.ClassName, FirstVersionId = t.FirstVersionId, ModifiedOn = t.ModifiedOn })
+                .ToList();
+            }
 
             CommercialGroupModel groupList = new CommercialGroupModel();
             groupList.Count = labelClasses.Count;
 
-            List<LabelClass> labelClassesFinal = labelClasses.OrderBy(t => t.ClassName).Skip(size * (page - 1)).Take(size).ToList();
+            List<LabelClass> labelClassesFinal = labelClasses.OrderByDescending(t=>t.ModifiedOn).Skip(size * (page - 1)).Take(size).ToList();
 
             //Make bool param for isTrained
             foreach (var item in labelClassesFinal)
@@ -88,7 +103,7 @@ namespace ML.Web.Controllers
                 else
                     list = _commercialService.GetAll().Where(t => t.ClassifiedBy == ClassifiedBy.ClassificationService && t.IsTrained == showTrained && classNamesFromAllVersions.Contains(t.PredictedLabel)).ToList();
 
-                groupList.Group.Add(new CommercialImagesGroupModel() { ID = id, PredictedLabel = item.ClassName, Commercials = list.OrderByDescending(t => t.ImageDateTime).Select(t => t.ToCommercialModel()).ToList() });
+                groupList.Group.Add(new CommercialImagesGroupModel() { ID = id, PredictedLabel = item.ClassName, ModifiedOn = item.ModifiedOn, Commercials = list.OrderByDescending(t => t.ImageDateTime).Select(t => t.ToCommercialModel()).ToList() });
             }
 
             return Ok(groupList);
@@ -200,7 +215,61 @@ namespace ML.Web.Controllers
             return Ok(systemSettings);
         }
 
-        
+        [Route("GetAllNewItemImages")]
+        public IActionResult GetAllNewItemImages(int size, int page, bool? showTrained = null, string? search = null)
+        {
+            var lastTrainingVersion = _labelClassService.GetAll().Max(t => t.TrainingVersion);
+
+            List<LabelClass> lastTrainingVersionLabels = _labelClassService
+                .GetAll()
+                .Where(t => t.TrainingVersion == lastTrainingVersion && !t.IsCleanedUp)
+                .ToList();
+
+            List<LabelClass> labelClasses = null;
+
+            if (string.IsNullOrWhiteSpace(search))
+            {
+                labelClasses = lastTrainingVersionLabels
+                .Where(t => t.ClassName.ToLowerInvariant().StartsWith("new_item"))
+                .GroupBy(r => r.FirstVersionId)
+                .Select(g => g.OrderByDescending(r => r.Version).First())
+                .Select(t => new LabelClass { Id = t.Id, ClassName = t.ClassName, FirstVersionId = t.FirstVersionId, ModifiedOn = t.ModifiedOn })
+                .ToList();
+            }
+            else
+            {
+                labelClasses = lastTrainingVersionLabels
+                .Where(t => t.ClassName.ToLowerInvariant().StartsWith("new_item") && t.ClassName.ToLowerInvariant().Contains(search))
+                .GroupBy(r => r.FirstVersionId)
+                .Select(g => g.OrderByDescending(r => r.Version).First())
+                .Select(t => new LabelClass { Id = t.Id, ClassName = t.ClassName, FirstVersionId = t.FirstVersionId, ModifiedOn = t.ModifiedOn })
+                .ToList();
+            }
+
+            CommercialGroupModel groupList = new CommercialGroupModel();
+            groupList.Count = labelClasses.Count;
+
+            List<LabelClass> labelClassesFinal = labelClasses.OrderByDescending(t => t.ModifiedOn).Skip(size * (page - 1)).Take(size).ToList();
+
+            //Make bool param for isTrained
+            foreach (var item in labelClassesFinal)
+            {
+                string id = item.Id.ToString();
+                List<string> classNamesFromAllVersions = _labelClassService.GetAll().Where(t => t.FirstVersionId == item.FirstVersionId).Select(t => t.ClassName).ToList();
+                List<Commercial> list = new List<Commercial>();
+
+                if (!showTrained.HasValue)
+                    list = _commercialService.GetAll().Where(t => t.ClassifiedBy == ClassifiedBy.ClassificationService && classNamesFromAllVersions.Contains(t.PredictedLabel)).ToList();
+                else
+                    list = _commercialService.GetAll().Where(t => t.ClassifiedBy == ClassifiedBy.ClassificationService && t.IsTrained == showTrained && classNamesFromAllVersions.Contains(t.PredictedLabel)).ToList();
+
+                groupList.Group.Add(new CommercialImagesGroupModel() { ID = id, PredictedLabel = item.ClassName, ModifiedOn = item.ModifiedOn, Commercials = list.OrderByDescending(t => t.ImageDateTime).Select(t => t.ToCommercialModel()).ToList() });
+            }
+
+            return Ok(groupList);
+        }
+
+
         [HttpPost]
         [Route("CreateEvaluationStream")]
         [ProducesResponseType(200)]
