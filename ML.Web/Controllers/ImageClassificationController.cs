@@ -174,28 +174,48 @@ namespace ML.Web.Controllers
                 listOfCommercialsForTimeFrames.AddRange(listByClassName);
             }
 
-            List<LabelTimeFramesReturnModel>
-                    groupList =
-                    listOfCommercialsForTimeFrames
-                    .GroupBy(t => t.ImageDateTime.Date)
-                    .Select(g =>
-                    new LabelTimeFramesReturnModel
+            //List<LabelTimeFramesReturnModel>
+            //        groupList =
+            //        listOfCommercialsForTimeFrames
+            //        .GroupBy(t => t.ImageDateTime.Date)
+            //        .Select(g =>
+            //        new LabelTimeFramesReturnModel
+            //        {
+            //            DateTimeKey = g.Key,
+            //            LabelTimeFrameGroups =
+            //                g.OrderByDescending(t => t.ImageDateTime).GroupBy(t => new { t.ClassName, t.GroupGuid })
+            //                .Select(gsg =>
+            //                new LabelTimeFrameGroup
+            //                {
+            //                    ClassName = gsg.Key.ClassName,
+            //                    GroupGuid = gsg.Key.GroupGuid,
+            //                    StartDate = gsg.Min(t => t.ImageDateTime),
+            //                    EndDate = gsg.Max(t => t.ImageDateTime),
+            //                    ClassifiedBy = gsg.Select(t => t.ClassifiedBy.ToString()).First(),
+            //                    EvaluationStreamName = gsg.Select(t => t.EvaluationStreamName).First()
+            //                }).ToList()
+            //        })
+            //        .ToList();
+
+            List<LabelTimeFramesReturnModel> groupList = listOfCommercialsForTimeFrames
+                .OrderBy(t => t.ImageDateTime)
+                .GroupBy(t => t.ImageDateTime.Date)
+                .Select(t =>
+                new LabelTimeFramesReturnModel()
+                {
+                    DateTimeKey = t.Key,
+                    LabelTimeFrameGroups = t.OrderByDescending(t => t.ImageDateTime).GroupWhile((preceeding, next) => preceeding.ClassName == next.ClassName)
+                    .Select(ltg => new LabelTimeFrameGroup()
                     {
-                        DateTimeKey = g.Key,
-                        LabelTimeFrameGroups =
-                            g.OrderByDescending(t => t.ImageDateTime).GroupBy(t => new { t.ClassName, t.GroupGuid })
-                            .Select(gsg =>
-                            new LabelTimeFrameGroup
-                            {
-                                ClassName = gsg.Key.ClassName,
-                                GroupGuid = gsg.Key.GroupGuid,
-                                StartDate = gsg.Min(t => t.ImageDateTime),
-                                EndDate = gsg.Max(t => t.ImageDateTime),
-                                ClassifiedBy = gsg.Select(t => t.ClassifiedBy.ToString()).First(),
-                                EvaluationStreamName = gsg.Select(t => t.EvaluationStreamName).First()
-                            }).ToList()
-                    })
-                    .ToList();
+                        ClassName = ltg.Select(tt=>tt.ClassName).FirstOrDefault(),
+                        GroupGuid = ltg.Select(tt => tt.GroupGuid).FirstOrDefault(),
+                        StartDate = ltg.Min(tt => tt.ImageDateTime),
+                        EndDate = ltg.Max(tt => tt.ImageDateTime),
+                        ClassifiedBy = ltg.Select(tt => tt.ClassifiedBy.ToString()).FirstOrDefault(),
+                        EvaluationStreamName = ltg.Select(tt => tt.EvaluationStreamName).FirstOrDefault()
+                    }).ToList()
+                })
+                .ToList();
 
             groupList = groupList.OrderByDescending(o => o.DateTimeKey).ToList();
             return Ok(groupList);

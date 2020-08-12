@@ -27,7 +27,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ML.ImageClassification.Trai
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ML.TrainingService", "ML.TrainingService\ML.TrainingService.csproj", "{62F2F3C8-24A5-41AE-909C-DE8F69D7556F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ML.ExportService", "ML.ExportService\ML.ExportService.csproj", "{FF68E083-B73F-4FB1-990B-C0E7E8ADC832}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ML.ExportService", "ML.ExportService\ML.ExportService.csproj", "{FF68E083-B73F-4FB1-990B-C0E7E8ADC832}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ML.CommercialBlockService", "CommercialBlockService\ML.CommercialBlockService.csproj", "{C8E78D8D-16F0-4462-B2BF-616BD9670434}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -87,6 +89,10 @@ Global
 		{FF68E083-B73F-4FB1-990B-C0E7E8ADC832}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FF68E083-B73F-4FB1-990B-C0E7E8ADC832}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FF68E083-B73F-4FB1-990B-C0E7E8ADC832}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C8E78D8D-16F0-4462-B2BF-616BD9670434}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C8E78D8D-16F0-4462-B2BF-616BD9670434}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C8E78D8D-16F0-4462-B2BF-616BD9670434}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C8E78D8D-16F0-4462-B2BF-616BD9670434}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
