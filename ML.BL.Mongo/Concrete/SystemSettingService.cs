@@ -199,7 +199,23 @@ namespace ML.BL.Mongo.Concrete
             }
         }
 
-        
+
+        public string Inellipse_Ad_Pointer_BaseURL
+        {
+            get
+            {
+                return GetSettingValueByKey("Inellipse_Ad_Pointer_BaseURL");
+            }
+        }
+
+        public string Inellipse_Ad_Pointer_Endpoint
+        {
+            get
+            {
+                return GetSettingValueByKey("Inellipse_Ad_Pointer_Endpoint");
+            }
+        }
+
         #endregion
     }
 }

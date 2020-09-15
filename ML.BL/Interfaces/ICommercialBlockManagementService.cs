@@ -8,5 +8,6 @@ namespace ML.BL.Interfaces
     {
         void MakeCommercialBlocks();
         void MakeCommercialVideosForBlocks();
+        void SendCommercialBlocks();
     }
 }

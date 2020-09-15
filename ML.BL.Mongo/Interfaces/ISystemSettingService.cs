@@ -29,5 +29,9 @@ namespace ML.BL.Mongo.Interfaces
         string CUSTOMLOGOMODEL_TrainedImagesFolderPath { get; }
         string CUSTOMLOGOMODEL_ImagesToTestAfterTrainingFolderPath { get; }
         string CUSTOMLOGOMODEL_ExportedFromService_ImagesToEvaluateFolderPath { get; }
+
+        string Inellipse_Ad_Pointer_BaseURL { get; }
+        string Inellipse_Ad_Pointer_Endpoint { get; }
+
     }
 }

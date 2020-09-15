@@ -15,5 +15,7 @@ namespace ML.Domain.Entities.Mongo
         public string VideoURL { get; set; }
         public ObjectId? EvaluationStreamID { get; set; }
         public string EvaluationStreamName { get; set; }
+        
+        public bool IsSentToAdPointer { get; set; } //re-implement this in different structure
     }
 }

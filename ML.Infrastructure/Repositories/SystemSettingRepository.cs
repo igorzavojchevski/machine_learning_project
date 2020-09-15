@@ -61,7 +61,12 @@ namespace ML.Infrastructure.Repositories
 
             if (!GetAll().Any(t => t.SettingKey == "CUSTOMLOGOMODEL_ExportedFromService_ImagesToEvaluateFolderPath"))
                 InsertOne(new SystemSetting { SettingKey = "CUSTOMLOGOMODEL_ExportedFromService_ImagesToEvaluateFolderPath", SettingValue = @"C:\Users\igor.zavojchevski\Desktop\Master\ML\assets\Training\inputs\images_for_prediction", ModifiedBy = "SystemSettingRepository", ModifiedOn = DateTime.UtcNow });
-            
+
+            if (!GetAll().Any(t => t.SettingKey == "Inellipse_Ad_Pointer_BaseURL"))
+                InsertOne(new SystemSetting { SettingKey = "Inellipse_Ad_Pointer_BaseURL", SettingValue = "https://development.ad-pointer.com/mgmt-api", ModifiedBy = "SystemSettingRepository", ModifiedOn = DateTime.UtcNow });
+
+            if (!GetAll().Any(t => t.SettingKey == "Inellipse_Ad_Pointer_Endpoint"))
+                InsertOne(new SystemSetting { SettingKey = "Inellipse_Ad_Pointer_Endpoint", SettingValue = "/v1/adevent/create", ModifiedBy = "SystemSettingRepository", ModifiedOn = DateTime.UtcNow });
 
             first_time_executed = true;
         }

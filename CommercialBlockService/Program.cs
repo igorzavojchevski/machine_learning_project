@@ -27,6 +27,7 @@ namespace CommercialBlockService
             {
                 IConfiguration Configuration = hostContext.Configuration;
 
+                services.AddHttpClient();
                 services.AddHostedService<Worker>()
                 .Configure<EventLogSettings>(config =>
                 {

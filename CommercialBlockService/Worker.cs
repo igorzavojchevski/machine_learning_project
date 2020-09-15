@@ -50,6 +50,7 @@ namespace CommercialBlockService
             {
                 _commercialBlockManagementService.MakeCommercialBlocks();
                 _commercialBlockManagementService.MakeCommercialVideosForBlocks();
+                _commercialBlockManagementService.SendCommercialBlocks();
                 Thread.Sleep(TimeSpan.FromMinutes(5));
             }
         }
