@@ -16,18 +16,18 @@ using System.Text;
 
 namespace ML.BL.Concrete
 {
-    public class CommercialBlockManagementService : ICommercialBlockManagementService
+    public class CommercialBlockService : Interfaces.ICommercialBlockService
     {
-        private readonly ILogger<CommercialBlockManagementService> _logger;
-        private readonly ICommercialBlockService _commercialBlockService;
+        private readonly ILogger<CommercialBlockService> _logger;
+        private readonly Mongo.Interfaces.ICommercialBlockService _commercialBlockService;
         private readonly ICommercialService _commercialService;
         private readonly IEvaluationStreamService _evaluationStreamService;
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly ISystemSettingService _systemSettingService;
 
-        public CommercialBlockManagementService(
-            ILogger<CommercialBlockManagementService> logger, 
-            ICommercialBlockService commercialBlockService, 
+        public CommercialBlockService(
+            ILogger<CommercialBlockService> logger,
+            Mongo.Interfaces.ICommercialBlockService commercialBlockService, 
             ICommercialService commercialService, 
             IEvaluationStreamService evaluationStreamService,
             IHttpClientFactory httpClientFactory,

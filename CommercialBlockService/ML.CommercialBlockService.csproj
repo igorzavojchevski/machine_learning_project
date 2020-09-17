@@ -15,4 +15,10 @@
     <ProjectReference Include="..\ML.BL\ML.BL.csproj" />
     <ProjectReference Include="..\ML.Infrastructure.DependecyResolution\ML.Infrastructure.DependecyResolution.csproj" />
   </ItemGroup>
+
+  <ItemGroup>
+    <Content Update="NLog.config">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+    </Content>
+  </ItemGroup>
 </Project>
