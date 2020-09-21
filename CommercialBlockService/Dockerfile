@@ -21,7 +21,7 @@ WORKDIR "/src/CommercialBlockService"
 RUN dotnet build "ML.CommercialBlockService.csproj" -c Release -o /app/build
 
 FROM build AS publish
-RUN dotnet publish "ML.CommercialBlockService.csproj" -c Release -o /app/publish
+RUN dotnet publish "ML.CommercialBlockService.csproj" -c Release --runtime linux-x64 --self-contained true -o /app/publish
 
 FROM base AS final
 WORKDIR /app
