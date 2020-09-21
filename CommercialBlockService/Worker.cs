@@ -12,9 +12,9 @@ namespace CommercialBlockService
     public class Worker : BackgroundService
     {
         private readonly ILogger<Worker> _logger;
-        private readonly ICommercialBlockManagementService _commercialBlockManagementService;
+        private readonly ICommercialBlockService _commercialBlockManagementService;
 
-        public Worker(ILogger<Worker> logger, ICommercialBlockManagementService commercialBlockManagementService)
+        public Worker(ILogger<Worker> logger, ICommercialBlockService commercialBlockManagementService)
         {
             _logger = logger;
             _commercialBlockManagementService = commercialBlockManagementService;

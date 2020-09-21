@@ -14,15 +14,15 @@ namespace ML.Utils.Extensions.Base
     public static class BaseExtensions
     {
         //TODO - Rewrite this method
-        public static string GetPath(string path, bool isAbsolute = true)
+        public static string GetPath(string path) //, bool isAbsolute = true)
         {
-            if (isAbsolute) return path;
+            //if (isAbsolute) return path;
+            return path;
+            //var _dataRoot = new FileInfo(Assembly.GetExecutingAssembly().Location);
+            //string assemblyFolderPath = _dataRoot.Directory.FullName;
 
-            var _dataRoot = new FileInfo(Assembly.GetExecutingAssembly().Location);
-            string assemblyFolderPath = _dataRoot.Directory.FullName;
-
-            string fullPath = Path.Combine(assemblyFolderPath, path);
-            return fullPath;
+            //string fullPath = Path.Combine(assemblyFolderPath, path);
+            //return fullPath;
         }
 
         public static IEnumerable<(string imagePath, string label)> LoadImagesFromDirectory(

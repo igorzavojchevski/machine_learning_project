@@ -59,7 +59,7 @@ namespace ML.Infrastructure.DependecyResolution
         {
             services.AddTransient<ISystemSettingService, SystemSettingService>();
             services.AddTransient<ICommercialService, CommercialService>();
-            services.AddTransient<ICommercialBlockService, CommercialBlockService>();
+            services.AddTransient<BL.Mongo.Interfaces.ICommercialBlockService, BL.Mongo.Concrete.CommercialBlockService>();
             services.AddTransient<ILabelClassService, LabelClassService>();
             services.AddTransient<IEvaluationGroupService, EvaluationGroupService>();
             services.AddTransient<IEvaluationStreamService, EvaluationStreamService>();
@@ -81,7 +81,8 @@ namespace ML.Infrastructure.DependecyResolution
             services.AddTransient<IScoringServiceFactory, ScoringServiceFactory>();
             services.AddTransient<ICommercialScoringService, CommercialScoringService>();
             services.AddTransient<ILabelScoringService, LabelScoringService>();
-            services.AddTransient<ICommercialBlockManagementService, CommercialBlockManagementService>();
+            services.AddHttpClient<BL.Interfaces.ICommercialBlockService, BL.Concrete.CommercialBlockService>();
+            services.AddTransient<BL.Interfaces.ICommercialBlockService, BL.Concrete.CommercialBlockService>();
 
             return services;
         }

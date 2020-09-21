@@ -4,7 +4,7 @@ using System.Text;
 
 namespace ML.BL.Interfaces
 {
-    public interface ICommercialBlockManagementService
+    public interface ICommercialBlockService
     {
         void MakeCommercialBlocks();
         void MakeCommercialVideosForBlocks();
