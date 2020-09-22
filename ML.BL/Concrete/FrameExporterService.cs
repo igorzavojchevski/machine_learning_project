@@ -70,6 +70,13 @@ namespace ML.BL.Concrete
                 });
                 Thread.Sleep(TimeSpan.FromSeconds(_systemSettingService.ExportService_ExportPeriod_Seconds));
                 process.Kill();
+
+                if(process == null)
+                {
+                    process.StartInfo.FileName = _systemSettingService.FFMPEG_ExecutablePath;
+                    process.StartInfo.UseShellExecute = true;
+                    process.StartInfo.CreateNoWindow = true;
+                }
             }
         }
 
@@ -82,7 +89,10 @@ namespace ML.BL.Concrete
             try
             {
                 Directory.CreateDirectory(newDir);
-                process.StartInfo.Arguments = $"-i {evaluationStream.Stream} -vf \"select=eq(pict_type\\,I)\" -vsync vfr -qscale:v 2 -strftime 1 {newDir}\\{newGuid}_%Y%m%d%H%M%S.jpeg";
+                _logger.LogInformation("FrameExporterService - DoWork - ProcessExport - newDir: " + newDir);
+                var finalPath = Path.Combine(newDir, newGuid.ToString());
+                _logger.LogInformation("FrameExporterService - DoWork - ProcessExport - finalPath: " + finalPath);
+                process.StartInfo.Arguments = $"-i {evaluationStream.Stream} -vf \"select=eq(pict_type\\,I)\" -vsync vfr -qscale:v 2 -strftime 1 {finalPath}_%Y%m%d%H%M%S.jpeg";
                     //$"-skip_frame nokey -i {evaluationStream.Stream} -vsync 0 -r 30 -f image2 -strftime 1 {newDir}\\{newGuid}_%Y%m%d%H%M%S.jpeg";
                 process.Start();
 
@@ -95,17 +105,28 @@ namespace ML.BL.Concrete
             }
             finally
             {
-                _evaluationGroupService.InsertOne(new EvaluationGroup() 
-                { 
-                    DirPath = newDir,
-                    EvaluationGroupGuid = newGuid, 
-                    ParentGroupGuid = newGuid, 
-                    Status = status, 
-                    EvaluationStreamId = evaluationStream.Id,
-                    EvaluationStreamName = evaluationStream.Name,
-                    ModifiedBy = "ExportService", 
-                    ModifiedOn = DateTime.UtcNow 
-                });
+                try
+                {
+                    _logger.LogInformation("FrameExporterService - DoWork - ProcessExport - start insert evaluation group");
+
+                    _evaluationGroupService.InsertOne(new EvaluationGroup()
+                    {
+                        DirPath = newDir,
+                        EvaluationGroupGuid = newGuid,
+                        ParentGroupGuid = newGuid,
+                        Status = status,
+                        EvaluationStreamId = evaluationStream.Id,
+                        EvaluationStreamName = evaluationStream.Name,
+                        ModifiedBy = "ExportService",
+                        ModifiedOn = DateTime.UtcNow
+                    });
+
+                    _logger.LogInformation("FrameExporterService - DoWork - ProcessExport - end insert evaluation group");
+                }
+                catch(Exception ex)
+                {
+                    _logger.LogError(ex, "FrameExporterService - DoWork - ProcessExport - insert evaluation group error");
+                }
             }
 
             _logger.LogInformation("FrameExporterService - DoWork - ProcessExport finished {0}", evaluationStream.Name);
