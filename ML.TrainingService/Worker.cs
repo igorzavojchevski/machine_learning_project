@@ -71,8 +71,8 @@ namespace ML.TrainingService
                 //Do before training start activities - (set flag for start etc.)
                 _trainingService.DoBeforeTrainingStart();
 
-                //Do cleanup for not used items
-                _trainingService.DoCleanup();
+                //Do cleanup for not used items (review this according to requirements)
+                //_trainingService.DoCleanup();
 
                 //Training for Logo Custom
                 _trainingService.Train();
