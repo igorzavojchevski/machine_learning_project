@@ -83,6 +83,7 @@ namespace ML.TrainingService
             catch(Exception ex)
             {
                 _logger.LogError(ex, "TrainingService exception");
+                _trainingService.DoAfterTrainingFinished();
             }
         }
     }
