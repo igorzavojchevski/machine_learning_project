@@ -66,7 +66,7 @@ namespace ML.BL.Concrete
 
                 List<EvaluationStream> evaluationStreams = _evaluationStreamService.GetAll().ToList() ?? new List<EvaluationStream>(); 
 
-                List<CommercialBlock> groupedCommercials = commercials
+                List<CommercialBlock> groupedCommercials = commercials.Where(t=>!t.PredictedLabel.ToLower().Contains("new_item"))
                     .OrderBy(t => t.ImageDateTime).GroupWhile((preceeding, next) => preceeding.PredictedLabel == next.PredictedLabel)
                     .Select(t =>
                     new CommercialBlock()

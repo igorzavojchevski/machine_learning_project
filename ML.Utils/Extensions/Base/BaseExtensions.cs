@@ -27,13 +27,17 @@ namespace ML.Utils.Extensions.Base
 
         public static IEnumerable<(string imagePath, string label)> LoadImagesFromDirectory(
             string folder,
-            bool useFolderNameAsLabel)
+            bool useFolderNameAsLabel,
+            bool useNewItems = true)
         {
             string[] imageSupportedFormats = Enum.GetNames(typeof(ImageFormat));
 
-            var imagesPath = Directory
-                .GetFiles(folder, "*", searchOption: SearchOption.AllDirectories)
-                .Where(x => imageSupportedFormats.Contains(Path.GetExtension(x).Replace(".", "")));
+            var imagesPath = 
+                useNewItems ?
+                Directory.GetFiles(folder, "*", searchOption: SearchOption.AllDirectories)
+                .Where(x => imageSupportedFormats.Contains(Path.GetExtension(x).Replace(".", ""))) :
+                Directory.GetFiles(folder, "*", searchOption: SearchOption.AllDirectories)
+                .Where(x => !x.ToLower().Contains("new_item") && imageSupportedFormats.Contains(Path.GetExtension(x).Replace(".", "")));
 
             return useFolderNameAsLabel
                 ? imagesPath.Select(imagePath => (imagePath, Directory.GetParent(imagePath).Name))
@@ -52,9 +56,9 @@ namespace ML.Utils.Extensions.Base
                 });
         }
 
-        public static IEnumerable<InMemoryImageData> LoadInMemoryImagesFromDirectory(string folder, bool useFolderNameAsLabel = true)
+        public static IEnumerable<InMemoryImageData> LoadInMemoryImagesFromDirectory(string folder, bool useFolderNameAsLabel = true, bool useNewItem = true)
         {
-            return LoadImagesFromDirectory(folder, useFolderNameAsLabel)
+            return LoadImagesFromDirectory(folder, useFolderNameAsLabel, useNewItem)
                            .Select(x => new InMemoryImageData(
                                image: File.ReadAllBytes(x.imagePath),
                                label: x.label,

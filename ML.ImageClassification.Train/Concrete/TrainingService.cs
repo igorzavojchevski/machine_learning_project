@@ -93,7 +93,8 @@ namespace ML.ImageClassification.Train.Concrete
                 //
                 _logger.LogInformation("TrainingService - Train - 2.Load the initial full image-set started");
                 // 2. Load the initial full image-set into an IDataView and shuffle so it will be better balanced
-                IEnumerable<ImageData> images = BaseExtensions.LoadImagesFromDirectory(folder: imagesToReTrainFolderPath, useFolderNameAsLabel: true).Select(x => new ImageData(x.imagePath, x.label));
+                IEnumerable<ImageData> images = 
+                    BaseExtensions.LoadImagesFromDirectory(folder: imagesToReTrainFolderPath, useFolderNameAsLabel: true, useNewItems: false).Select(x => new ImageData(x.imagePath, x.label));
                 IDataView fullImagesDataset = _mlContext.Data.LoadFromEnumerable(images);
                 IDataView shuffledFullImageFilePathsDataset = _mlContext.Data.ShuffleRows(fullImagesDataset);
 
@@ -355,7 +356,7 @@ namespace ML.ImageClassification.Train.Concrete
                 if (evaluationGroup == null) { _logger.LogInformation("TrainingService - TrySinglePrediction - No trainingGroup with NEW status"); return; }
                 if (string.IsNullOrWhiteSpace(evaluationGroup.DirPath)) { _logger.LogInformation("TrainingService - TrySinglePrediction - Invalid EvaluationGroupDirPath"); return; }
 
-                IEnumerable<InMemoryImageData> testImages = BaseExtensions.LoadInMemoryImagesFromDirectory(evaluationGroup.DirPath, false);
+                IEnumerable<InMemoryImageData> testImages = BaseExtensions.LoadInMemoryImagesFromDirectory(evaluationGroup.DirPath, false, false);
 
                 InMemoryImageData imageToPredict = testImages.FirstOrDefault();
                 if (imageToPredict == null)
