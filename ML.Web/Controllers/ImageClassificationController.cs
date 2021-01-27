@@ -62,7 +62,7 @@ namespace ML.Web.Controllers
 
             List<LabelClass> lastTrainingVersionLabels = _labelClassService
                 .GetAll()
-                .Where(t => t.TrainingVersion == lastTrainingVersion && !t.IsCleanedUp)
+                .Where(t => !t.ClassName.ToLower().Contains("new_item") && t.TrainingVersion == lastTrainingVersion && !t.IsCleanedUp)
                 .ToList();
             
             List<LabelClass> labelClasses = null;
