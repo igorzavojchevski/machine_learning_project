@@ -30,6 +30,35 @@ namespace ML.BL.Concrete
 
         public void ArchiveImages()
         {
+            try
+            {
+                DoDeleteNewItems();
+                DoArchive();
+            }
+            catch(Exception ex)
+            {
+                _logger.LogError(ex, "ArchiveImages error");
+            }
+        }
+
+        private void DoDeleteNewItems()
+        {
+            _logger.LogInformation("ArchivingService - DoDeleteNewItems - started");
+
+            string dirpath = _systemSettingService.CUSTOMLOGOMODEL_TrainedImagesFolderPath;
+
+            IEnumerable<string> listOfNewItems = Directory.GetDirectories(dirpath).Where(t => t.ToLower().Contains("new_item"));
+
+            foreach(var item in listOfNewItems)
+            {
+                Directory.Delete(item, true);
+            }
+
+            _logger.LogInformation("ArchivingService - DoDeleteNewItems - ended");
+        }
+
+        private void DoArchive()
+        {
             _logger.LogInformation("ArchivingService - ArchiveImages - started");
 
             string archiveLastStartDateString = _systemSettingService.Archive_LastStartDate;
@@ -37,9 +66,9 @@ namespace ML.BL.Concrete
             if (!isParsable) { _logger.LogInformation("ArchivingService - ArchiveImages - Archive_StartDate does not have appropriate format"); return; }
 
             if ((DateTime.UtcNow - archiveLastStartDate).TotalMinutes < _systemSettingService.Archive_NextStartPeriod_Minutes)
-            { 
-                _logger.LogInformation("ArchivingService - ArchiveImages - Not in Archive_NextStartPeriod_Minutes"); 
-                return; 
+            {
+                _logger.LogInformation("ArchivingService - ArchiveImages - Not in Archive_NextStartPeriod_Minutes");
+                return;
             }
 
             List<EvaluationGroup> evaluationGroupsToArchive = _evaluationGroupService.GetAll().Where(t => t.Status == TrainingStatus.Processed).ToList();
